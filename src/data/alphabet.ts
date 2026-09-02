@@ -1,5 +1,5 @@
 // PLACEHOLDER INVENTORY — replace with the real Amadunia alphabet.
-// Nineteen letters: five vowels, fourteen consonants. One letter, one sound.
+// One letter, one sound. The count on the site is derived from this list.
 export interface Letter {
   glyph: string;
   ipa: string;
@@ -30,7 +30,6 @@ export const consonants: Letter[] = [
   { glyph: 'p', ipa: '/p/', as_in: 'pen', example: 'papa', gloss: 'placeholder' },
   { glyph: 's', ipa: '/s/', as_in: 'sun', example: 'sasa', gloss: 'placeholder' },
   { glyph: 't', ipa: '/t/', as_in: 'time', example: 'tata', gloss: 'placeholder' },
-  { glyph: 'w', ipa: '/w/', as_in: 'water', example: 'wawa', gloss: 'placeholder' },
 ];
 
 export const alphabet: Letter[] = [...vowels, ...consonants].sort((a, b) =>

@@ -250,7 +250,8 @@ img, svg { max-width: 100%; }
 /* ---------- Alphabet ---------- */
 
 /* The strip is one line, because the claim on the page is that it fits on one.
-   Below ~780px it stays one line and scrolls sideways rather than breaking. */
+   --n is set from the data; on narrow screens the line scrolls sideways rather
+   than breaking. */
 .alphabet-scroll {
   min-width: 0;
   overflow-x: auto;
@@ -259,8 +260,8 @@ img, svg { max-width: 100%; }
 }
 .alphabet {
   display: grid;
-  grid-template-columns: repeat(19, minmax(2.5rem, 1fr));
-  min-width: 47.5rem;
+  grid-template-columns: repeat(var(--n, 19), minmax(2.5rem, 1fr));
+  min-width: calc(var(--n, 19) * 2.5rem);
   border-top: 1px solid var(--rule);
   border-left: 1px solid var(--rule);
 }

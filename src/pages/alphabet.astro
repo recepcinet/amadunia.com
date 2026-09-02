@@ -7,7 +7,7 @@ import { Spell, spell } from '../data/spell';
 
 <Base
   title="Alphabet"
-  description="The nineteen letters of Amadunia: five vowels, fourteen consonants, one sound each."
+  description={`The ${spell(alphabet.length)} letters of Amadunia: ${spell(vowels.length)} vowels, ${spell(consonants.length)} consonants, one sound each.`}
 >
   <Band name="Alphabet" count={`${alphabet.length} letters`}>
     <h1 class="h-section">{Spell(alphabet.length)} letters, {spell(alphabet.length)} sounds.</h1>
@@ -18,7 +18,7 @@ import { Spell, spell } from '../data/spell';
     </p>
 
     <div class="alphabet-scroll" style="margin-top:2.25rem">
-      <div class="alphabet">
+      <div class="alphabet" style={`--n:${alphabet.length}`}>
         {
           alphabet.map((letter) => (
             <div class="letter" id={letter.glyph}>

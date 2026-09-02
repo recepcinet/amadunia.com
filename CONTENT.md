@@ -4,9 +4,10 @@ The site structure is finished; the language content in it is placeholder and ma
 in the source. Replace these before the site goes public.
 
 ## src/data/alphabet.ts
-- The nineteen letters are a plausible guess (5 vowels, 14 consonants), not a decision.
+- The eighteen letters are a plausible guess (5 vowels, 13 consonants), not a decision.
+  `w` was dropped deliberately; the rest have not been examined yet.
 - Every IPA value, "as in" example, and example word is invented.
-- Decide whether `r`, `c`, `v`, `y`, `z` are genuinely excluded, and say why on `/alphabet/`.
+- Decide whether `r`, `c`, `v`, `w`, `y`, `z` are genuinely excluded, and say why on `/alphabet/`.
 
 ## src/data/rules.ts
 - Rules 1 and 2 are written as real claims; confirm them.

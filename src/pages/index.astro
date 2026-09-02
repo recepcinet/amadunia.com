@@ -14,7 +14,7 @@ const sentence = [
 
 <Base
   title="Amadunia"
-  description="A world auxiliary language built from the easiest features of all languages. Nineteen letters, no exceptions."
+  description={`A world auxiliary language built from the easiest features of all languages. ${Spell(alphabet.length)} letters, no exceptions.`}
 >
   <section class="hero">
     <div class="wrap">
@@ -58,7 +58,7 @@ const sentence = [
     </div>
     <div class="wrap band__full">
       <div class="alphabet-scroll">
-        <div class="alphabet">
+        <div class="alphabet" style={`--n:${alphabet.length}`}>
           {
             alphabet.map((letter) => (
               <a class="letter" href={`/alphabet/#${letter.glyph}`}>

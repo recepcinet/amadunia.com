@@ -1,11 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
+import { alphabet } from '../data/alphabet';
+import { spell } from '../data/spell';
 
 // PLACEHOLDER COURSE — replace with the real lessons.
 const lessons = [
   { n: 1, title: 'Say your first sentence', note: 'In preparation' },
-  { n: 2, title: 'The nineteen sounds', note: 'In preparation' },
+  { n: 2, title: `The ${spell(alphabet.length)} sounds`, note: 'In preparation' },
   { n: 3, title: 'Naming things', note: 'In preparation' },
   { n: 4, title: 'Talking about yesterday and tomorrow', note: 'In preparation' },
   { n: 5, title: 'Asking a question', note: 'In preparation' },
@@ -43,7 +45,7 @@ const lessons = [
       <li>
         <a href="/alphabet/">
           <span class="stack__title">Learn the alphabet</span>
-          <span class="stack__note">19 letters, one sound each</span>
+          <span class="stack__note">{alphabet.length} letters, one sound each</span>
         </a>
       </li>
       <li>
