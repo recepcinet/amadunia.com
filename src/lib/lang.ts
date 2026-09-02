@@ -142,7 +142,9 @@ export interface Status {
 export function readmeStatus(): Status {
   const body = readLang('README.md');
   const target = Number(body.match(/target for A1 is \*\*(\d+) roots\*\*/i)?.[1] ?? 300);
-  const ms = body.match(/Milestones:\s*(.+)$/m)?.[1] ?? '';
+  // "Milestones: 80 roots (survival — reached September 2, 2026) → 180 → 300"
+  // — the numbers that matter are outside the parentheses.
+  const ms = (body.match(/Milestones:\s*(.+)$/m)?.[1] ?? '').replace(/\([^)]*\)/g, '');
   const milestones = (ms.match(/\d+/g) ?? []).map(Number);
   const born = body.match(/born on \*\*(.+?)\*\*/)?.[1];
   const settled = body
