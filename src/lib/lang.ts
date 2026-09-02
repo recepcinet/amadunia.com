@@ -74,7 +74,7 @@ export interface Entry {
 /** Plain text from a table cell: no emphasis markers, no "— see [file](path)" cross-references, links reduced to their label. */
 const strip = (s: string) =>
   s
-    .replace(/\s*[—-]\s*see \[[^\]]+\]\([^)]+\)/g, '')
+    .replace(/\s*[—;-]\s*see \[[^\]]+\]\([^)]+\)/g, '')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/\*\*/g, '')
     .replace(/\*/g, '')
@@ -149,7 +149,8 @@ export function readmeStatus(): Status {
   const born = body.match(/born on \*\*(.+?)\*\*/)?.[1];
   const settled = body
     .match(/^([^\n]*? are settled\.(?:[^\n]*?still being decided\.)?)/m)?.[1]
-    ?.trim();
+    ?.replace(/\*/g, '')
+    .trim();
   return { target, milestones, born, settled };
 }
 
@@ -166,7 +167,9 @@ export function splitLessonTitle(title: string): { label: string; name: string }
 }
 
 export function newWordsOf(body: string): number {
-  return tableRows(body, '## New words').filter((r) => r[0]).length;
+  const heading = body.match(/^## New words?\s*$/m)?.[0];
+  if (!heading) return 0;
+  return tableRows(body, heading).filter((r) => r[0]).length;
 }
 
 /* ---------- Whole-repository readers: full text and parallel corpus ---------- */

@@ -64,6 +64,12 @@ export const rules: Rule[] = [
     example: { form: 'Mi kan ta. Ta kan mi.', gloss: 'I see her. She sees me.' },
   },
   {
+    claim: 'Before a noun, es. Before anything else, nothing',
+    body: 'Two nouns side by side already mean possession, so "X is a Y" needs the verb es. An adjective or a place word cannot own anything, so it stands alone as the sentence and takes the tense particle directly.',
+    href: '/grammar/copula/',
+    example: { form: 'Mi es doktor. Ruma kabir.', gloss: 'I am a doctor. The house is big.' },
+  },
+  {
     claim: 'Numbers are built, never irregular',
     body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
     href: '/grammar/numbers/',
