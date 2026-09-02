@@ -52,6 +52,12 @@ export const rules: Rule[] = [
     example: { form: 'ruma rafiki mi', gloss: "my friend's house" },
   },
   {
+    claim: 'A question is the answer with one word swapped',
+    body: 'Yes/no questions are a statement said with a rising tone and written with a question mark. For what, who, where, when, why, how and how many, the question word sits exactly where the answer would. Word order never changes.',
+    href: '/grammar/questions/',
+    example: { form: 'Yu kan ke?', gloss: 'What do you see? — Yu kan anak. You see a child.' },
+  },
+  {
     claim: 'Numbers are built, never irregular',
     body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
     href: '/grammar/numbers/',
