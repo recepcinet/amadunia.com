@@ -1,7 +1,9 @@
 // Rehype plugin for Markdown that comes from lang/ (the amadunia-lang repo).
 //
 //  1. Drops the leading H1 — the page renders the title itself.
-//  2. Drops the "*Status: …*" paragraph — the page shows status in its rail.
+//  2. Drops a leading emphasis-only paragraph that holds no link — a grammar
+//     page's "*Status: …*" and a text's subtitle, both rendered by the page
+//     itself. A lesson's "*Prerequisite: [Lesson 4](…)*" has a link, so it stays.
 //  3. Rewrites relative links between repo files into site routes.
 //  4. Marks table columns that hold Amadunia with lang="art-x-amadunia", so
 //     the site's one colour rule applies inside the language's own tables.
@@ -25,7 +27,9 @@ function loadLexicon() {
   return lexicon;
 }
 
-const SKIP = new Set(['code', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'script', 'style']);
+// pre/code are not skipped: a text's story block is set as a code block, and the
+// dictionary test keeps consonant clusters like `rk` and `mb` grey anyway.
+const SKIP = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'script', 'style']);
 const SPLIT = /(\s[—–-]\s|—|\(|\)|"|“|”)/;
 
 function isAmadunia(fragment) {
@@ -71,6 +75,9 @@ const AMADUNIA_HEADERS = new Set([
   'statement', 'question', 'answer', 'form',
 ]);
 
+const hasLink = (node) =>
+  node.tagName === 'a' || (node.children ?? []).some(hasLink);
+
 const text = (node) =>
   node.type === 'text' ? node.value : (node.children ?? []).map(text).join('');
 
@@ -100,12 +107,16 @@ export default function rehypeLang() {
     const kids = tree.children ?? [];
 
     // 1 + 2: drop the H1 and the status line, wherever they sit at top level.
-    tree.children = kids.filter((n, i) => {
+    // Count elements, not nodes: mdast leaves newline text nodes between them.
+    let seen = 0;
+    tree.children = kids.filter((n) => {
       if (n.type !== 'element') return true;
+      const nth = seen++;
       if (n.tagName === 'h1') return false;
-      if (n.tagName === 'p') {
+      if (n.tagName === 'p' && nth <= 1) {
         const inner = n.children?.filter((c) => !(c.type === 'text' && !c.value.trim()));
-        if (inner?.length === 1 && inner[0].tagName === 'em' && /^Status:/.test(text(inner[0]))) return false;
+        const only = inner?.length === 1 ? inner[0] : undefined;
+        if (only?.tagName === 'em' && !hasLink(only)) return false;
       }
       return true;
     });

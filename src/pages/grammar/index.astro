@@ -6,7 +6,7 @@ import { rules } from '../../data/rules';
 import { titleOf, statusOf, openQuestionsOf, readmeStatus, LANG_REPO } from '../../lib/lang';
 import { spell } from '../../data/spell';
 
-const ORDER = ['phonology', 'numbers', 'tense', 'plural', 'possession', 'questions', 'pronouns', 'copula'];
+const ORDER = ['phonology', 'numbers', 'tense', 'plural', 'possession', 'questions', 'pronouns', 'copula', 'negation', 'conjunction', 'demonstratives', 'place'];
 const docs = (await getCollection('grammar'))
   .map((e) => ({
     id: e.id,

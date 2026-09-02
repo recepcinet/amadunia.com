@@ -49,7 +49,7 @@ export const rules: Rule[] = [
     claim: 'The owner comes right after the thing owned',
     body: 'Nothing is added: no possessive pronouns, no suffix, no "of". The ordinary pronoun or noun takes the slot after the noun, before any adjective, and chains to any depth.',
     href: '/grammar/possession/',
-    example: { form: 'ruma rafiki mi', gloss: "my friend's house" },
+    example: { form: 'dom rafiki mi', gloss: "my friend's house" },
   },
   {
     claim: 'A question is the answer with one word swapped',
@@ -70,6 +70,30 @@ export const rules: Rule[] = [
     example: { form: 'Mi es doktor. Ruma kabir.', gloss: 'I am a doctor. The house is big.' },
   },
   {
+    claim: 'To deny anything, put no in front of it',
+    body: 'The same no you answer questions with, placed immediately before the verb, the adjective, the place word or es. With tense the order is always no, then the particle, then the verb.',
+    href: '/grammar/negation/',
+    example: { form: 'Mi no suda kula.', gloss: 'I did not eat.' },
+  },
+  {
+    claim: 'One word joins everything: aur',
+    body: 'Nouns, adjectives and whole sentences take the same conjunction, because two nouns side by side already mean possession. o is or.',
+    href: '/grammar/conjunction/',
+    example: { form: 'Angin aur yuki lai.', gloss: 'Wind and snow came.' },
+  },
+  {
+    claim: 'This and that come last',
+    body: 'ini and itu follow the noun, after any owner and any adjective. The noun phrase order is fixed and complete: noun, owner, adjective, this or that.',
+    href: '/grammar/demonstratives/',
+    example: { form: 'dom mi kabir ini', gloss: 'this big house of mine' },
+  },
+  {
+    claim: 'Three small words mark place: in, dari, por',
+    body: 'At, from, and to — each before its noun. A verb of motion needs none of them: whatever follows it is the destination.',
+    href: '/grammar/place/',
+    example: { form: 'Mi lai dari market.', gloss: 'I come from the market.' },
+  },
+  {
     claim: 'Numbers are built, never irregular',
     body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
     href: '/grammar/numbers/',
@@ -79,6 +103,6 @@ export const rules: Rule[] = [
     claim: 'No conjugation, no gender, no articles',
     body: 'One pronoun for he and she. No word for "a" or "the". Grammar you can learn in a day.',
     href: '/about/',
-    example: { form: 'Ta go ruma.', gloss: 'She goes home. He goes home.' },
+    example: { form: 'Ta go dom.', gloss: 'She goes home. He goes home.' },
   },
 ];

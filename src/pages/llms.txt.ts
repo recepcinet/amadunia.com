@@ -6,13 +6,14 @@ import { getCollection } from 'astro:content';
 import { alphabet, letters, vowels, consonants, digraphs } from '../data/alphabet';
 import { rules } from '../data/rules';
 import { Spell, spell } from '../data/spell';
-import { dictionary, readmeStatus, titleOf, statusOf, lessonNumber, splitLessonTitle, LANG_REPO } from '../lib/lang';
+import { dictionary, readmeStatus, titleOf, subtitleOf, statusOf, lessonNumber, splitLessonTitle, LANG_REPO } from '../lib/lang';
 
 export const GET: APIRoute = async ({ site }) => {
   const base = site?.toString() ?? 'https://amadunia.com/';
   const words = dictionary();
   const { target } = readmeStatus();
   const grammar = (await getCollection('grammar')).map((e) => ({ id: e.id, title: titleOf(e.body ?? ''), status: statusOf(e.body ?? '') }));
+  const texts = await getCollection('texts');
   const lessons = (await getCollection('lessons'))
     .map((e) => ({ id: e.id, n: lessonNumber(e.id), ...splitLessonTitle(titleOf(e.body ?? '')) }))
     .sort((a, b) => a.n - b.n);
@@ -35,9 +36,16 @@ Topics: ${grammar.map((g) => `[${g.title}](${base}grammar/${g.id}/) (${g.status 
 
 ${lessons.map((l) => `- [${l.label}: ${l.name}](${base}learn/${l.id}/)`).join('\n')}
 
+## Texts
+
+Original writing in Amadunia, using only settled words and settled grammar; each text records what the language could not yet say.
+
+${texts.map((t) => `- [${titleOf(t.body ?? '')}](${base}texts/${t.id}/) — ${subtitleOf(t.body ?? '') ?? ''}`).join('\n')}
+
 ## Pages
 
 - [Alphabet](${base}alphabet/)
+- [Texts](${base}texts/)
 - [Grammar](${base}grammar/)
 - [Dictionary](${base}dictionary/): ${words.length} roots, searchable
 - [Learn](${base}learn/)

@@ -1,0 +1,62 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { titleOf, subtitleOf, rootsUsedOf, gapsOf, LANG_REPO } from '../../lib/lang';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('texts');
+  return docs.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const body = entry.body ?? '';
+const title = titleOf(body);
+const subtitle = subtitleOf(body);
+const roots = rootsUsedOf(body);
+const gaps = gapsOf(body);
+const { Content } = await render(entry);
+
+const site = Astro.site?.toString() ?? 'https://amadunia.com/';
+const ld = [
+  {
+    '@type': 'ShortStory',
+    '@id': `${site}texts/${entry.id}/#story`,
+    name: title,
+    alternativeHeadline: subtitle,
+    inLanguage: 'art-x-amadunia',
+    author: { '@id': `${site}#author` },
+    license: 'https://creativecommons.org/licenses/by-sa/4.0/',
+    isPartOf: { '@id': `${site}#website` },
+    about: { '@id': `${site}#language` },
+  },
+];
+---
+
+<Base
+  title={title}
+  description={`${subtitle ?? title} — an original story in Amadunia${roots ? `, written with ${roots.used} of its ${roots.of} roots` : ''}.`}
+  ld={ld}
+  crumbs={[['Texts', '/texts/'], [title, `/texts/${entry.id}/`]]}
+>
+  <section class="band">
+    <div class="wrap band__grid">
+      <p class="rail">
+        <span class="rail__name"><a href="/texts/">Texts</a></span>
+        <span class="rail__count">
+          {roots && `${roots.used} of ${roots.of} roots`}
+          {gaps.open > 0 && ` · ${gaps.open} open gaps`}
+        </span>
+      </p>
+      <div>
+        <h1 class="h-section" lang="art-x-amadunia">{title}</h1>
+        {subtitle && <p class="lede" style="margin-top:0.6rem">{subtitle}</p>}
+        <article class="prose" style="margin-top:2rem">
+          <Content />
+        </article>
+        <p class="source">
+          Source: <a href={`${LANG_REPO}/blob/main/texts/${entry.id}.md`}>texts/{entry.id}.md</a> in the language repository.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

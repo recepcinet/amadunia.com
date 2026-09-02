@@ -166,6 +166,37 @@ export function splitLessonTitle(title: string): { label: string; name: string }
   return { label: label.trim(), name: rest.join(' — ').trim() || label.trim() };
 }
 
+/* ---------- Texts ---------- */
+
+/** The italic line under a text's title: its English rendering. */
+export function subtitleOf(body: string): string | undefined {
+  const after = body.replace(/^#\s+.+$/m, '');
+  return after.match(/^\*([^*\n]+)\*\s*$/m)?.[1]?.trim();
+}
+
+/** The body of one "## Heading" section, up to the next heading of any level. */
+function section(body: string, heading: RegExp): string {
+  const m = body.match(heading);
+  if (!m || m.index === undefined) return '';
+  const rest = body.slice(m.index + m[0].length);
+  const next = rest.search(/^#{1,3} /m);
+  return next === -1 ? rest : rest.slice(0, next);
+}
+
+/** "34 of 113" from a text's "## Roots used" section. */
+export function rootsUsedOf(body: string): { used: number; of: number } | undefined {
+  const n = section(body, /^##\s+Roots used\s*$/m).match(/(\d+)\s+of\s+(\d+)/);
+  return n ? { used: Number(n[1]), of: Number(n[2]) } : undefined;
+}
+
+/** Gaps a text records; a struck-through one has since been closed. */
+export function gapsOf(body: string): { total: number; open: number } {
+  const items = section(body, /^##\s+What the language could not say\s*$/m)
+    .split('\n')
+    .filter((l) => /^\s*\d+\.\s+/.test(l));
+  return { total: items.length, open: items.filter((l) => !/~~/.test(l)).length };
+}
+
 export function newWordsOf(body: string): number {
   const heading = body.match(/^## New words?\s*$/m)?.[0];
   if (!heading) return 0;

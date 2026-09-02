@@ -516,3 +516,20 @@ img, svg { max-width: 100%; }
 .rail a:hover { text-decoration: underline; }
 .rule__claim a { text-decoration: none; }
 .rule__claim a:hover { text-decoration: underline; }
+
+/* ---------- A text set as a block: the story itself, not code ---------- */
+
+.prose pre {
+  margin: 2rem 0;
+  padding: 1.5rem 0 1.5rem 1.5rem;
+  border-left: 2px solid var(--rule-strong);
+  overflow-x: auto;
+}
+.prose pre code {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  line-height: 1.75;
+  background: none;
+  padding: 0;
+  white-space: pre-wrap;
+}

@@ -1,0 +1,65 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Band from '../../components/Band.astro';
+import { titleOf, subtitleOf, rootsUsedOf, gapsOf, LANG_REPO } from '../../lib/lang';
+import { dictionary } from '../../lib/lang';
+
+const texts = (await getCollection('texts'))
+  .map((e) => ({
+    id: e.id,
+    title: titleOf(e.body ?? ''),
+    subtitle: subtitleOf(e.body ?? ''),
+    roots: rootsUsedOf(e.body ?? ''),
+    gaps: gapsOf(e.body ?? ''),
+  }))
+  .sort((a, b) => a.id.localeCompare(b.id));
+
+const openGaps = texts.reduce((n, t) => n + t.gaps.open, 0);
+const roots = dictionary().length;
+---
+
+<Base
+  title="Texts"
+  description={`Original writing in Amadunia — ${texts.length === 1 ? 'one story' : `${texts.length} texts`} using only settled words and settled grammar, and a record of what the language could not yet say.`}
+  crumbs={[['Texts', '/texts/']]}
+>
+  <Band name="Texts" count={texts.length === 1 ? '1 text' : `${texts.length} texts`}>
+    <h1 class="h-section">What the language can already say.</h1>
+    <p class="lede">
+      Original writing, not translation. Every text uses only the {roots} settled roots and only
+      settled grammar — nothing is invented to make a sentence work. Where a text cannot say
+      something, it says so at the end.
+    </p>
+    <ul class="stack" style="margin-top:2rem">
+      {
+        texts.map((t) => (
+          <li>
+            <a href={`/texts/${t.id}/`}>
+              <span class="stack__title" lang="art-x-amadunia">{t.title}</span>
+              <span class="stack__note">
+                {t.subtitle}
+                {t.roots && ` · ${t.roots.used} of ${t.roots.of} roots`}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </Band>
+
+  <Band name="Why texts" count={openGaps > 0 ? `${openGaps} open gaps` : undefined}>
+    <h2 class="h-section">A lesson shows what the language can do. A text finds out what it cannot.</h2>
+    <p class="lede">
+      Writing the first story turned up four things thirteen lessons had missed — no word for
+      <em>and</em>, no word for <em>not</em>, no <em>again</em>, no way to mark place. Two were
+      settled the same day; the story is left as it was written, from before those words existed.
+    </p>
+    <div class="panel" style="margin-top:2rem">
+      <p>
+        Texts live in <a href={`${LANG_REPO}/tree/main/texts`}>texts/</a> in the language
+        repository, under CC BY-SA 4.0 like everything else.
+      </p>
+    </div>
+  </Band>
+</Base>

@@ -8,6 +8,7 @@ lessons or the dictionary; it renders them at build time.
 |---|---|---|
 | `/grammar/<topic>/` | `lang/grammar/*.md` | content collection, rendered as-is |
 | `/learn/<lesson>/` | `lang/lessons/lesson-*.md` | content collection, rendered as-is |
+| `/texts/<story>/` | `lang/texts/story-*.md` | content collection; roots-used and gap counts parsed |
 | `/dictionary/` | `lang/dictionary/dictionary.md` | table parsed in `src/lib/lang.ts` |
 | letter list | `lang/grammar/phonology.md` | checked against `src/data/alphabet.ts` at build; mismatch fails the build |
 | roots count, A1 target, milestones, birth date | dictionary rows, `lang/README.md` | parsed |
@@ -21,6 +22,7 @@ lessons or the dictionary; it renders them at build time.
   changed or added there, this list has to be updated by hand.
 - `src/pages/about.astro` — the "why" prose and the five design rules, paraphrased from the
   language README.
+- `src/pages/texts/index.astro` — the framing prose, which names the gaps the first story found.
 - `scripts/og.py` — the share image; regenerate if the motto or the colours change.
 
 ## Inside rendered Markdown
@@ -32,6 +34,8 @@ text is coloured when the dictionary says so: at least three quarters of its wor
 Amadunia words (`lang/dictionary/dictionary.md` is the lexicon). Source-language words
 (*sudah*, *sawfa*) and rejected candidates (*kami*, *kya*) fail that test and stay grey.
 See `src/lib/rehype-lang.mjs`.
+
+A text's fenced block is a story, not code, so `syntaxHighlight` is off in `astro.config.mjs`.
 
 **Cache:** Astro keeps rendered Markdown in `node_modules/.astro/data-store.json` and does not
 notice plugin changes. After editing `rehype-lang.mjs`, run `rm -rf node_modules/.astro` before
