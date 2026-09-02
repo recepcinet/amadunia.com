@@ -7,11 +7,34 @@ const groups = dictionaryGroups();
 const roots = groups.reduce((n, g) => n + g.entries.length, 0);
 const { target, milestones } = readmeStatus();
 const nextMilestone = milestones.find((m) => m > roots);
+
+const site = Astro.site?.toString() ?? 'https://amadunia.com/';
+const ld = [
+  {
+    '@type': 'DefinedTermSet',
+    '@id': `${site}dictionary/#terms`,
+    name: 'Amadunia dictionary',
+    inLanguage: 'art-x-amadunia',
+    license: 'https://creativecommons.org/licenses/by-sa/4.0/',
+    hasDefinedTerm: groups.flatMap((g) =>
+      g.entries.map((e) => ({
+        '@type': 'DefinedTerm',
+        name: e.word,
+        description: e.meaning,
+        inLanguage: 'art-x-amadunia',
+        termCode: e.group,
+        inDefinedTermSet: `${site}dictionary/#terms`,
+      })),
+    ),
+  },
+];
 ---
 
 <Base
   title="Dictionary"
   description={`Every Amadunia word settled so far — ${roots} roots with their meanings and source languages, searchable.`}
+  ld={ld}
+  crumbs={[['Dictionary', '/dictionary/']]}
 >
   <Band name="Dictionary" count={`${roots} roots`}>
     <h1 class="h-section">Every word settled so far.</h1>

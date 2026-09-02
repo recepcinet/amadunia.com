@@ -6,9 +6,13 @@ import Colophon from '../components/Colophon.astro';
 interface Props {
   title: string;
   description: string;
+  /** Extra schema.org nodes for this page, merged into the @graph. */
+  ld?: Record<string, unknown>[];
+  /** Breadcrumb trail below the home page, e.g. [['Learn', '/learn/'], ['Lesson 1', '/learn/lesson-1/']]. */
+  crumbs?: [string, string][];
 }
 
-const { title, description } = Astro.props;
+const { title, description, ld = [], crumbs = [] } = Astro.props;
 const pageTitle = title === 'Amadunia' ? title : `${title} — Amadunia`;
 const url = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og.png', Astro.site);
@@ -54,7 +58,23 @@ const jsonLd = {
       about: { '@id': `${Astro.site}#language` },
       inLanguage: 'en',
       primaryImageOfPage: ogImage.toString(),
+      ...(crumbs.length ? { breadcrumb: { '@id': `${url}#breadcrumb` } } : {}),
     },
+    ...(crumbs.length
+      ? [
+          {
+            '@type': 'BreadcrumbList',
+            '@id': `${url}#breadcrumb`,
+            itemListElement: [['Amadunia', '/'], ...crumbs].map(([name, path], i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              name,
+              item: new URL(path, Astro.site).toString(),
+            })),
+          },
+        ]
+      : []),
+    ...ld,
   ],
 };
 ---
@@ -69,6 +89,8 @@ const jsonLd = {
     <link rel="canonical" href={url} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#faf7f0" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="alternate" type="application/json" href="/dictionary.json" title="Amadunia dictionary" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Amadunia" />

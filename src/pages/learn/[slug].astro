@@ -15,9 +15,25 @@ const { entry, prev, next } = Astro.props;
 const { label, name } = splitLessonTitle(titleOf(entry.body ?? ''));
 const { Content } = await render(entry);
 const nameOf = (e: typeof entry) => splitLessonTitle(titleOf(e.body ?? '')).name;
+const site = Astro.site?.toString() ?? 'https://amadunia.com/';
+const ld = [
+  {
+    '@type': 'LearningResource',
+    '@id': `${site}learn/${entry.id}/`,
+    name: `${label}: ${name}`,
+    learningResourceType: 'lesson',
+    educationalLevel: 'beginner',
+    inLanguage: 'en',
+    teaches: 'Amadunia (art-x-amadunia)',
+    isPartOf: { '@id': `${site}learn/#course` },
+    isAccessibleForFree: true,
+    license: 'https://creativecommons.org/licenses/by-sa/4.0/',
+    author: { '@id': `${site}#author` },
+  },
+];
 ---
 
-<Base title={`${label}: ${name}`} description={`${label} of Amadunia — ${name}. New words, the pattern, a conversation, and practice.`}>
+<Base title={`${label}: ${name}`} description={`${label} of Amadunia — ${name}. New words, the pattern, a conversation, and practice.`} ld={ld} crumbs={[['Learn', '/learn/'], [label, `/learn/${entry.id}/`]]}>
   <section class="band">
     <div class="wrap band__grid">
       <p class="rail">

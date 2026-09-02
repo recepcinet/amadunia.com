@@ -1,4 +1,27 @@
+# amadunia.com — everything here is public and licensed CC BY-SA 4.0.
+# Search engines and AI crawlers alike are welcome; a plain-text summary is
+# at /llms.txt, the full reference at /llms-full.txt, and machine-readable
+# data at /dictionary.json and /corpus.tsv.
+
 User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot-Extended
 Allow: /
 
 Sitemap: https://amadunia.com/sitemap-index.xml

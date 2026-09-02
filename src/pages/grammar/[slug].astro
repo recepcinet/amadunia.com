@@ -14,9 +14,23 @@ const title = titleOf(body);
 const status = statusOf(body);
 const open = openQuestionsOf(body);
 const { Content } = await render(entry);
+const site = Astro.site?.toString() ?? 'https://amadunia.com/';
+const ld = [
+  {
+    '@type': 'Article',
+    '@id': `${site}grammar/${entry.id}/#article`,
+    headline: `${title} in Amadunia`,
+    about: { '@id': `${site}#language` },
+    inLanguage: 'en',
+    author: { '@id': `${site}#author` },
+    license: 'https://creativecommons.org/licenses/by-sa/4.0/',
+    isPartOf: { '@id': `${site}#website` },
+    mainEntityOfPage: `${site}grammar/${entry.id}/`,
+  },
+];
 ---
 
-<Base title={title} description={`${title} in Amadunia — ${status ?? 'draft'}. The rule, where it comes from, and what was rejected.`}>
+<Base title={title} description={`${title} in Amadunia — ${status ?? 'draft'}. The rule, where it comes from, and what was rejected.`} ld={ld} crumbs={[['Grammar', '/grammar/'], [title, `/grammar/${entry.id}/`]]}>
   <section class="band">
     <div class="wrap band__grid">
       <p class="rail">

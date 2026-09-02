@@ -49,6 +49,14 @@ public/            favicon, og.png, robots.txt, CNAME
 
 See [CONTENT.md](CONTENT.md) for what is derived from `lang/` and what is maintained by hand.
 
+## For search engines and models
+
+Besides the pages: `/llms.txt` (summary), `/llms-full.txt` (the whole language as text),
+`/dictionary.json`, and `/corpus.tsv` — Amadunia⇄English sentence pairs from every lesson and
+grammar table, the parallel corpus a translation system would train on. Every page carries
+schema.org JSON-LD (the dictionary as `DefinedTermSet`, lessons as a `Course`). `scripts/indexnow.sh`
+pings IndexNow after a deploy.
+
 ## Design
 
 One rule governs colour: grey is English, fuchsia `#b3155f` is Amadunia. Text in the language

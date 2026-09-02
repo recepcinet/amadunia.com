@@ -13,5 +13,5 @@ Sync the site with the language repository (amadunia-lang, vendored as the git s
 4. `npm run build`; fix anything that fails. Check the built HTML for the change (counts, new pages, links without `.md`).
 5. Commit everything with the message `Update language to <short sha>: <upstream commit subject>` (list any site adaptations in the body), then push:
    `git push git@github.com:recepcinet/amadunia.com.git HEAD:main` (HTTPS has no credentials here; SSH does).
-6. Confirm the deploy: poll `https://api.github.com/repos/recepcinet/amadunia.com/actions/runs?per_page=1` until the run for that sha completes, then spot-check the live page that changed on https://amadunia.com.
+6. Confirm the deploy: poll `https://api.github.com/repos/recepcinet/amadunia.com/actions/runs?per_page=1` until the run for that sha completes, then spot-check the live page that changed on https://amadunia.com. Then run `scripts/indexnow.sh` so search engines learn about the changed URLs.
 7. Report in Turkish, briefly: what changed upstream, what the site needed, deploy result.

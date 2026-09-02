@@ -166,3 +166,78 @@ export function splitLessonTitle(title: string): { label: string; name: string }
 export function newWordsOf(body: string): number {
   return tableRows(body, '## New words').filter((r) => r[0]).length;
 }
+
+/* ---------- Whole-repository readers: full text and parallel corpus ---------- */
+
+import { readdirSync } from 'node:fs';
+
+export interface LangFile {
+  rel: string; // e.g. "grammar/tense.md"
+  body: string;
+}
+
+/** Every Markdown file the site renders or parses, in a stable order. */
+export function allLangFiles(): LangFile[] {
+  const files: LangFile[] = [{ rel: 'README.md', body: readLang('README.md') }];
+  for (const dir of ['grammar', 'lessons', 'dictionary']) {
+    const names = readdirSync(join(LANG, dir))
+      .filter((n) => n.endsWith('.md'))
+      .sort((a, b) => {
+        const na = a.match(/lesson-(\d+)/), nb = b.match(/lesson-(\d+)/);
+        return na && nb ? Number(na[1]) - Number(nb[1]) : a.localeCompare(b);
+      });
+    for (const n of names) files.push({ rel: `${dir}/${n}`, body: readLang(`${dir}/${n}`) });
+  }
+  return files;
+}
+
+export interface Pair {
+  am: string;
+  en: string;
+  source: string; // file the pair came from
+}
+
+const clean = (s: string) =>
+  s.replace(/\*\*/g, '').replace(/\*/g, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').trim();
+
+/**
+ * Amadunia–English sentence pairs, pulled from every table whose columns are
+ * "Amadunia | English" (or a headerless two-column table in a lesson) and from
+ * every practice line of the form "1. Mi kan anak. — *I see a child.*".
+ */
+export function corpus(): Pair[] {
+  const pairs: Pair[] = [];
+  const seen = new Set<string>();
+  const push = (am: string, en: string, source: string) => {
+    am = clean(am); en = clean(en);
+    if (!am || !en || am === '—' || en === '—') return;
+    const key = `${am}\t${en}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    pairs.push({ am, en, source });
+  };
+
+  for (const { rel, body } of allLangFiles()) {
+    if (rel === 'README.md' || rel.startsWith('dictionary/')) continue;
+    const lines = body.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // Practice lines: "3. Doktor bil. — *The doctor knows.*"
+      const m = line.match(/^\s*\d+\.\s+(.+?)\s+—\s+\*(.+?)\*/);
+      if (m) { push(m[1], m[2], rel); continue; }
+      // Table header rows
+      if (!/^\s*\|/.test(line) || !/^\s*\|/.test(lines[i + 1] ?? '') || !/-{2,}/.test(lines[i + 1])) continue;
+      const headers = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim().toLowerCase());
+      let amIdx = headers.indexOf('amadunia'), enIdx = headers.indexOf('english');
+      if (amIdx === -1 && enIdx === -1 && headers.length === 2 && headers.every((h) => !h) && rel.startsWith('lessons/')) {
+        amIdx = 0; enIdx = 1;
+      }
+      if (amIdx === -1 || enIdx === -1) continue;
+      for (let j = i + 2; j < lines.length && /^\s*\|/.test(lines[j]); j++) {
+        const cells = lines[j].trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+        push(cells[amIdx] ?? '', cells[enIdx] ?? '', rel);
+      }
+    }
+  }
+  return pairs;
+}

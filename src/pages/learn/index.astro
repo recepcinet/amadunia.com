@@ -9,9 +9,24 @@ const lessons = (await getCollection('lessons'))
   .map((e) => ({ id: e.id, n: lessonNumber(e.id), ...splitLessonTitle(titleOf(e.body ?? '')), words: newWordsOf(e.body ?? '') }))
   .sort((a, b) => a.n - b.n);
 const roots = dictionary().length;
+const site = Astro.site?.toString() ?? 'https://amadunia.com/';
+const ld = [
+  {
+    '@type': 'Course',
+    '@id': `${site}learn/#course`,
+    name: 'Learn Amadunia',
+    description: `${lessons.length} short lessons from the first greeting to questions and pronouns.`,
+    provider: { '@id': `${site}#author` },
+    inLanguage: 'en',
+    teaches: 'Amadunia (art-x-amadunia)',
+    isAccessibleForFree: true,
+    license: 'https://creativecommons.org/licenses/by-sa/4.0/',
+    hasPart: lessons.map((l) => ({ '@type': 'LearningResource', '@id': `${site}learn/${l.id}/`, name: `${l.label}: ${l.name}`, url: `${site}learn/${l.id}/` })),
+  },
+];
 ---
 
-<Base title="Learn" description={`Learn Amadunia in ${lessons.length} short lessons, from the first greeting to past, future and plural.`}>
+<Base title="Learn" description={`Learn Amadunia in ${lessons.length} short lessons, from the first greeting to past, future and plural.`} ld={ld} crumbs={[['Learn', '/learn/']]}>
   <Band name="Learn" count={`${lessons.length} lessons`}>
     <h1 class="h-section">Ten minutes to your first sentence.</h1>
     <p class="lede">
