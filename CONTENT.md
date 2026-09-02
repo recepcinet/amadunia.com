@@ -27,9 +27,15 @@ lessons or the dictionary; it renders them at build time.
 
 Tables from `lang/` get the language colour on columns whose header names Amadunia
 (`Word`, `Amadunia`, `Singular`, `Plural`, `Example`, `Particle`, tense columns, digit headers).
-Running prose and dialogue blockquotes stay grey: italics there are used for Amadunia, for
-English emphasis, and for source-language words alike, and the site does not guess.
+Everywhere else — dialogue, practice lines, italics in prose, untagged table cells — a run of
+text is coloured when the dictionary says so: at least three quarters of its words are settled
+Amadunia words (`lang/dictionary/dictionary.md` is the lexicon). Source-language words
+(*sudah*, *sawfa*) and rejected candidates (*kami*, *kya*) fail that test and stay grey.
 See `src/lib/rehype-lang.mjs`.
+
+**Cache:** Astro keeps rendered Markdown in `node_modules/.astro/data-store.json` and does not
+notice plugin changes. After editing `rehype-lang.mjs`, run `rm -rf node_modules/.astro` before
+building (the deploy workflow always starts clean).
 
 ## Updating
 

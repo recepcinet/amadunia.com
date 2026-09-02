@@ -5,6 +5,65 @@
 //  3. Rewrites relative links between repo files into site routes.
 //  4. Marks table columns that hold Amadunia with lang="art-x-amadunia", so
 //     the site's one colour rule applies inside the language's own tables.
+//  5. Everywhere else — dialogue, practice lines, italics in prose — marks a
+//     run of text as Amadunia when the dictionary says so: at least three
+//     quarters of its words are settled Amadunia words. Source-language
+//     words and rejected candidates fail that test and stay grey.
+
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+let lexicon;
+function loadLexicon() {
+  if (lexicon) return lexicon;
+  lexicon = new Set();
+  const md = readFileSync(join(process.cwd(), 'lang', 'dictionary', 'dictionary.md'), 'utf8');
+  for (const line of md.split('\n')) {
+    const m = line.match(/^\|\s*([a-z][a-z-]*)\s*\|/);
+    if (m) for (const part of m[1].split('-')) lexicon.add(part);
+  }
+  return lexicon;
+}
+
+const SKIP = new Set(['code', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'script', 'style']);
+const SPLIT = /(\s[—–-]\s|—|\(|\)|"|“|”)/;
+
+function isAmadunia(fragment) {
+  const words = fragment.toLowerCase().match(/[a-z]+(?:-[a-z]+)*/g);
+  if (!words) return false;
+  const lex = loadLexicon();
+  let hit = 0, total = 0;
+  for (const w of words) for (const part of w.split('-')) { total += 1; if (lex.has(part)) hit += 1; }
+  return total > 0 && hit / total >= 0.75;
+}
+
+/** Split a text node into plain text and lang-tagged spans. */
+function tagText(node) {
+  const pieces = node.value.split(SPLIT);
+  if (pieces.length === 1 && !isAmadunia(node.value)) return [node];
+  return pieces
+    .filter((p) => p !== '')
+    .map((p) =>
+      isAmadunia(p) && !SPLIT.test(p)
+        ? { type: 'element', tagName: 'span', properties: { lang: 'art-x-amadunia' }, children: [{ type: 'text', value: p }] }
+        : { type: 'text', value: p },
+    );
+}
+
+function tagProse(node, tagged = false) {
+  if (node.type !== 'element' && node.type !== 'root') return;
+  if (node.type === 'element') {
+    if (SKIP.has(node.tagName)) return;
+    if (node.properties?.lang === 'art-x-amadunia') tagged = true;
+  }
+  if (tagged) return; // already coloured by an ancestor
+  const out = [];
+  for (const c of node.children ?? []) {
+    if (c.type === 'text') out.push(...tagText(c));
+    else { tagProse(c, tagged); out.push(c); }
+  }
+  node.children = out;
+}
 
 const AMADUNIA_HEADERS = new Set([
   'amadunia', 'word', 'singular', 'plural', 'one', 'more than one', 'particle',
@@ -60,6 +119,12 @@ export default function rehypeLang() {
       for (const c of node.children ?? []) walk(c);
     };
     walk(tree);
+    const before = JSON.stringify(tree).length;
+    let lexSize = -1, err = '';
+    try { lexSize = loadLexicon().size; } catch (e) { err = String(e); }
+    tagProse(tree);
+    const spans = JSON.stringify(tree).split('"art-x-amadunia"').length - 1;
+    if (process.env.REHYPE_DEBUG) console.error(`[rehype-lang] cwd=${process.cwd()} lex=${lexSize} ${err} spans=${spans} textTypes=${[...new Set((tree.children||[]).flatMap(c => (c.children||[]).map(x => x.type)))].join(',')} rootTypes=${[...new Set((tree.children||[]).map(c => c.type))].join(',')} delta=${JSON.stringify(tree).length - before}`);
   };
 }
 

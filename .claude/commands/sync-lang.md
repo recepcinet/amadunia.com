@@ -10,7 +10,7 @@ Sync the site with the language repository (amadunia-lang, vendored as the git s
    - README status prose (what is settled / still open) changed → update the Status band in `src/pages/about.astro`.
    - new lessons, dictionary rows, README counts → nothing to do; they are derived.
    - a new kind of file or folder in `lang/` → decide whether the site needs a page for it, and build one in the existing style if so.
-4. `npm run build`; fix anything that fails. Check the built HTML for the change (counts, new pages, links without `.md`).
+4. `npm run build`; fix anything that fails. If you changed `src/lib/rehype-lang.mjs`, `rm -rf node_modules/.astro` first — rendered Markdown is cached there and ignores plugin changes. Check the built HTML for the change (counts, new pages, links without `.md`).
 5. Commit everything with the message `Update language to <short sha>: <upstream commit subject>` (list any site adaptations in the body), then push:
    `git push git@github.com:recepcinet/amadunia.com.git HEAD:main` (HTTPS has no credentials here; SSH does).
 6. Confirm the deploy: poll `https://api.github.com/repos/recepcinet/amadunia.com/actions/runs?per_page=1` until the run for that sha completes, then spot-check the live page that changed on https://amadunia.com. Then run `scripts/indexnow.sh` so search engines learn about the changed URLs.
