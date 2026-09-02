@@ -9,7 +9,7 @@
 const AMADUNIA_HEADERS = new Set([
   'amadunia', 'word', 'singular', 'plural', 'one', 'more than one', 'particle',
   'example', 'past', 'present', 'future', 'letters', 'sequence',
-  'statement', 'question', 'answer',
+  'statement', 'question', 'answer', 'form',
 ]);
 
 const text = (node) =>

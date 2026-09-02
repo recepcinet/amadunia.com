@@ -58,6 +58,12 @@ export const rules: Rule[] = [
     example: { form: 'Yu kan ke?', gloss: 'What do you see? — Yu kan anak. You see a child.' },
   },
   {
+    claim: 'Pronouns never change',
+    body: 'Not for case, not for gender, not for politeness: mi, yu, ta whether acting or acted on, for anyone. Plural by doubling, like every noun. Two ways to say we — kita with you, mi-mi without you.',
+    href: '/grammar/pronouns/',
+    example: { form: 'Mi kan ta. Ta kan mi.', gloss: 'I see her. She sees me.' },
+  },
+  {
     claim: 'Numbers are built, never irregular',
     body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
     href: '/grammar/numbers/',

@@ -27,9 +27,13 @@ export function statusOf(body: string): string | undefined {
 
 /** Bullets under "## Open questions". */
 export function openQuestionsOf(body: string): number {
-  const m = body.match(/^## Open questions\s*\n([\s\S]*?)(?=^## |\Z)/m);
-  if (!m) return 0;
-  return (m[1].match(/^\s*-\s+/gm) ?? []).length;
+  const i = body.search(/^## Open questions\s*$/m);
+  if (i === -1) return 0;
+  let section = body.slice(i).split('\n').slice(1).join('\n');
+  const next = section.search(/^## /m);
+  if (next !== -1) section = section.slice(0, next);
+  // A struck-through bullet ("~~Pronouns~~ — settled") is a closed question.
+  return section.split('\n').filter((l) => /^\s*-\s+/.test(l) && !/^\s*-\s+~~/.test(l)).length;
 }
 
 /** Rows of the first Markdown table found after `heading` (or in the whole body). */
@@ -67,7 +71,14 @@ export interface Entry {
   group: string;
 }
 
-const strip = (s: string) => s.replace(/\*\*/g, '').replace(/\*/g, '').trim();
+/** Plain text from a table cell: no emphasis markers, no "— see [file](path)" cross-references, links reduced to their label. */
+const strip = (s: string) =>
+  s
+    .replace(/\s*[—-]\s*see \[[^\]]+\]\([^)]+\)/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .trim();
 
 export function dictionary(): Entry[] {
   const body = readLang('dictionary/dictionary.md');
