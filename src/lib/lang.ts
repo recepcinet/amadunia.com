@@ -86,8 +86,11 @@ export function dictionary(): Entry[] {
   let group = '';
   for (const cells of tableRows(body)) {
     const [word, meaning, sources] = cells;
-    if (/^\*\*.+\*\*$/.test(word) && !meaning && !sources) {
-      group = strip(word);
+    // A group heading fills only the first cell. Some carry a note after the
+    // bold name ("**Prepositions** — before the noun"), so match the opening
+    // bold rather than the whole cell.
+    if (/^\*\*/.test(word) && !meaning && !sources) {
+      group = strip(word).replace(/\s+[—-]\s+.*$/, '');
       continue;
     }
     if (!word) continue;
@@ -185,7 +188,8 @@ function section(body: string, heading: RegExp): string {
 
 /** "34 of 113" from a text's "## Roots used" section. */
 export function rootsUsedOf(body: string): { used: number; of: number } | undefined {
-  const n = section(body, /^##\s+Roots used\s*$/m).match(/(\d+)\s+of\s+(\d+)/);
+  // "34 of 113" and "34 roots, of the 113 that existed when this was written".
+  const n = section(body, /^##\s+Roots used\s*$/m).match(/(\d+)\b[^.]*?\bof\b[^.]*?(\d+)/);
   return n ? { used: Number(n[1]), of: Number(n[2]) } : undefined;
 }
 

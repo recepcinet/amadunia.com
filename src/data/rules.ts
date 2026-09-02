@@ -94,6 +94,12 @@ export const rules: Rule[] = [
     example: { form: 'Mi lai dari market.', gloss: 'I come from the market.' },
   },
   {
+    claim: 'Verbs in a row need nothing between them',
+    body: 'Want to, can, must: the verbs simply follow one another. Two nouns side by side already meant possession, which is why es and aur had to exist; two verbs side by side meant nothing, so the language took the slot for free.',
+    href: '/grammar/verb-chains/',
+    example: { form: 'Mi mau kula pan.', gloss: 'I want to eat bread.' },
+  },
+  {
     claim: 'Numbers are built, never irregular',
     body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
     href: '/grammar/numbers/',
