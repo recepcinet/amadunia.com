@@ -4,7 +4,7 @@ import Band from '../components/Band.astro';
 import { dictionary, readmeStatus, LANG_REPO } from '../lib/lang';
 
 const roots = dictionary().length;
-const { target, milestones, born } = readmeStatus();
+const { target, milestones, born, settled } = readmeStatus();
 ---
 
 <Base title="About" description="Why Amadunia exists, where its words come from, the five rules it holds itself to, and how it is being built in the open.">
@@ -45,9 +45,8 @@ const { target, milestones, born } = readmeStatus();
       {milestones.length > 0 && ` Milestones: ${milestones.join(' → ')}.`}
     </p>
     <p style="margin-top:1.5rem">
-      Phonology, numbers, tense and plural are settled. Possession and question-marking are still
-      being decided. Follow the commits in the language repository to watch a language grow in
-      real time.
+      {settled ?? 'Some parts of the grammar are settled and some are still being decided.'} Follow
+      the commits in the language repository to watch a language grow in real time.
     </p>
   </Band>
 

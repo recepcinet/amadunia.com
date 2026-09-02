@@ -38,7 +38,9 @@ function tableRows(body: string, heading?: string): string[][] {
   if (heading) {
     const i = body.indexOf(heading);
     if (i === -1) return [];
-    src = body.slice(i);
+    src = body.slice(i + heading.length);
+    const next = src.search(/\n##? /); // stay inside this section
+    if (next !== -1) src = src.slice(0, next);
   }
   const rows: string[][] = [];
   let inTable = false;
@@ -122,6 +124,8 @@ export interface Status {
   target: number;
   milestones: number[];
   born?: string;
+  /** The README's own sentence(s) on what is settled and what is still open. */
+  settled?: string;
 }
 
 export function readmeStatus(): Status {
@@ -130,7 +134,10 @@ export function readmeStatus(): Status {
   const ms = body.match(/Milestones:\s*(.+)$/m)?.[1] ?? '';
   const milestones = (ms.match(/\d+/g) ?? []).map(Number);
   const born = body.match(/born on \*\*(.+?)\*\*/)?.[1];
-  return { target, milestones, born };
+  const settled = body
+    .match(/^([^\n]*? are settled\.(?:[^\n]*?still being decided\.)?)/m)?.[1]
+    ?.trim();
+  return { target, milestones, born, settled };
 }
 
 /* ---------- Lessons ---------- */

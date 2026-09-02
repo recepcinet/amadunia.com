@@ -3,10 +3,10 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Band from '../../components/Band.astro';
 import { rules } from '../../data/rules';
-import { titleOf, statusOf, openQuestionsOf, LANG_REPO } from '../../lib/lang';
+import { titleOf, statusOf, openQuestionsOf, readmeStatus, LANG_REPO } from '../../lib/lang';
 import { spell } from '../../data/spell';
 
-const ORDER = ['phonology', 'numbers', 'tense', 'plural'];
+const ORDER = ['phonology', 'numbers', 'tense', 'plural', 'possession'];
 const docs = (await getCollection('grammar'))
   .map((e) => ({
     id: e.id,
@@ -20,6 +20,7 @@ const docs = (await getCollection('grammar'))
     return a.title.localeCompare(b.title);
   });
 const openTotal = docs.reduce((n, d) => n + d.open, 0);
+const { settled } = readmeStatus();
 ---
 
 <Base
@@ -76,9 +77,8 @@ const openTotal = docs.reduce((n, d) => n + d.open, 0);
     <h2 class="h-section">Not decided yet.</h2>
     <div class="panel">
       <p>
-        {spell(openTotal).replace(/^./, (c) => c.toUpperCase())} questions are listed at the foot of
-        the topics above, and possession and question-marking have no page at all yet. Decisions are
-        made in the open, in the
+        {settled && `${settled} `}{spell(openTotal).replace(/^./, (c) => c.toUpperCase())} smaller
+        questions are listed at the foot of the topics above. Decisions are made in the open, in the
         <a href={`${LANG_REPO}/issues`}>language repository</a>.
       </p>
     </div>

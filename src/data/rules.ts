@@ -46,6 +46,12 @@ export const rules: Rule[] = [
     example: { form: 'tri anak', gloss: 'three children' },
   },
   {
+    claim: 'The owner comes right after the thing owned',
+    body: 'Nothing is added: no possessive pronouns, no suffix, no "of". The ordinary pronoun or noun takes the slot after the noun, before any adjective, and chains to any depth.',
+    href: '/grammar/possession/',
+    example: { form: 'ruma rafiki mi', gloss: "my friend's house" },
+  },
+  {
     claim: 'Numbers are built, never irregular',
     body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
     href: '/grammar/numbers/',

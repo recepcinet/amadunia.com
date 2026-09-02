@@ -26,7 +26,7 @@ const roots = dictionary().length;
               <h2 class="rule__claim">
                 <a href={`/learn/${l.id}/`}>{l.name}</a>
               </h2>
-              <p class="rule__body">{l.words === 1 ? 'One new word' : `${l.words} new words`}</p>
+              <p class="rule__body">{l.words === 0 ? 'No new words' : l.words === 1 ? 'One new word' : `${l.words} new words`}</p>
             </div>
           </li>
         ))
