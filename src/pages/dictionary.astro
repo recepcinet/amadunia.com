@@ -23,7 +23,7 @@ const entries = [
 
     <form style="margin-top:2rem" role="search" onsubmit="return false">
       <label class="stack__note" for="q">Search Amadunia or English</label>
-      <input class="field" id="q" name="q" type="search" placeholder="dunia" autocomplete="off" style="margin-top:0.5rem" />
+      <input class="field" id="q" name="q" type="search" placeholder="dunia" lang="art-x-amadunia" autocomplete="off" style="margin-top:0.5rem" />
     </form>
 
     <ul class="stack" id="results" style="margin-top:2rem">
@@ -31,8 +31,8 @@ const entries = [
         entries.map((entry) => (
           <li data-word={`${entry.word} ${entry.sense}`}>
             <span class="stack__inert">
-              <span class="stack__title">
-                {entry.word} <span class="stack__note">{entry.pos}</span>
+              <span class="stack__title" lang="art-x-amadunia">
+                {entry.word} <span class="stack__note" lang="en">{entry.pos}</span>
               </span>
               <span class="stack__note">{entry.sense}</span>
             </span>

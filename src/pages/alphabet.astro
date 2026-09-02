@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
 import { alphabet, vowels, consonants } from '../data/alphabet';
+import { Spell, spell } from '../data/spell';
 ---
 
 <Base
@@ -9,7 +10,7 @@ import { alphabet, vowels, consonants } from '../data/alphabet';
   description="The nineteen letters of Amadunia: five vowels, fourteen consonants, one sound each."
 >
   <Band name="Alphabet" count={`${alphabet.length} letters`}>
-    <h1 class="h-section">Nineteen letters, nineteen sounds.</h1>
+    <h1 class="h-section">{Spell(alphabet.length)} letters, {spell(alphabet.length)} sounds.</h1>
     <p class="lede">
       Amadunia uses the Latin alphabet without accents or digraphs. A letter is read the same way
       wherever it appears, so a written word has exactly one pronunciation and a spoken word has
@@ -21,7 +22,7 @@ import { alphabet, vowels, consonants } from '../data/alphabet';
         {
           alphabet.map((letter) => (
             <div class="letter" id={letter.glyph}>
-              <span class="letter__glyph">{letter.glyph}</span>
+              <span class="letter__glyph" lang="art-x-amadunia">{letter.glyph}</span>
               <span class="letter__sound">{letter.ipa}</span>
             </div>
           ))
@@ -47,11 +48,11 @@ import { alphabet, vowels, consonants } from '../data/alphabet';
         {
           vowels.map((letter) => (
             <tr>
-              <td>{letter.glyph}</td>
+              <td lang="art-x-amadunia">{letter.glyph}</td>
               <td>{letter.ipa}</td>
               <td>{letter.as_in}</td>
               <td>
-                {letter.example} — {letter.gloss}
+                <span lang="art-x-amadunia">{letter.example}</span> — {letter.gloss}
               </td>
             </tr>
           ))
@@ -80,11 +81,11 @@ import { alphabet, vowels, consonants } from '../data/alphabet';
         {
           consonants.map((letter) => (
             <tr>
-              <td>{letter.glyph}</td>
+              <td lang="art-x-amadunia">{letter.glyph}</td>
               <td>{letter.ipa}</td>
               <td>{letter.as_in}</td>
               <td>
-                {letter.example} — {letter.gloss}
+                <span lang="art-x-amadunia">{letter.example}</span> — {letter.gloss}
               </td>
             </tr>
           ))
