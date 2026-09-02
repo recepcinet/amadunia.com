@@ -1,0 +1,26 @@
+---
+const links = [
+  { href: '/alphabet/', label: 'Alphabet' },
+  { href: '/grammar/', label: 'Grammar' },
+  { href: '/dictionary/', label: 'Dictionary' },
+  { href: '/learn/', label: 'Learn' },
+  { href: '/about/', label: 'About' },
+];
+
+const here = Astro.url.pathname;
+---
+
+<header class="masthead">
+  <div class="wrap masthead__inner">
+    <a class="wordmark" href="/">amadunia</a>
+    <nav class="nav" aria-label="Main">
+      {
+        links.map((link) => (
+          <a href={link.href} aria-current={here.startsWith(link.href) ? 'page' : undefined}>
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>

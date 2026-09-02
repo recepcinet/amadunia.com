@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import Band from '../components/Band.astro';
+import { alphabet, vowels, consonants } from '../data/alphabet';
+---
+
+<Base
+  title="Alphabet"
+  description="The nineteen letters of Amadunia: five vowels, fourteen consonants, one sound each."
+>
+  <Band name="Alphabet" count={`${alphabet.length} letters`}>
+    <h1 class="h-section">Nineteen letters, nineteen sounds.</h1>
+    <p class="lede">
+      Amadunia uses the Latin alphabet without accents or digraphs. A letter is read the same way
+      wherever it appears, so a written word has exactly one pronunciation and a spoken word has
+      exactly one spelling.
+    </p>
+
+    <div class="alphabet-scroll" style="margin-top:2.25rem">
+      <div class="alphabet">
+        {
+          alphabet.map((letter) => (
+            <div class="letter" id={letter.glyph}>
+              <span class="letter__glyph">{letter.glyph}</span>
+              <span class="letter__sound">{letter.ipa}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </Band>
+
+  <Band name="Vowels" count={`${vowels.length}`}>
+    <h2 class="h-section">Vowels</h2>
+    <p class="lede">Pure vowels, no diphthongs. Length does not change meaning.</p>
+    <table class="table" style="margin-top:2rem">
+      <caption>Placeholder values — confirm each sound before publishing.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Letter</th>
+          <th scope="col">Sound</th>
+          <th scope="col">As in</th>
+          <th scope="col">Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          vowels.map((letter) => (
+            <tr>
+              <td>{letter.glyph}</td>
+              <td>{letter.ipa}</td>
+              <td>{letter.as_in}</td>
+              <td>
+                {letter.example} — {letter.gloss}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </Band>
+
+  <Band name="Consonants" count={`${consonants.length}`}>
+    <h2 class="h-section">Consonants</h2>
+    <p class="lede">
+      Chosen for how widely they are shared across the world's languages, not for how many
+      distinctions they can draw.
+    </p>
+    <table class="table" style="margin-top:2rem">
+      <caption>Placeholder values — confirm each sound before publishing.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Letter</th>
+          <th scope="col">Sound</th>
+          <th scope="col">As in</th>
+          <th scope="col">Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          consonants.map((letter) => (
+            <tr>
+              <td>{letter.glyph}</td>
+              <td>{letter.ipa}</td>
+              <td>{letter.as_in}</td>
+              <td>
+                {letter.example} — {letter.gloss}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </Band>
+</Base>

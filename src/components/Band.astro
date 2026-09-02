@@ -1,0 +1,21 @@
+---
+interface Props {
+  name: string;
+  count?: string;
+  id?: string;
+}
+
+const { name, count, id } = Astro.props;
+---
+
+<section class="band" id={id}>
+  <div class="wrap band__grid">
+    <p class="rail">
+      <span class="rail__name">{name}</span>
+      {count && <span class="rail__count">{count}</span>}
+    </p>
+    <div>
+      <slot />
+    </div>
+  </div>
+</section>

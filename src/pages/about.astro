@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import Band from '../components/Band.astro';
+---
+
+<Base
+  title="About"
+  description="Why Amadunia exists, what it takes from other languages, and how it is being built."
+>
+  <Band name="About">
+    <h1 class="h-section">A language you can finish learning.</h1>
+    <p class="lede">
+      Amadunia is a world auxiliary language assembled from the parts of other languages that
+      people learn fastest, and stripped of the parts they never stop tripping over.
+    </p>
+    <p style="margin-top:1.5rem">
+      Placeholder. Say who the language is for, what problem it answers, and what it deliberately
+      refuses to do.
+    </p>
+    <p>
+      Placeholder. Name the languages the vocabulary and sound system draw on, and the principle
+      used to choose between them.
+    </p>
+  </Band>
+
+  <Band name="Design rules" count="3">
+    <h2 class="h-section">What the project holds itself to.</h2>
+    <ol class="rules" style="margin-top:1.5rem">
+      <li>
+        <div>
+          <h3 class="rule__claim">No exceptions</h3>
+          <p class="rule__body">
+            A rule with an exception is two rules. Anything that needs one is left out of the
+            language instead.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3 class="rule__claim">Easy for the most people, not for the fewest</h3>
+          <p class="rule__body">
+            Sounds and structures are chosen by how widely they are already shared, not by how
+            elegant they look on paper.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3 class="rule__claim">Small enough to hold in your head</h3>
+          <p class="rule__body">
+            If the grammar stops fitting on one page, something has gone wrong and gets removed.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </Band>
+
+  <Band name="The project">
+    <h2 class="h-section">How it is being built.</h2>
+    <div class="panel">
+      <p>
+        Amadunia is developed in the open under the MIT licence. Proposals, objections, and word
+        submissions go through
+        <a href="https://github.com/recepcinet/amadunia.com">the repository</a>.
+      </p>
+    </div>
+  </Band>
+</Base>

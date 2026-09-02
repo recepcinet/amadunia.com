@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import Band from '../components/Band.astro';
+import { rules } from '../data/rules';
+---
+
+<Base
+  title="Grammar"
+  description="The complete grammar of Amadunia, stated as a short list of rules that take no exceptions."
+>
+  <Band name="Grammar" count={`${rules.length} rules`}>
+    <h1 class="h-section">The complete grammar.</h1>
+    <p class="lede">
+      This page is the whole of it. Nothing here is qualified by a footnote, and no word is exempt
+      from any line below.
+    </p>
+    <ol class="rules" style="margin-top:2.25rem">
+      {
+        rules.map((rule) => (
+          <li>
+            <div>
+              <h2 class="rule__claim">{rule.claim}</h2>
+              <p class="rule__body">{rule.body}</p>
+              {rule.example && (
+                <p class="example">
+                  <b>{rule.example.form}</b> <span>{rule.example.gloss}</span>
+                </p>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Band>
+
+  <Band name="Open questions">
+    <h2 class="h-section">Still being decided.</h2>
+    <div class="panel">
+      <p>
+        Several parts of the grammar are not settled yet: how time is marked, how questions are
+        formed, and how compounds are built. Drafts and arguments go in the
+        <a href="https://github.com/recepcinet/amadunia.com/issues">issue tracker</a>.
+      </p>
+    </div>
+  </Band>
+</Base>

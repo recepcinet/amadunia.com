@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import Band from '../components/Band.astro';
+---
+
+<Base title="Page not found" description="That page does not exist on amadunia.com.">
+  <Band name="404">
+    <h1 class="h-section">That page is not here.</h1>
+    <p class="lede">The link may be old, or the page may not be written yet.</p>
+    <ul class="stack" style="margin-top:2rem">
+      <li>
+        <a href="/">
+          <span class="stack__title">Home</span>
+          <span class="stack__note">Start over</span>
+        </a>
+      </li>
+      <li>
+        <a href="/grammar/">
+          <span class="stack__title">Grammar</span>
+          <span class="stack__note">The whole language, one page</span>
+        </a>
+      </li>
+    </ul>
+  </Band>
+</Base>
