@@ -1,27 +1,29 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
-import { alphabet, vowels, consonants } from '../data/alphabet';
+import { alphabet, letters, vowels, consonants, digraphs, assertMatchesPhonology } from '../data/alphabet';
+
+assertMatchesPhonology();
 import { Spell, spell } from '../data/spell';
 ---
 
 <Base
   title="Alphabet"
-  description={`The ${spell(alphabet.length)} letters of Amadunia: ${spell(vowels.length)} vowels, ${spell(consonants.length)} consonants, one sound each.`}
+  description={`The ${spell(letters.length)} letters of Amadunia: ${spell(vowels.length)} vowels, ${spell(consonants.length)} consonants and the digraph ch, one sound each.`}
 >
-  <Band name="Alphabet" count={`${alphabet.length} letters`}>
-    <h1 class="h-section">{Spell(alphabet.length)} letters, {spell(alphabet.length)} sounds.</h1>
+  <Band name="Alphabet" count={`${letters.length} letters + ${digraphs.map((d) => d.glyph).join(", ")}`}>
+    <h1 class="h-section">{Spell(letters.length)} letters, one digraph, one sound each.</h1>
     <p class="lede">
-      Amadunia uses the Latin alphabet without accents or digraphs. A letter is read the same way
-      wherever it appears, so a written word has exactly one pronunciation and a spoken word has
-      exactly one spelling.
+      Amadunia uses the Latin alphabet without accents. A letter is read the same way wherever it
+      appears, so a written word has exactly one pronunciation and a spoken word has exactly one
+      spelling. Syllables stay simple: never more than two consonants in a row.
     </p>
 
     <div class="alphabet-scroll" style="margin-top:2.25rem">
       <div class="alphabet" style={`--n:${alphabet.length}`}>
         {
           alphabet.map((letter) => (
-            <div class="letter" id={letter.glyph}>
+            <div class={`letter${letter.digraph ? ' letter--digraph' : ''}`} id={letter.glyph}>
               <span class="letter__glyph" lang="art-x-amadunia">{letter.glyph}</span>
               <span class="letter__sound">{letter.ipa}</span>
             </div>
@@ -35,7 +37,7 @@ import { Spell, spell } from '../data/spell';
     <h2 class="h-section">Vowels</h2>
     <p class="lede">Pure vowels, no diphthongs. Length does not change meaning.</p>
     <table class="table" style="margin-top:2rem">
-      <caption>Placeholder values — confirm each sound before publishing.</caption>
+      <caption>Sound values are the site's reading of one letter, one sound; the letter list is checked against the grammar at build time.</caption>
       <thead>
         <tr>
           <th scope="col">Letter</th>
@@ -61,14 +63,34 @@ import { Spell, spell } from '../data/spell';
     </table>
   </Band>
 
+  <Band name="Digraph" count={`${digraphs.length}`}>
+    <h2 class="h-section">One digraph.</h2>
+    <p class="lede">Two letters, one sound, counted apart from the nineteen.</p>
+    <table class="table" style="margin-top:2rem">
+      <thead>
+        <tr><th scope="col">Letters</th><th scope="col">Sound</th><th scope="col">As in</th><th scope="col">Example</th></tr>
+      </thead>
+      <tbody>
+        {digraphs.map((letter) => (
+          <tr>
+            <td lang="art-x-amadunia">{letter.glyph}</td>
+            <td>{letter.ipa}</td>
+            <td>{letter.as_in}</td>
+            <td><span lang="art-x-amadunia">{letter.example}</span> — {letter.gloss}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </Band>
+
   <Band name="Consonants" count={`${consonants.length}`}>
     <h2 class="h-section">Consonants</h2>
     <p class="lede">
       Chosen for how widely they are shared across the world's languages, not for how many
-      distinctions they can draw.
+      distinctions they can draw. <span lang="art-x-amadunia">y</span> is always a consonant glide, never a vowel.
     </p>
     <table class="table" style="margin-top:2rem">
-      <caption>Placeholder values — confirm each sound before publishing.</caption>
+      <caption>Sound values are the site's reading of one letter, one sound; the letter list is checked against the grammar at build time.</caption>
       <thead>
         <tr>
           <th scope="col">Letter</th>

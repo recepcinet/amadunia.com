@@ -1,0 +1,37 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { titleOf, statusOf, openQuestionsOf, LANG_REPO } from '../../lib/lang';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('grammar');
+  return docs.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const body = entry.body ?? '';
+const title = titleOf(body);
+const status = statusOf(body);
+const open = openQuestionsOf(body);
+const { Content } = await render(entry);
+---
+
+<Base title={title} description={`${title} in Amadunia — ${status ?? 'draft'}. The rule, where it comes from, and what was rejected.`}>
+  <section class="band">
+    <div class="wrap band__grid">
+      <p class="rail">
+        <span class="rail__name"><a href="/grammar/">Grammar</a></span>
+        <span class="rail__count">{status ?? 'draft'}{open > 0 && ` · ${open} open`}</span>
+      </p>
+      <div>
+        <h1 class="h-section">{title}</h1>
+        <article class="prose">
+          <Content />
+        </article>
+        <p class="source">
+          Source: <a href={`${LANG_REPO}/blob/main/grammar/${entry.id}.md`}>grammar/{entry.id}.md</a> in the language repository.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

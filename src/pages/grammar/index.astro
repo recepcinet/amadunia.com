@@ -1,0 +1,86 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Band from '../../components/Band.astro';
+import { rules } from '../../data/rules';
+import { titleOf, statusOf, openQuestionsOf, LANG_REPO } from '../../lib/lang';
+import { spell } from '../../data/spell';
+
+const ORDER = ['phonology', 'numbers', 'tense', 'plural'];
+const docs = (await getCollection('grammar'))
+  .map((e) => ({
+    id: e.id,
+    title: titleOf(e.body ?? ''),
+    status: statusOf(e.body ?? ''),
+    open: openQuestionsOf(e.body ?? ''),
+  }))
+  .sort((a, b) => {
+    const ia = ORDER.indexOf(a.id), ib = ORDER.indexOf(b.id);
+    if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    return a.title.localeCompare(b.title);
+  });
+const openTotal = docs.reduce((n, d) => n + d.open, 0);
+---
+
+<Base
+  title="Grammar"
+  description={`The grammar of Amadunia, topic by topic: ${docs.map((d) => d.title.toLowerCase()).join(', ')}. Every rule holds everywhere.`}
+>
+  <Band name="Grammar" count={`${docs.length} topics`}>
+    <h1 class="h-section">The grammar, topic by topic.</h1>
+    <p class="lede">
+      Each topic is written once, marked settled or open, and applies without exception. What is
+      not on these pages has not been decided yet.
+    </p>
+    <ul class="stack" style="margin-top:2rem">
+      {
+        docs.map((d) => (
+          <li>
+            <a href={`/grammar/${d.id}/`}>
+              <span class="stack__title">{d.title}</span>
+              <span class="stack__note">
+                {d.status ?? 'draft'}
+                {d.open > 0 && ` · ${d.open} open`}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </Band>
+
+  <Band name="At a glance" count={`${rules.length} rules`}>
+    <h2 class="h-section">Every rule holds. That is the whole design.</h2>
+    <ol class="rules" style="margin-top:1.5rem">
+      {
+        rules.map((rule) => (
+          <li>
+            <div>
+              <h3 class="rule__claim">
+                <a href={rule.href}>{rule.claim}</a>
+              </h3>
+              <p class="rule__body">{rule.body}</p>
+              {rule.example && (
+                <p class="example">
+                  <b lang="art-x-amadunia">{rule.example.form}</b> {rule.example.gloss}
+                </p>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Band>
+
+  <Band name="Still open" count={`${openTotal} questions`}>
+    <h2 class="h-section">Not decided yet.</h2>
+    <div class="panel">
+      <p>
+        {spell(openTotal).replace(/^./, (c) => c.toUpperCase())} questions are listed at the foot of
+        the topics above, and possession and question-marking have no page at all yet. Decisions are
+        made in the open, in the
+        <a href={`${LANG_REPO}/issues`}>language repository</a>.
+      </p>
+    </div>
+  </Band>
+</Base>

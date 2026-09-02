@@ -1,31 +1,42 @@
-# What still needs real content
+# Where the content comes from
 
-The site structure is finished; the language content in it is placeholder and marked as such
-in the source. Replace these before the site goes public.
+The language lives in [amadunia-lang](https://github.com/recepcinet/amadunia-lang), vendored
+here as the git submodule `lang/`. The site does not carry its own copy of the grammar, the
+lessons or the dictionary; it renders them at build time.
 
-## src/data/alphabet.ts
-- The eighteen letters are a plausible guess (5 vowels, 13 consonants), not a decision.
-  `w` was dropped deliberately; the rest have not been examined yet.
-- Every IPA value, "as in" example, and example word is invented.
-- Decide whether `r`, `c`, `v`, `w`, `y`, `z` are genuinely excluded, and say why on `/alphabet/`.
+| On the site | Comes from | How |
+|---|---|---|
+| `/grammar/<topic>/` | `lang/grammar/*.md` | content collection, rendered as-is |
+| `/learn/<lesson>/` | `lang/lessons/lesson-*.md` | content collection, rendered as-is |
+| `/dictionary/` | `lang/dictionary/dictionary.md` | table parsed in `src/lib/lang.ts` |
+| letter list | `lang/grammar/phonology.md` | checked against `src/data/alphabet.ts` at build; mismatch fails the build |
+| roots count, A1 target, milestones, birth date | dictionary rows, `lang/README.md` | parsed |
+| `/llms.txt` | all of the above | generated |
 
-## src/data/rules.ts
-- Rules 1 and 2 are written as real claims; confirm them.
-- Rules 3–8 are placeholders. Each needs a claim, a short body, and an example with a gloss.
-- The homepage shows the first four rules, so order matters.
+## Hand-maintained, must follow the language
 
-## src/pages/dictionary.astro
-- Three placeholder entries. Decide where the real word list lives — a data file now, a
-  content collection once it outgrows one file.
-- The search filters the rendered list in the browser. Past a few hundred words it will need
-  a real index instead.
+- `src/data/alphabet.ts` — IPA values, "as in" hints and example words per letter. The letter
+  list must match phonology.md (enforced); the rest is the site's reading.
+- `src/data/rules.ts` — the eight-line summary of `lang/grammar/`. When a topic is settled,
+  changed or added there, this list has to be updated by hand.
+- `src/pages/about.astro` — the "why" prose and the five design rules, paraphrased from the
+  language README.
+- `scripts/og.py` — the share image; regenerate if the motto or the colours change.
 
-## src/pages/learn.astro
-- Five lesson titles, no lesson bodies. Decide whether lessons become their own routes.
+## Inside rendered Markdown
 
-## src/pages/about.astro
-- Two placeholder paragraphs: who the language is for, and which languages it draws on.
+Tables from `lang/` get the language colour on columns whose header names Amadunia
+(`Word`, `Amadunia`, `Singular`, `Plural`, `Example`, `Particle`, tense columns, digit headers).
+Running prose and dialogue blockquotes stay grey: italics there are used for Amadunia, for
+English emphasis, and for source-language words alike, and the site does not guess.
+See `src/lib/rehype-lang.mjs`.
 
-## Elsewhere
-- `public/favicon.svg` is a plain `a` on blue. Replace if the project gets a real mark.
-- No Open Graph image yet; `/og.png` referenced by nothing so far.
+## Updating
+
+```bash
+git submodule update --remote lang
+npm run build
+```
+
+Then commit the new submodule pointer. If the build fails on the phonology check, the alphabet
+has changed upstream: update `src/data/alphabet.ts` to match.

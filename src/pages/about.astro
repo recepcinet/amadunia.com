@@ -1,67 +1,65 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
+import { dictionary, readmeStatus, LANG_REPO } from '../lib/lang';
+
+const roots = dictionary().length;
+const { target, milestones, born } = readmeStatus();
 ---
 
-<Base
-  title="About"
-  description="Why Amadunia exists, what it takes from other languages, and how it is being built."
->
+<Base title="About" description="Why Amadunia exists, where its words come from, the five rules it holds itself to, and how it is being built in the open.">
   <Band name="About">
     <h1 class="h-section">A language you can finish learning.</h1>
     <p class="lede">
-      Amadunia is a world auxiliary language assembled from the parts of other languages that
-      people learn fastest, and stripped of the parts they never stop tripping over.
+      Amadunia — <span lang="art-x-amadunia">ama</span> love, <span lang="art-x-amadunia">dunia</span> world — is a constructed world auxiliary language built on one
+      principle: take the easiest feature from every language. If a sound or a rule is hard for
+      anyone on Earth, it is out.
     </p>
     <p style="margin-top:1.5rem">
-      Placeholder. Say who the language is for, what problem it answers, and what it deliberately
-      refuses to do.
-    </p>
-    <p>
-      Placeholder. Name the languages the vocabulary and sound system draw on, and the principle
-      used to choose between them.
+      Esperanto proved in 1887 that a constructed language can live, but its roots are almost
+      entirely European. Amadunia draws from the largest language families of the whole world:
+      <span lang="art-x-amadunia">ba</span> (eight) is Chinese, <span lang="art-x-amadunia">pat</span> (four) is Indonesian and
+      Tagalog, <span lang="art-x-amadunia">cha</span> (tea) is at home in Chinese, Hindi, Turkish, Swahili and Russian alike,
+      <span lang="art-x-amadunia">dunia</span> spans Arabic, Hindi, Swahili, Indonesian and Turkish,
+      <span lang="art-x-amadunia">ama</span> is Latin, <span lang="art-x-amadunia">kita</span> is Indonesian. Every continent should hear
+      something familiar.
     </p>
   </Band>
 
-  <Band name="Design rules" count="3">
-    <h2 class="h-section">What the project holds itself to.</h2>
+  <Band name="Design rules" count="5">
+    <h2 class="h-section">What the language holds itself to.</h2>
     <ol class="rules" style="margin-top:1.5rem">
-      <li>
-        <div>
-          <h3 class="rule__claim">No exceptions</h3>
-          <p class="rule__body">
-            A rule with an exception is two rules. Anything that needs one is left out of the
-            language instead.
-          </p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="rule__claim">Easy for the most people, not for the fewest</h3>
-          <p class="rule__body">
-            Sounds and structures are chosen by how widely they are already shared, not by how
-            elegant they look on paper.
-          </p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="rule__claim">Small enough to hold in your head</h3>
-          <p class="rule__body">
-            If the grammar stops fitting on one page, something has gone wrong and gets removed.
-          </p>
-        </div>
-      </li>
+      <li><div><h3 class="rule__claim">Zero exceptions</h3><p class="rule__body">Every rule works everywhere. A word that would need a rule of its own is not admitted.</p></div></li>
+      <li><div><h3 class="rule__claim">Written as spoken</h3><p class="rule__body">One letter, one sound. No silent letters, no letter that can be read two ways.</p></div></li>
+      <li><div><h3 class="rule__claim">No conjugation, no gender, no articles</h3><p class="rule__body">Grammar you can learn in a day. The verb never changes; one pronoun covers he and she.</p></div></li>
+      <li><div><h3 class="rule__claim">Global balance</h3><p class="rule__body">No language family dominates. The dictionary lists each word's sources so this can be checked.</p></div></li>
+      <li><div><h3 class="rule__claim">Already-global words stay</h3><p class="rule__body"><span lang="art-x-amadunia">hi</span>, <span lang="art-x-amadunia">ok</span>, <span lang="art-x-amadunia">taksi</span>, <span lang="art-x-amadunia">foto</span> — vocabulary the world already shares is free.</p></div></li>
     </ol>
   </Band>
 
-  <Band name="The project">
-    <h2 class="h-section">How it is being built.</h2>
+  <Band name="Status" count={`${roots} roots`}>
+    <h2 class="h-section">Under construction, in public.</h2>
+    <p class="lede">
+      {born ? `Amadunia was born on ${born}.` : 'Amadunia is young.'} The vocabulary stands at {roots} roots; the
+      target for A1 is {target}, because compounding does the rest.
+      {milestones.length > 0 && ` Milestones: ${milestones.join(' → ')}.`}
+    </p>
+    <p style="margin-top:1.5rem">
+      Phonology, numbers, tense and plural are settled. Possession and question-marking are still
+      being decided. Follow the commits in the language repository to watch a language grow in
+      real time.
+    </p>
+  </Band>
+
+  <Band name="Licence">
+    <h2 class="h-section">Free to use, share and build on.</h2>
     <div class="panel">
       <p>
-        Amadunia is developed in the open under the MIT licence. Proposals, objections, and word
-        submissions go through
-        <a href="https://github.com/recepcinet/amadunia.com">the repository</a>.
+        The language and all its materials are licensed
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> and live in
+        <a href={LANG_REPO}>amadunia-lang</a>. This site reads them directly from that repository; its
+        own code is MIT, in <a href="https://github.com/recepcinet/amadunia.com">amadunia.com</a>.
+        Suggestions and contributions are welcome in either.
       </p>
     </div>
   </Band>

@@ -1,45 +1,60 @@
-// PLACEHOLDER RULES — replace with the real Amadunia grammar.
-// The claim of the language is that this list stays short and takes no exceptions.
+// The grammar at a glance: one line per settled rule, each pointing at the
+// page in lang/grammar/ that states it in full. This is a hand-written
+// summary of that folder and has to be updated when it changes.
 export interface Rule {
   claim: string;
   body: string;
+  href: string;
   example?: { form: string; gloss: string };
 }
 
 export const rules: Rule[] = [
   {
     claim: 'One letter, one sound',
-    body: 'Spelling and pronunciation never diverge. If you can read a word, you can say it.',
-    example: { form: 'dunia', gloss: '/du.ni.a/ — world' },
+    body: 'No silent letters, none that change value by position, none that can be read two ways. A word is pronounced exactly as written.',
+    href: '/grammar/phonology/',
+    example: { form: 'dunia', gloss: 'du-ni-a — world' },
   },
   {
-    claim: 'Stress falls on the second-to-last syllable',
-    body: 'No word carries a written accent, because stress is never in doubt.',
-    example: { form: 'amadunia', gloss: 'a·ma·du·NI·a' },
+    claim: 'Syllables stay simple',
+    body: 'Never more than two consonants in a row. If you can say "banana" and "taksi", you can say anything in Amadunia.',
+    href: '/grammar/phonology/',
+    example: { form: 'taksi', gloss: 'tak-si — taxi' },
   },
   {
-    claim: 'Word order is subject, verb, object',
-    body: 'Placeholder. Describe the fixed constituent order and what it lets the language leave out.',
-    example: { form: 'Mi ama dunia.', gloss: 'I love world — I love the world.' },
+    claim: 'The verb never changes',
+    body: 'Time is one particle placed before the verb: suda for the past, saufa for the future. Nothing to conjugate, no agreement with the subject.',
+    href: '/grammar/tense/',
+    example: { form: 'Mi suda kula pan.', gloss: 'I ate bread.' },
   },
   {
-    claim: 'Verbs do not conjugate',
-    body: 'Placeholder. One form for every person and number; time is carried by a separate particle.',
+    claim: 'The present is unmarked',
+    body: 'The most common tense is the shortest form. Once a time has been set, the particle need not be repeated until the time changes.',
+    href: '/grammar/tense/',
+    example: { form: 'Mi kula pan.', gloss: 'I eat bread.' },
   },
   {
-    claim: 'Nouns do not decline',
-    body: 'Placeholder. No gender, no case. Plurality is marked once, in one way.',
+    claim: 'To make a plural, say the noun twice',
+    body: 'Joined by a hyphen. Nothing is added and nothing inside the word changes, so there is nothing that could become irregular.',
+    href: '/grammar/plural/',
+    example: { form: 'anak-anak', gloss: 'children' },
   },
   {
-    claim: 'Adjectives follow the noun',
-    body: 'Placeholder. State the position and whether it ever varies.',
+    claim: 'After a number, the noun stays single',
+    body: 'The number has already done the work. The unmarked noun is neutral, not singular; doubling is used only when "more than one" actually matters.',
+    href: '/grammar/plural/',
+    example: { form: 'tri anak', gloss: 'three children' },
   },
   {
-    claim: 'Questions use one particle',
-    body: 'Placeholder. No inversion, no auxiliary, no change in word order.',
+    claim: 'Numbers are built, never irregular',
+    body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
+    href: '/grammar/numbers/',
+    example: { form: 'du-des-uan', gloss: '21' },
   },
   {
-    claim: 'There are no irregular words',
-    body: 'A word that would need its own rule is not admitted into the language.',
+    claim: 'No conjugation, no gender, no articles',
+    body: 'One pronoun for he and she. No word for "a" or "the". Grammar you can learn in a day.',
+    href: '/about/',
+    example: { form: 'Ta go ruma.', gloss: 'She goes home. He goes home.' },
   },
 ];

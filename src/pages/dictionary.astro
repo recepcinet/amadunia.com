@@ -1,48 +1,54 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
+import { dictionaryGroups, readmeStatus, LANG_REPO } from '../lib/lang';
 
-// PLACEHOLDER ENTRIES — replace with the real word list.
-const entries = [
-  { word: 'ama', pos: 'verb', sense: 'to love' },
-  { word: 'dunia', pos: 'noun', sense: 'world' },
-  { word: 'mi', pos: 'pronoun', sense: 'I, me' },
-];
+const groups = dictionaryGroups();
+const roots = groups.reduce((n, g) => n + g.entries.length, 0);
+const { target, milestones } = readmeStatus();
+const nextMilestone = milestones.find((m) => m > roots);
 ---
 
 <Base
   title="Dictionary"
-  description="Look up a word in Amadunia. The word list is being compiled in the open."
+  description={`Every Amadunia word settled so far — ${roots} roots with their meanings and source languages, searchable.`}
 >
-  <Band name="Dictionary" count={`${entries.length} words`}>
-    <h1 class="h-section">Look up a word.</h1>
+  <Band name="Dictionary" count={`${roots} roots`}>
+    <h1 class="h-section">Every word settled so far.</h1>
     <p class="lede">
-      The word list is small on purpose and grows slowly. A word gets in when it earns its place
-      against the ones already here.
+      {roots} roots, on the way to {target} for A1. The source languages are listed with each word
+      because global balance is a rule, and this is where it gets checked.
+      {nextMilestone && ` Next milestone: ${nextMilestone}.`}
     </p>
 
     <form style="margin-top:2rem" role="search" onsubmit="return false">
-      <label class="stack__note" for="q">Search Amadunia or English</label>
+      <label class="stack__note" for="q">Search Amadunia, English, or a source language</label>
       <input class="field" id="q" name="q" type="search" placeholder="dunia" lang="art-x-amadunia" autocomplete="off" style="margin-top:0.5rem" />
     </form>
 
-    <ul class="stack" id="results" style="margin-top:2rem">
+    <div id="groups">
       {
-        entries.map((entry) => (
-          <li data-word={`${entry.word} ${entry.sense}`}>
-            <span class="stack__inert">
-              <span class="stack__title" lang="art-x-amadunia">
-                {entry.word} <span class="stack__note" lang="en">{entry.pos}</span>
-              </span>
-              <span class="stack__note">{entry.sense}</span>
-            </span>
-          </li>
+        groups.map((g) => (
+          <section class="group" data-group>
+            <h2 class="group__name">{g.name}</h2>
+            <ul class="stack">
+              {g.entries.map((e) => (
+                <li data-word={`${e.word} ${e.meaning} ${e.sources}`.toLowerCase()}>
+                  <span class="stack__inert entry">
+                    <span class="entry__word" lang="art-x-amadunia">{e.word}</span>
+                    <span class="entry__meaning">{e.meaning}</span>
+                    <span class="entry__sources">{e.sources && e.sources !== '—' ? e.sources : 'source not yet documented'}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
         ))
       }
-    </ul>
+    </div>
     <p class="stack__note" id="empty" hidden style="margin-top:1.5rem">
       No word matches that yet. Propose it in the
-      <a href="https://github.com/recepcinet/amadunia.com/issues">issue tracker</a>.
+      <a href={`${LANG_REPO}/issues`}>language repository</a>.
     </p>
   </Band>
 
@@ -50,9 +56,9 @@ const entries = [
     <h2 class="h-section">Add a word.</h2>
     <div class="panel">
       <p>
-        Every entry needs a form, a part of speech, a sense in English, and a reason it cannot be
-        built from words already in the list. Open an issue with those four things and it will be
-        reviewed.
+        Every entry needs a form, a meaning, and its source languages. A word gets in when it is
+        already at home in several language families and collides with nothing settled. Open an
+        issue or a pull request on <a href={`${LANG_REPO}/blob/main/dictionary/dictionary.md`}>dictionary.md</a>.
       </p>
     </div>
   </Band>
@@ -60,17 +66,22 @@ const entries = [
 
 <script>
   const input = document.getElementById('q') as HTMLInputElement | null;
-  const list = document.getElementById('results');
   const empty = document.getElementById('empty');
+  const groups = Array.from(document.querySelectorAll<HTMLElement>('[data-group]'));
 
   input?.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
     let shown = 0;
-    list?.querySelectorAll<HTMLLIElement>('li').forEach((li) => {
-      const hit = !q || (li.dataset.word ?? '').toLowerCase().includes(q);
-      li.hidden = !hit;
-      if (hit) shown += 1;
-    });
+    for (const g of groups) {
+      let inGroup = 0;
+      g.querySelectorAll<HTMLLIElement>('li[data-word]').forEach((li) => {
+        const hit = !q || (li.dataset.word ?? '').includes(q);
+        li.hidden = !hit;
+        if (hit) inGroup += 1;
+      });
+      g.hidden = inGroup === 0;
+      shown += inGroup;
+    }
     if (empty) empty.hidden = shown > 0;
   });
 </script>

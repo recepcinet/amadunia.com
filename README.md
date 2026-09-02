@@ -1,17 +1,30 @@
 # amadunia.com
 
-Amadunia — a world auxiliary language built from the easiest features of all languages.
-18 letters, zero exceptions. Mi ama dunia! 🌍
+The website for Amadunia — a world auxiliary language built from the easiest features of all
+languages. Nineteen letters plus *ch*, one sound each, zero exceptions. Mi ama dunia! 🌍
 
-This repository holds the language and the website that documents it.
+The language itself lives in [amadunia-lang](https://github.com/recepcinet/amadunia-lang)
+(CC BY-SA 4.0). This repository is only the site (MIT); it reads the grammar, lessons and
+dictionary straight from that repository, vendored here as the git submodule `lang/`.
 
 ## Running the site
 
 ```bash
+git clone --recurse-submodules https://github.com/recepcinet/amadunia.com.git
 npm install
 npm run dev      # http://localhost:4321
 npm run build    # static output in dist/
 npm run preview  # serve the built output
+```
+
+If you cloned without `--recurse-submodules`, run `git submodule update --init` first.
+
+To pull the latest language changes:
+
+```bash
+git submodule update --remote lang
+npm run build    # fails if src/data/alphabet.ts no longer matches lang/grammar/phonology.md
+git add lang && git commit -m "Update language to <commit>"
 ```
 
 Built with [Astro](https://astro.build). No client framework; the only JavaScript on the site
@@ -20,24 +33,28 @@ is the dictionary filter.
 ## Structure
 
 ```
+lang/              the language (git submodule → amadunia-lang)
 src/
-  data/            the language itself — alphabet.ts, rules.ts
-  pages/           one file per route
-  layouts/Base     document shell, fonts, metadata
+  content.config   collections over lang/grammar and lang/lessons
+  lib/lang.ts      build-time parsers: dictionary table, alphabet, README status
+  lib/rehype-lang  Markdown plugin: strips H1/status, rewrites links, tags Amadunia table columns
+  data/            alphabet.ts (sound values; checked against phonology.md), rules.ts (summary)
+  pages/           routes; grammar/[slug] and learn/[slug] come from the collections
+  layouts/Base     document shell, fonts, metadata, JSON-LD
   components/      Masthead, Colophon, Band (a section with its left rail)
   styles/          global.css — all design tokens live at the top
-public/            favicon, robots.txt, CNAME
+scripts/og.py      renders public/og.png
+public/            favicon, og.png, robots.txt, CNAME
 ```
 
-Content lives in `src/data`. Editing `alphabet.ts` or `rules.ts` updates every page that
-counts or lists them, including the counts in the section rails.
+See [CONTENT.md](CONTENT.md) for what is derived from `lang/` and what is maintained by hand.
 
 ## Design
 
-Two inks on paper, after the risograph pamphlets of the auxiliary-language movement: a small
-ink set for a small letter set. Federal blue `#2a4b8d`, fluorescent pink `#ff48b0`, paper
-`#faf7f0`. Archivo for display, Newsreader for reading. Colour pairs are checked against
-WCAG AA; see the tokens at the top of `src/styles/global.css`.
+One rule governs colour: grey is English, fuchsia `#b3155f` is Amadunia. Text in the language
+is marked `lang="art-x-amadunia"` (BCP 47 for a constructed language with no code) and the
+colour follows from that. Archivo for display, Newsreader for reading, on paper `#faf7f0`.
+Colour pairs are checked against WCAG AA; tokens are at the top of `src/styles/global.css`.
 
 ## Deploying
 
@@ -67,4 +84,5 @@ For `www`, a CNAME to `recepcinet.github.io`.
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
+Site code: MIT, see [LICENSE](LICENSE). Language content under `lang/`:
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), © Recep Cinet.
