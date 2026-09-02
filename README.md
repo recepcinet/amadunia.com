@@ -1,7 +1,7 @@
 # amadunia.com
 
 The website for Amadunia — a world auxiliary language built from the easiest features of all
-languages. Nineteen letters plus *ch*, one sound each, zero exceptions. Mi ama dunia! 🌍
+languages. Twenty letters, one sound each, zero exceptions. Mi ama dunia! 🌍
 
 The language itself lives in [amadunia-lang](https://github.com/recepcinet/amadunia-lang)
 (CC BY-SA 4.0). This repository is only the site (MIT); it reads the grammar, lessons and

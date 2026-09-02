@@ -9,14 +9,14 @@ import { Spell, spell } from '../data/spell';
 
 <Base
   title="Alphabet"
-  description={`The ${spell(letters.length)} letters of Amadunia: ${spell(vowels.length)} vowels, ${spell(consonants.length)} consonants and the digraph ch, one sound each.`}
+  description={`The ${spell(letters.length)} letters of Amadunia: ${spell(vowels.length)} vowels and ${spell(consonants.length)} consonants, one sound each, no digraphs, no diacritics.`}
 >
-  <Band name="Alphabet" count={`${letters.length} letters + ${digraphs.map((d) => d.glyph).join(", ")}`}>
-    <h1 class="h-section">{Spell(letters.length)} letters, one digraph, one sound each.</h1>
+  <Band name="Alphabet" count={`${letters.length} letters${digraphs.length > 0 ? ` + ${digraphs.map((d) => d.glyph).join(', ')}` : ''}`}>
+    <h1 class="h-section">{Spell(letters.length)} letters, {spell(letters.length)} sounds.</h1>
     <p class="lede">
-      Amadunia uses the Latin alphabet without accents. A letter is read the same way wherever it
-      appears, so a written word has exactly one pronunciation and a spoken word has exactly one
-      spelling. Syllables stay simple: never more than two consonants in a row.
+      Amadunia uses the Latin alphabet without accents or digraphs. A letter is read the same way
+      wherever it appears, so a written word has exactly one pronunciation and a spoken word has
+      exactly one spelling. Syllables stay simple: never more than two consonants in a row.
     </p>
 
     <div class="alphabet-scroll" style="margin-top:2.25rem">
@@ -63,31 +63,35 @@ import { Spell, spell } from '../data/spell';
     </table>
   </Band>
 
-  <Band name="Digraph" count={`${digraphs.length}`}>
-    <h2 class="h-section">One digraph.</h2>
-    <p class="lede">Two letters, one sound, counted apart from the nineteen.</p>
-    <table class="table" style="margin-top:2rem">
-      <thead>
-        <tr><th scope="col">Letters</th><th scope="col">Sound</th><th scope="col">As in</th><th scope="col">Example</th></tr>
-      </thead>
-      <tbody>
-        {digraphs.map((letter) => (
-          <tr>
-            <td lang="art-x-amadunia">{letter.glyph}</td>
-            <td>{letter.ipa}</td>
-            <td>{letter.as_in}</td>
-            <td><span lang="art-x-amadunia">{letter.example}</span> — {letter.gloss}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </Band>
+  {digraphs.length > 0 && (
+    <Band name="Digraph" count={`${digraphs.length}`}>
+      <h2 class="h-section">{Spell(digraphs.length)} digraph{digraphs.length > 1 ? 's' : ''}.</h2>
+      <p class="lede">Two letters, one sound, counted apart from the letters.</p>
+      <table class="table" style="margin-top:2rem">
+        <thead>
+          <tr><th scope="col">Letters</th><th scope="col">Sound</th><th scope="col">As in</th><th scope="col">Example</th></tr>
+        </thead>
+        <tbody>
+          {digraphs.map((letter) => (
+            <tr>
+              <td lang="art-x-amadunia">{letter.glyph}</td>
+              <td>{letter.ipa}</td>
+              <td>{letter.as_in}</td>
+              <td><span lang="art-x-amadunia">{letter.example}</span> — {letter.gloss}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Band>
+  )}
 
   <Band name="Consonants" count={`${consonants.length}`}>
     <h2 class="h-section">Consonants</h2>
     <p class="lede">
       Chosen for how widely they are shared across the world's languages, not for how many
-      distinctions they can draw. <span lang="art-x-amadunia">y</span> is always a consonant glide, never a vowel.
+      distinctions they can draw. <span lang="art-x-amadunia">c</span> is always the sound of
+      <em>chai</em> and <em>church</em>, never k, never s; <span lang="art-x-amadunia">y</span> is always a
+      consonant glide, never a vowel.
     </p>
     <table class="table" style="margin-top:2rem">
       <caption>Sound values are the site's reading of one letter, one sound; the letter list is checked against the grammar at build time.</caption>

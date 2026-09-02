@@ -50,12 +50,12 @@ const sentence = [
     <div class="wrap band__grid">
       <p class="rail">
         <span class="rail__name">Alphabet</span>
-        <span class="rail__count">{letters.length} letters + {digraphs.map((d) => d.glyph).join(", ")}</span>
+        <span class="rail__count">{letters.length} letters{digraphs.length > 0 && ` + ${digraphs.map((d) => d.glyph).join(', ')}`}</span>
       </p>
       <div>
         <h2 class="h-section">The whole alphabet fits on one line.</h2>
         <p class="lede">
-          {Spell(vowels.length)} vowels, {spell(consonants.length)} consonants, and one digraph. Every
+          {Spell(vowels.length)} vowels and {spell(consonants.length)} consonants{digraphs.length > 0 && `, and ${spell(digraphs.length)} digraph${digraphs.length > 1 ? 's' : ''}`}. Every
           letter is pronounced, always the same way, in every word.
         </p>
       </div>

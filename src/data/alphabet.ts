@@ -25,6 +25,7 @@ export const vowels: Letter[] = [
 
 export const consonants: Letter[] = [
   { glyph: 'b', ipa: '/b/', as_in: 'boat', example: 'bai', gloss: 'goodbye' },
+  { glyph: 'c', ipa: '/tʃ/', as_in: 'church, chai', example: 'ca', gloss: 'tea' },
   { glyph: 'd', ipa: '/d/', as_in: 'day', example: 'din', gloss: 'day' },
   { glyph: 'f', ipa: '/f/', as_in: 'find', example: 'fai', gloss: 'five' },
   { glyph: 'g', ipa: '/g/', as_in: 'good', example: 'go', gloss: 'to go' },
@@ -40,13 +41,12 @@ export const consonants: Letter[] = [
   { glyph: 'y', ipa: '/j/', as_in: 'yes', example: 'ya', gloss: 'yes' },
 ];
 
-export const digraphs: Letter[] = [
-  { glyph: 'ch', ipa: '/tʃ/', as_in: 'church', example: 'cha', gloss: 'tea', digraph: true },
-];
+// None since 2026-09-02: ch became c. Kept as a list so the pages stay correct if one returns.
+export const digraphs: Letter[] = [];
 
 export const letters: Letter[] = [...vowels, ...consonants].sort((a, b) => a.glyph.localeCompare(b.glyph));
 
-/** Letters plus digraphs, in one line: what the strip on the page shows. */
+/** Letters plus any digraphs, in one line: what the strip on the page shows. */
 export const alphabet: Letter[] = [...letters, ...digraphs];
 
 export function assertMatchesPhonology(): void {
