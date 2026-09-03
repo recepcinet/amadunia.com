@@ -1,11 +1,14 @@
 // Build-time readers for the parts of lang/ that are not rendered as pages
 // but parsed into data: the dictionary table, the alphabet in phonology.md,
 // and the status line in the README. Everything here runs at build only.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const LANG = join(process.cwd(), 'lang');
 export const LANG_REPO = 'https://github.com/recepcinet/amadunia-lang';
+
+/** writing/ is a proposal upstream; guard every use so the site is quiet without it. */
+export const hasWriting = existsSync(join(LANG, 'writing'));
 
 export function readLang(rel: string): string {
   return readFileSync(join(LANG, rel), 'utf8');

@@ -71,7 +71,7 @@ function tagProse(node, tagged = false) {
 
 const AMADUNIA_HEADERS = new Set([
   'amadunia', 'word', 'singular', 'plural', 'one', 'more than one', 'particle',
-  'example', 'past', 'present', 'future', 'letters', 'sequence',
+  'example', 'past', 'present', 'future', 'letter', 'letters', 'sequence',
   'statement', 'question', 'answer', 'form',
 ]);
 

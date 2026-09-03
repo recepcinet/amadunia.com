@@ -1,0 +1,102 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Band from '../../components/Band.astro';
+import { titleOf, statusOf, openQuestionsOf, hasWriting, LANG_REPO } from '../../lib/lang';
+
+// One route for the section and its pages, so that when writing/ is not in the
+// language repository the whole section simply does not exist.
+export async function getStaticPaths() {
+  if (!hasWriting) return [];
+  const docs = await getCollection('writing');
+  return [
+    { params: { slug: undefined }, props: { entry: null, docs } },
+    ...docs.map((entry) => ({ params: { slug: entry.id }, props: { entry, docs } })),
+  ];
+}
+
+const { entry, docs } = Astro.props;
+
+const summary = (e: (typeof docs)[number]) => ({
+  id: e.id,
+  title: titleOf(e.body ?? ''),
+  status: statusOf(e.body ?? ''),
+  open: openQuestionsOf(e.body ?? ''),
+});
+
+const page = entry ? summary(entry) : null;
+const Content = entry ? (await render(entry)).Content : null;
+const list = docs.map(summary).sort((a, b) => a.title.localeCompare(b.title));
+---
+
+{
+  page && Content ? (
+    <Base
+      title={page.title}
+      description={`${page.title} for Amadunia — ${page.status ?? 'draft'}. What it proposes, what it rejected, and what it has not yet proved.`}
+      crumbs={[['Writing', '/writing/'], [page.title, `/writing/${page.id}/`]]}
+    >
+      <section class="band">
+        <div class="wrap band__grid">
+          <p class="rail">
+            <span class="rail__name"><a href="/writing/">Writing</a></span>
+            <span class="rail__count">{page.status ?? 'draft'}{page.open > 0 && ` · ${page.open} open`}</span>
+          </p>
+          <div>
+            <h1 class="h-section">{page.title}</h1>
+            <article class="prose">
+              <Content />
+            </article>
+            <p class="source">
+              Source: <a href={`${LANG_REPO}/blob/main/writing/${page.id}.md`}>writing/{page.id}.md</a> in the language repository.
+            </p>
+          </div>
+        </div>
+      </section>
+    </Base>
+  ) : (
+    <Base
+      title="Writing"
+      description="How Amadunia is written down and passed between people: a keyboard layout it does not require, and words for spelling a word aloud."
+      crumbs={[['Writing', '/writing/']]}
+    >
+      <Band name="Writing" count={list.length === 1 ? '1 convention' : `${list.length} conventions`}>
+        <h1 class="h-section">Nothing here changes the language.</h1>
+        <p class="lede">
+          How Amadunia is written down and passed between people, as opposed to how it is built.
+          A speaker who never reads this page can still write and say everything; these are
+          conventions for when the plain letters are not enough on their own.
+        </p>
+        <ul class="stack" style="margin-top:2rem">
+          {list.map((d) => (
+            <li>
+              <a href={`/writing/${d.id}/`}>
+                <span class="stack__title">{d.title}</span>
+                <span class="stack__note">
+                  {d.status ?? 'draft'}
+                  {d.open > 0 && ` · ${d.open} open`}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Band>
+
+      <Band name="Typing it">
+        <h2 class="h-section">Amadunia needs no special keyboard.</h2>
+        <p class="lede">
+          Twenty plain Latin letters, no accents and no diacritics. Every keyboard already in the
+          world types it unchanged — which is exactly what Esperanto, with its six accented
+          letters, has never been able to say.
+        </p>
+        <div class="panel" style="margin-top:2rem">
+          <p>
+            These conventions are drafts, not decisions. They live in
+            <a href={`${LANG_REPO}/tree/main/writing`}>writing/</a> in the language repository, and
+            each one records what it rejected and what it has not yet proved.
+          </p>
+        </div>
+      </Band>
+    </Base>
+  )
+}

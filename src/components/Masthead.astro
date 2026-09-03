@@ -1,10 +1,14 @@
 ---
+// Writing is a proposal upstream; the link appears with the folder.
+import { hasWriting } from '../lib/lang';
+
 const links = [
   { href: '/alphabet/', label: 'Alphabet' },
   { href: '/grammar/', label: 'Grammar' },
   { href: '/dictionary/', label: 'Dictionary' },
   { href: '/learn/', label: 'Learn' },
   { href: '/texts/', label: 'Texts' },
+  ...(hasWriting ? [{ href: '/writing/', label: 'Writing' }] : []),
   { href: '/about/', label: 'About' },
 ];
 
