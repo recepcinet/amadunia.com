@@ -202,12 +202,16 @@ export function rootsUsedOf(body: string): { used: number; of: number } | undefi
   return n ? { used: Number(n[1]), of: Number(n[2]) } : undefined;
 }
 
-/** Gaps a text records; a struck-through one has since been closed. */
+/**
+ * Gaps a text records; a struck-through one has since been closed. The heading
+ * and the shape both vary — five wordings, and either a numbered list or a run
+ * of paragraphs each opening in bold.
+ */
 export function gapsOf(body: string): { total: number; open: number } {
-  // The heading has been written four ways across the five texts.
-  const items = section(body, /^##\s+What (?:the language|this text)[^\n]*could not[^\n]*$/m)
+  const heading = /^##\s+(?:Gaps\s*$|What (?:the language|this text)[^\n]*could not[^\n]*$)/m;
+  const items = section(body, heading)
     .split('\n')
-    .filter((l) => /^\s*\d+\.\s+/.test(l));
+    .filter((l) => /^\s*\d+\.\s+/.test(l) || /^\*\*/.test(l));
   return { total: items.length, open: items.filter((l) => !/~~/.test(l)).length };
 }
 
