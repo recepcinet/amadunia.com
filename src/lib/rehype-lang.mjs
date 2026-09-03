@@ -114,18 +114,20 @@ export default function rehypeLang() {
     const kids = tree.children ?? [];
 
     // 1 + 2: drop the H1 and the status line, wherever they sit at top level.
-    // Count elements, not nodes: mdast leaves newline text nodes between them.
-    let seen = 0;
+    // The front matter is however many paragraphs open the file before the
+    // first heading — grammar pages now lead with where the rule is taught,
+    // then their status, and a fixed index would miss the second.
+    let leading = true;
     tree.children = kids.filter((n) => {
       if (n.type !== 'element') return true;
-      const nth = seen++;
+      if (n.tagName !== 'h1' && n.tagName !== 'p') leading = false;
+      if (!leading) return true;
       if (n.tagName === 'h1') return false;
-      if (n.tagName === 'p' && nth <= 1) {
-        const inner = n.children?.filter((c) => !(c.type === 'text' && !c.value.trim()));
-        const only = inner?.length === 1 ? inner[0] : undefined;
-        if (only?.tagName === 'em' && !hasLink(only)) return false;
-      }
-      return true;
+      const inner = n.children?.filter((c) => !(c.type === 'text' && !c.value.trim()));
+      const only = inner?.length === 1 ? inner[0] : undefined;
+      // Emphasis with no link is metadata the page renders itself; emphasis
+      // with one is navigation, and stays.
+      return !(only?.tagName === 'em' && !hasLink(only));
     });
 
     const walk = (node) => {
