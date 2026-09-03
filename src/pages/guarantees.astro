@@ -1,0 +1,40 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { titleOf, guaranteeCounts, LANG_REPO } from '../lib/lang';
+
+const [entry] = await getCollection('guarantees');
+const { Content } = await render(entry);
+const title = titleOf(entry.body ?? '');
+const { guarantees, groups } = guaranteeCounts();
+---
+
+<Base
+  title="What the checker refuses"
+  description={`Every rule Amadunia holds itself to, as the message its checker prints when something breaks${guarantees ? ` — ${guarantees} guarantees in ${groups} groups` : ''}. Generated from the checker, and it fails if the list has drifted.`}
+  crumbs={[['Guarantees', '/guarantees/']]}
+>
+  <section class="band">
+    <div class="wrap band__grid">
+      <p class="rail">
+        <span class="rail__name">Guarantees</span>
+        {guarantees && <span class="rail__count">{guarantees} in {groups} groups</span>}
+      </p>
+      <div>
+        <h1 class="h-section">{title}</h1>
+        <p class="lede">
+          A language is only as good as what it refuses. This is the list, and it is not written
+          by hand: every line is the exact message the checker prints, and the checker regenerates
+          the page and fails if it has fallen behind itself.
+        </p>
+        <article class="prose" style="margin-top:2rem">
+          <Content />
+        </article>
+        <p class="source">
+          Source: <a href={`${LANG_REPO}/blob/main/GUARANTEES.md`}>GUARANTEES.md</a> in the language
+          repository, generated from <a href={`${LANG_REPO}/blob/main/check.py`}>check.py</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

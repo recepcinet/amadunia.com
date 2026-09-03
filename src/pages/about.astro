@@ -1,10 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
-import { dictionary, readmeStatus, LANG_REPO } from '../lib/lang';
+import { dictionary, readmeStatus, guaranteeCounts, LANG_REPO } from '../lib/lang';
 
 const roots = dictionary().length;
 const { born, passed, next, grammar } = readmeStatus();
+const { guarantees, groups } = guaranteeCounts();
 ---
 
 <Base crumbs={[["About", "/about/"]]} title="About" description="Why Amadunia exists, where its words come from, the five rules it holds itself to, and how it is being built in the open.">
@@ -57,6 +58,23 @@ const { born, passed, next, grammar } = readmeStatus();
       language repository to watch a language grow in real time.
     </p>
   </Band>
+
+  {
+    guarantees && (
+      <Band name="What it refuses" count={`${guarantees} guarantees`}>
+        <h2 class="h-section">Zero exceptions is a claim. This is the enforcement.</h2>
+        <p class="lede">
+          Every rule on this site is checked on every change to the language — {guarantees} of them
+          in {groups} groups, from "three consonants in a row" to "a lesson uses a word nothing has
+          taught yet". The list is generated from the checker, so it cannot describe a rule the
+          checker no longer has.
+        </p>
+        <p style="margin-top:1.5rem">
+          <a href="/guarantees/">Read what the checker refuses</a>.
+        </p>
+      </Band>
+    )
+  }
 
   <Band name="Licence">
     <h2 class="h-section">Free to use, share and build on.</h2>

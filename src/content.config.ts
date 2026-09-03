@@ -21,6 +21,7 @@ export const collections = {
     }),
     schema: doc,
   }),
+  guarantees: defineCollection({ loader: glob({ pattern: 'GUARANTEES.md', base: './lang' }), schema: doc }),
   phrasebook: defineCollection({ loader: glob({ pattern: 'phrasebook.md', base: './lang' }), schema: doc }),
   // writing/ is a proposal upstream. The collection is empty until it lands on
   // main, and every page that uses it disappears with it.

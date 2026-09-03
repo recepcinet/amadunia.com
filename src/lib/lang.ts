@@ -279,6 +279,14 @@ export function questionDemand(): { asOf?: string; rows: Demand[]; settled: numb
   return { asOf, rows: rows.filter((r) => !r.settled), settled: rows.filter((r) => r.settled).length };
 }
 
+/** The headline counts GUARANTEES.md states about itself. */
+export function guaranteeCounts(): { guarantees?: number; groups?: number } {
+  const m = readLang('GUARANTEES.md').match(
+    /\*\*(\d+) guarantees\*\*[\s\S]{0,40}?\*\*(\d+) groups\*\*/,
+  );
+  return m ? { guarantees: Number(m[1]), groups: Number(m[2]) } : {};
+}
+
 /* ---------- Texts ---------- */
 
 /** The italic line under a text's title: its English rendering. */
