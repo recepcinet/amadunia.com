@@ -7,7 +7,7 @@ import { titleOf, statusOf, openQuestionsOf, readmeStatus, questionDemand, LANG_
 import { spell } from '../../data/spell';
 
 const ORDER = [
-  'phonology', 'stress', 'pronunciation', 'numbers', 'tense', 'plural', 'possession', 'definiteness', 'word-formation', 'questions',
+  'phonology', 'stress', 'pronunciation', 'numbers', 'tense', 'plural', 'possession', 'definiteness', 'word-formation', 'questions', 'sentence-types',
   'pronouns', 'copula', 'negation', 'conjunction', 'demonstratives', 'place', 'verb-chains',
   'comparison', 'subordination', 'adverbs',
 ];
@@ -147,6 +147,8 @@ const unreached = demand.rows.filter((r) => r.pages === 0);
           <p class="lede">
             A narrow measure, and the useful one: a page that tried to say something and stopped,
             recorded at the time in a text's gaps or the phrasebook.
+            {demand.settled > 0 &&
+              ` ${demand.settled === 1 ? 'One has' : `${demand.settled} have`} since been settled and left this list.`}
             {unreached.length > 0 &&
               ` ${unreached.length} of the questions have never been reached for by anything anyone wrote — an argument about order, not about dropping them.`}
           </p>

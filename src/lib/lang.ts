@@ -245,9 +245,11 @@ export interface Demand {
   question: string;
   pages: number;
   sources: { label: string; href?: string }[];
+  /** Struck through upstream once the question has been answered. */
+  settled: boolean;
 }
 
-export function questionDemand(): { asOf?: string; rows: Demand[] } {
+export function questionDemand(): { asOf?: string; rows: Demand[]; settled: number } {
   const body = readLang('grammar/README.md');
   const heading = '### What the writing has actually asked for';
   if (!body.includes(heading)) return { rows: [] };
@@ -271,9 +273,10 @@ export function questionDemand(): { asOf?: string; rows: Demand[] } {
                 : `/grammar/${id}/`;
         return { label: strip(m[1]), href };
       });
-      return { question: strip(r[0]), pages, sources };
+      const settled = /~~/.test(r[0]);
+      return { question: strip(r[0]).replace(/~~/g, ''), pages, sources, settled };
     });
-  return { asOf, rows };
+  return { asOf, rows: rows.filter((r) => !r.settled), settled: rows.filter((r) => r.settled).length };
 }
 
 /* ---------- Texts ---------- */

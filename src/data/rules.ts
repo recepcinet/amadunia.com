@@ -62,6 +62,12 @@ export const rules: Rule[] = [
     example: { form: 'dom rafiki mi', gloss: "my friend's house" },
   },
   {
+    claim: 'A verb with no subject is a command',
+    body: 'Nothing is added and nothing moves — the subject is simply absent, which is possible because word order is fixed and a statement always has one. Any constituent may also stand alone: the first conversation in the course is made of fragments.',
+    href: '/grammar/sentence-types/',
+    example: { form: 'Buka mulut!', gloss: 'Open your mouth. — against Yu buka mulut, you open your mouth.' },
+  },
+  {
     claim: 'A question is the answer with one word swapped',
     body: 'Yes/no questions are a statement said with a rising tone and written with a question mark. For what, who, where, when, why, how and how many, the question word sits exactly where the answer would. Word order never changes.',
     href: '/grammar/questions/',
