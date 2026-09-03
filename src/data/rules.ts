@@ -159,9 +159,9 @@ export const rules: Rule[] = [
   },
   {
     claim: 'Numbers are built, never irregular',
-    body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
+    body: 'Ten digits, des for ten, sen for a hundred, mila for a thousand. Position carries the arithmetic: a digit before a base multiplies it, a digit after it adds. So du-des is twenty and des-du is twelve, and which side the du stands on is the only difference.',
     href: '/grammar/numbers/',
-    example: { form: 'du-des-uan', gloss: '21' },
+    example: { form: 'du-des · des-du', gloss: 'twenty · twelve' },
   },
   {
     claim: 'No conjugation, no gender, no articles',
