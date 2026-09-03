@@ -46,6 +46,7 @@ ${texts.map((t) => `- [${titleOf(t.body ?? '')}](${base}texts/${t.id}/) — ${su
 
 - [Alphabet](${base}alphabet/)
 - [Texts](${base}texts/)
+- [Data](${base}data/) — the corpus, the dictionary and the full reference as downloadable files, CC BY-SA 4.0
 - [Grammar](${base}grammar/)
 - [Dictionary](${base}dictionary/): ${words.length} roots, searchable
 - [Learn](${base}learn/)

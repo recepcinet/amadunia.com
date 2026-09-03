@@ -1,7 +1,8 @@
 # amadunia.com — everything here is public and licensed CC BY-SA 4.0.
 # Search engines and AI crawlers alike are welcome; a plain-text summary is
 # at /llms.txt, the full reference at /llms-full.txt, and machine-readable
-# data at /dictionary.json and /corpus.tsv.
+# data at /data/ — a parallel corpus, the dictionary and the full reference,
+# all CC BY-SA 4.0.
 
 User-agent: *
 Allow: /

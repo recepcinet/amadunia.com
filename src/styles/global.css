@@ -556,3 +556,14 @@ img, svg { max-width: 100%; }
   .stack > li > .demand { grid-template-columns: minmax(0, 1fr) 5rem; }
   .demand__sources { grid-column: 1 / -1; }
 }
+
+/* ---------- Definition list: a file and what is in it ---------- */
+
+.notes { margin: 2rem 0 0; }
+.notes dt {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: var(--t-sm);
+  margin-top: 1.25rem;
+}
+.notes dd { margin: 0.2rem 0 0; color: var(--ink-soft); max-width: var(--measure); }

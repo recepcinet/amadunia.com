@@ -1,25 +1,10 @@
-// /dictionary.json — every settled word, for tools and models.
+// /dictionary.json — every settled word, for tools and models. The body is
+// built in lib/lang so the data page can measure exactly what is served.
 import type { APIRoute } from 'astro';
-import { dictionary, readmeStatus, LANG_REPO } from '../lib/lang';
+import { dictionaryJson, readmeStatus } from '../lib/lang';
 
-export const GET: APIRoute = ({ site }) => {
-  const entries = dictionary();
-  const { next } = readmeStatus();
-  const body = {
-    language: { name: 'Amadunia', tag: 'art-x-amadunia' },
-    roots: entries.length,
-    next_target: next?.roots ?? null,
-    license: 'CC BY-SA 4.0',
-    source: `${LANG_REPO}/blob/main/dictionary/dictionary.md`,
-    site: site?.toString(),
-    entries: entries.map((e) => ({
-      word: e.word,
-      meaning: e.meaning,
-      group: e.group,
-      sources: e.sources === '—' ? null : e.sources,
-    })),
-  };
-  return new Response(JSON.stringify(body, null, 2), {
-    headers: { 'Content-Type': 'application/json; charset=utf-8' },
-  });
-};
+export const GET: APIRoute = ({ site }) =>
+  new Response(
+    dictionaryJson(site?.toString() ?? 'https://amadunia.com/', readmeStatus().next?.roots ?? null),
+    { headers: { 'Content-Type': 'application/json; charset=utf-8' } },
+  );

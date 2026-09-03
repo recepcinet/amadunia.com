@@ -1,0 +1,164 @@
+---
+import Base from '../layouts/Base.astro';
+import Band from '../components/Band.astro';
+import { corpus, dictionary, corpusTsv, corpusJsonl, fullReference, dictionaryJson, readmeStatus, langFileSize, bytes, LANG_REPO } from '../lib/lang';
+
+const pairs = corpus();
+const words = dictionary();
+
+const site = Astro.site?.toString() ?? 'https://amadunia.com/';
+const fullTextBytes = bytes(fullReference(site));
+const LICENCE = 'https://creativecommons.org/licenses/by-sa/4.0/';
+
+const kb = (n: number) => `${Math.round(n / 1024)} KB`;
+
+const files = [
+  {
+    href: '/corpus.tsv',
+    format: 'text/tab-separated-values',
+    what: 'Amadunia–English sentence pairs',
+    detail: `${pairs.length} rows, three columns: the Amadunia, the English, and the file each came from.`,
+    size: bytes(corpusTsv()),
+  },
+  {
+    href: '/corpus.jsonl',
+    format: 'application/x-ndjson',
+    what: 'The same pairs, one JSON object per line',
+    detail: 'For translation and language-model pipelines, which read JSONL rather than TSV.',
+    size: bytes(corpusJsonl()),
+  },
+  {
+    href: '/dictionary.json',
+    format: 'application/json',
+    what: `Every root — ${words.length} of them`,
+    detail: 'Word, meaning, thematic group, and the languages each root came from.',
+    size: bytes(dictionaryJson(site, readmeStatus().next?.roots ?? null)),
+  },
+  {
+    href: '/dictionary.csv',
+    format: 'text/csv',
+    what: 'The same roots as a spreadsheet',
+    detail: 'Imports straight into a flashcard deck. Generated upstream and checked against the Markdown on every push.',
+    size: langFileSize('dictionary/dictionary.csv'),
+  },
+  {
+    href: '/llms-full.txt',
+    format: 'text/plain',
+    what: 'The whole language as one document',
+    detail: 'Every grammar page, lesson, text and the dictionary, concatenated. For a model or a person who wants all of it at once.',
+    size: fullTextBytes,
+  },
+];
+
+const ld = [
+  {
+    '@type': 'Dataset',
+    '@id': `${site}data/#dataset`,
+    name: 'Amadunia: parallel corpus, dictionary and complete reference',
+    description:
+      `A constructed world auxiliary language with ${words.length} roots, an eighteen-rule grammar, ` +
+      `twenty-five lessons and ten original texts. This dataset contains ${pairs.length} Amadunia–English ` +
+      'sentence pairs drawn from that material, the full dictionary with sourced etymologies, and the ' +
+      'complete reference as plain text. Every sentence obeys the settled grammar and uses only settled ' +
+      'words; a checker in the language repository verifies that on every change.',
+    url: `${site}data/`,
+    license: LICENCE,
+    isAccessibleForFree: true,
+    inLanguage: ['art-x-amadunia', 'en'],
+    creator: { '@id': `${site}#author` },
+    about: { '@id': `${site}#language` },
+    sameAs: LANG_REPO,
+    keywords: [
+      'Amadunia',
+      'constructed language',
+      'auxiliary language',
+      'parallel corpus',
+      'machine translation',
+      'low-resource language',
+      'bitext',
+      'lexicon',
+    ],
+    measurementTechnique:
+      'Extracted at build time from the language repository: every table pairing Amadunia with English, and every glossed practice line.',
+    distribution: files.map((f) => ({
+      '@type': 'DataDownload',
+      name: f.what,
+      encodingFormat: f.format,
+      contentUrl: `${site.replace(/\/$/, '')}${f.href}`,
+      contentSize: `${f.size}`,
+      license: LICENCE,
+    })),
+  },
+];
+---
+
+<Base
+  title="Data"
+  description={`Amadunia as machine-readable data: ${pairs.length} Amadunia–English sentence pairs, ${words.length} dictionary roots with sourced etymologies, and the complete reference as plain text. CC BY-SA 4.0.`}
+  ld={ld}
+  crumbs={[['Data', '/data/']]}
+>
+  <Band name="Data" count={`${files.length} files`}>
+    <h1 class="h-section">The language, machine-readable.</h1>
+    <p class="lede">
+      Everything below is generated from the language repository when this site is built, so it
+      cannot drift from what the pages say. All of it is CC BY-SA 4.0: use it, keep the licence,
+      say where it came from.
+    </p>
+    <ul class="stack" style="margin-top:2rem">
+      {
+        files.map((f) => (
+          <li>
+            <a href={f.href}>
+              <span class="stack__title">{f.href}</span>
+              <span class="stack__note">{f.what} · {kb(f.size)}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <dl class="notes">
+      {
+        files.map((f) => (
+          <>
+            <dt>{f.href}</dt>
+            <dd>{f.detail}</dd>
+          </>
+        ))
+      }
+    </dl>
+  </Band>
+
+  <Band name="The corpus" count={`${pairs.length} pairs`}>
+    <h2 class="h-section">What it is, and what it is not.</h2>
+    <p class="lede">
+      Every pair comes from a lesson, a grammar page or an original text, where an Amadunia
+      sentence stands beside its English. Nothing was translated to make the corpus; the
+      translations were already there, because the material teaches by glossing.
+    </p>
+    <p style="margin-top:1.5rem">
+      It is small, and honest about that. {pairs.length} pairs will not train a translation system
+      on their own — a language pair normally needs hundreds of thousands. What it is good for is
+      a language that has no data at all: a seed, a test set, or the evidence that a constructed
+      language has been used rather than only specified. It grows with every lesson and every text,
+      and it has never contained a sentence that breaks a rule.
+    </p>
+  </Band>
+
+  <Band name="Citing it">
+    <h2 class="h-section">How to cite.</h2>
+    <div class="panel">
+      <p>
+        Cinet, Recep. <em>Amadunia: a world auxiliary language</em>. {new Date().getFullYear()}.
+        CC BY-SA 4.0. <a href={site}>{site.replace(/^https:\/\//, '').replace(/\/$/, '')}</a> ·
+        <a href={LANG_REPO}>{LANG_REPO.replace(/^https:\/\/github\.com\//, '')}</a>
+      </p>
+      <p style="margin-top:1rem">
+        The language and all its materials are licensed
+        <a href={LICENCE}>CC BY-SA 4.0</a>; the code that builds this site is
+        <a href="https://github.com/recepcinet/amadunia.com">MIT</a>. Corrections and additions
+        belong upstream, in the language repository.
+      </p>
+    </div>
+  </Band>
+</Base>

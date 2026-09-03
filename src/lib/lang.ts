@@ -350,6 +350,70 @@ export function newWordsOf(body: string): number {
   return tableRows(body, heading).filter((r) => r[0]).length;
 }
 
+/** Byte size of a file the site serves, for the dataset listing. */
+export function langFileSize(rel: string): number {
+  return Buffer.byteLength(readLang(rel), 'utf8');
+}
+
+/* ---------- Downloadable bodies -------------------------------------------
+ * Built here rather than in the routes, so the data page can measure exactly
+ * what the routes will serve. A contentSize in the dataset markup is a factual
+ * claim and cannot be an estimate. */
+
+export function corpusTsv(): string {
+  const rows = corpus().map((p) => `${p.am}\t${p.en}\t${p.source}`);
+  return ['amadunia\tenglish\tsource', ...rows].join('\n') + '\n';
+}
+
+export function corpusJsonl(): string {
+  return (
+    corpus()
+      .map((p) => JSON.stringify({ am: p.am, en: p.en, source: p.source }))
+      .join('\n') + '\n'
+  );
+}
+
+/** The whole language as one plain-text document, as /llms-full.txt serves it. */
+export function fullReference(base: string): string {
+  const head = `# Amadunia — complete reference
+
+Source: ${LANG_REPO} (CC BY-SA 4.0). Rendered at ${base}. Summary: ${base}llms.txt. Machine-readable: ${base}dictionary.json, ${base}corpus.tsv.
+Language tag: art-x-amadunia. Grey/fuchsia on the site marks English/Amadunia; here, Amadunia words are the ones in the left columns and in italics.
+
+`;
+  const parts = allLangFiles().map(
+    ({ rel, body }) => `<!-- ${rel} — ${LANG_REPO}/blob/main/${rel} -->\n\n${body.trim()}\n`,
+  );
+  return head + parts.join('\n\n---\n\n');
+}
+
+/** The dictionary payload as /dictionary.json serves it. */
+export function dictionaryJson(site: string, nextTarget: number | null): string {
+  const entries = dictionary();
+  return JSON.stringify(
+    {
+      language: { name: 'Amadunia', tag: 'art-x-amadunia' },
+      roots: entries.length,
+      next_target: nextTarget,
+      license: 'CC BY-SA 4.0',
+      source: `${LANG_REPO}/blob/main/dictionary/dictionary.md`,
+      site,
+      entries: entries.map((e) => ({
+        word: e.word,
+        meaning: e.meaning,
+        group: e.group,
+        sources: e.sources === '—' ? null : e.sources,
+      })),
+    },
+    null,
+    2,
+  );
+}
+
+export function bytes(text: string): number {
+  return Buffer.byteLength(text, 'utf8');
+}
+
 /* ---------- Whole-repository readers: full text and parallel corpus ---------- */
 
 import { readdirSync } from 'node:fs';
