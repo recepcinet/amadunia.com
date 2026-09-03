@@ -92,11 +92,17 @@ function rewriteHref(href) {
   if (/^\.\.\/lessons\/?$/.test(path)) return `/learn/${anchor}`;
   if (/^\.\.\/dictionary\/?$/.test(path)) return `/dictionary/${anchor}`;
 
+  // A folder's README is its index; the site's equivalent is that section.
+  const SECTION = { grammar: '/grammar/', lessons: '/learn/', texts: '/texts/', dictionary: '/dictionary/', writing: '/writing/' };
+
   if (base.endsWith('.md')) {
     const slug = base.slice(0, -3);
+    if (slug === 'README') return `${SECTION[dir] ?? '/about/'}${anchor}`;
     if (slug.startsWith('lesson-')) return `/learn/${slug}/${anchor}`;
-    if (slug === 'README') return dir === 'dictionary' ? `/dictionary/${anchor}` : `/about/${anchor}`;
-    if (slug === 'dictionary') return `/dictionary/${anchor}`;
+    if (slug.startsWith('story-') || slug.startsWith('text-')) return `/texts/${slug}/${anchor}`;
+    if (slug === 'dictionary' || slug === 'index-english' || slug === 'balance') return `/dictionary/${anchor}`;
+    if (slug === 'phrasebook') return `/phrasebook/${anchor}`;
+    if (dir === 'writing') return `/writing/${slug}/${anchor}`;
     return `/grammar/${slug}/${anchor}`;
   }
   return href;

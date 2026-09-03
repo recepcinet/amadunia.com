@@ -33,6 +33,7 @@ const docs = all
   });
 const openTotal = docs.reduce((n, d) => n + d.open, 0);
 const { settled } = readmeStatus();
+const withOpen = docs.filter((d) => d.open > 0);
 ---
 
 <Base
@@ -108,11 +109,27 @@ const { settled } = readmeStatus();
 
   <Band name="Still open" count={`${openTotal} questions`}>
     <h2 class="h-section">Loose ends inside settled rules.</h2>
-    <div class="panel">
+    <p class="lede">
+      Details a settled rule has not had to answer yet — <em>very</em>, <em>never</em>, the
+      superlative of a named group. Each is recorded at the foot of the rule it would belong to.
+    </p>
+    <ul class="stack" style="margin-top:2rem">
+      {
+        withOpen.map((d) => (
+          <li>
+            <a href={`/grammar/${d.id}/#open-questions`}>
+              <span class="stack__title">{d.title}</span>
+              <span class="stack__note">{d.open === 1 ? '1 question' : `${d.open} questions`}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="panel" style="margin-top:2rem">
       <p>
-        {spell(openTotal).replace(/^./, (c) => c.toUpperCase())} smaller questions are listed at
-        the foot of the topics above — details a settled rule has not had to answer yet. Decisions
-        are made in the open, in the <a href={`${LANG_REPO}/issues`}>language repository</a>.
+        Decisions are made in the open, in the
+        <a href={`${LANG_REPO}/issues`}>language repository</a>, and the four with a briefing are
+        listed above.
       </p>
     </div>
   </Band>
