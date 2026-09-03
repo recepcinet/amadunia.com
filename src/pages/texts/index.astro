@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Band from '../../components/Band.astro';
-import { titleOf, subtitleOf, rootsUsedOf, gapsOf, textNumber, textKinds, LANG_REPO } from '../../lib/lang';
+import { titleOf, subtitleOf, rootsUsedOf, gapsOf, textNumber, textKinds, textsClaims, markAmadunia, LANG_REPO } from '../../lib/lang';
 import { dictionary } from '../../lib/lang';
 
 const kinds = textKinds();
@@ -19,6 +19,7 @@ const texts = (await getCollection('texts'))
 
 const openGaps = texts.reduce((n, t) => n + t.gaps.open, 0);
 const roots = dictionary().length;
+const claims = textsClaims();
 ---
 
 <Base
@@ -59,10 +60,28 @@ const roots = dictionary().length;
       found the one that still matters most: nothing in the language says where the stress falls,
       so two people can read the same line as two different poems.
     </p>
-    <div class="panel" style="margin-top:2rem">
+    {
+      claims.length > 0 && (
+        <dl class="notes" style="margin-top:2.5rem">
+          {claims.map((c) => (
+            <>
+              <dt>{c.lead}</dt>
+              <dd>
+                {markAmadunia(c.rest).map((p) =>
+                  p.am ? <span lang="art-x-amadunia">{p.text}</span> : p.text,
+                )}
+              </dd>
+            </>
+          ))}
+        </dl>
+      )
+    }
+
+    <div class="panel" style="margin-top:2.5rem">
       <p>
-        Texts live in <a href={`${LANG_REPO}/tree/main/texts`}>texts/</a> in the language
-        repository, under CC BY-SA 4.0 like everything else.
+        The rules above are the collection's own, quoted from
+        <a href={`${LANG_REPO}/tree/main/texts`}>texts/</a> in the language repository, where
+        a checker holds every text to them. Everything here is CC BY-SA 4.0.
       </p>
     </div>
   </Band>

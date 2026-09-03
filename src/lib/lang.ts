@@ -316,6 +316,27 @@ export function gapsOf(body: string): { total: number; open: number } {
   return { total: items.length, open: items.filter((l) => !/~~/.test(l)).length };
 }
 
+/**
+ * The claims texts/README.md makes about the collection, each a paragraph
+ * opening in bold. Quoted rather than restated, so they cannot drift from what
+ * upstream says or from what its checker enforces.
+ */
+export function textsClaims(): { lead: string; rest: string }[] {
+  const body = readLang('texts/README.md');
+  const out: { lead: string; rest: string }[] = [];
+  for (const para of body.split(/\n\s*\n/)) {
+    const m = para.match(/^\*\*([^*]+)\*\*([\s\S]*)$/);
+    if (!m) continue;
+    const clean = (t: string) =>
+      t
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/\s+/g, ' ')
+        .trim();
+    out.push({ lead: clean(m[1]), rest: clean(m[2]) });
+  }
+  return out;
+}
+
 /** "story-2-safari-por-pahar" and "text-5-uan" both order by their number. */
 export function textNumber(id: string): number {
   return Number(id.match(/^(?:story|text)-(\d+)/)?.[1] ?? 0);
