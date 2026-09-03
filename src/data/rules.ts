@@ -128,6 +128,12 @@ export const rules: Rule[] = [
     example: { form: 'Ta anda hayai.', gloss: 'She walks fast.' },
   },
   {
+    claim: 'There is no word for "a" and none for "the"',
+    body: 'A bare noun is neither definite nor indefinite; the situation decides, as it does in Russian, Turkish, Hindi, Indonesian, Chinese and Swahili. More people learn to speak without articles than with them, and those who have them do not agree on how many.',
+    href: '/grammar/definiteness/',
+    example: { form: 'Mi kan dom.', gloss: 'I see a house. I see the house. Both, and nothing is added either way.' },
+  },
+  {
     claim: 'Two roots join for a number or a plural, and for nothing else',
     body: 'Every hyphen in the language is one or the other; not one compound word has ever been formed. Three hundred roots go further than three hundred words because things can be described with what is already there, not because new words can be built out of old ones.',
     href: '/grammar/word-formation/',
