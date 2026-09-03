@@ -350,7 +350,8 @@ img, svg { max-width: 100%; }
 .stack { list-style: none; margin: 0; padding: 0; }
 .stack > li { border-top: 1px solid var(--rule); }
 .stack > li:last-child { border-bottom: 1px solid var(--rule); }
-.stack a, .stack .stack__inert {
+.stack > li > a,
+.stack > li > .stack__inert {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem;
@@ -358,8 +359,8 @@ img, svg { max-width: 100%; }
   padding-block: 1.05rem;
   text-decoration: none;
 }
-.stack a { text-decoration: underline; text-decoration-color: var(--rule-strong); }
-.stack a:hover { text-decoration-color: var(--ink); }
+.stack > li > a { text-decoration: underline; text-decoration-color: var(--rule-strong); }
+.stack > li > a:hover { text-decoration-color: var(--ink); }
 .stack__title { font-family: var(--sans); font-weight: 600; }
 .stack__note { font-size: var(--t-sm); color: var(--ink-soft); }
 
@@ -501,7 +502,7 @@ img, svg { max-width: 100%; }
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
-.stack .entry {
+.stack > li > .entry {
   grid-template-columns: 8rem minmax(0, 1fr) minmax(0, 1.4fr);
   gap: 0.35rem 1.5rem;
 }
@@ -509,7 +510,7 @@ img, svg { max-width: 100%; }
 .entry__meaning { color: var(--ink); }
 .entry__sources { font-size: var(--t-xs); color: var(--ink-soft); }
 @media (max-width: 640px) {
-  .stack .entry { grid-template-columns: 6rem minmax(0, 1fr); }
+  .stack > li > .entry { grid-template-columns: 6rem minmax(0, 1fr); }
   .entry__sources { grid-column: 2; }
 }
 .rail a { text-decoration: none; }
@@ -532,4 +533,26 @@ img, svg { max-width: 100%; }
   background: none;
   padding: 0;
   white-space: pre-wrap;
+}
+
+.h-sub {
+  font-size: var(--t-lg);
+  margin-top: 3rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* ---------- Open questions, ordered by what the writing reached for ---------- */
+
+.stack > li > .demand {
+  grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1fr);
+  gap: 0.35rem 1.5rem;
+  align-items: baseline;
+}
+.demand__question { font-family: var(--sans); font-weight: 600; }
+.demand__count { font-family: var(--sans); font-size: var(--t-sm); color: var(--am); font-variant-numeric: tabular-nums; }
+.demand__sources { font-size: var(--t-sm); color: var(--ink-soft); }
+@media (max-width: 640px) {
+  .stack > li > .demand { grid-template-columns: minmax(0, 1fr) 5rem; }
+  .demand__sources { grid-column: 1 / -1; }
 }

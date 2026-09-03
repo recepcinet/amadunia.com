@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Band from '../../components/Band.astro';
 import { rules } from '../../data/rules';
-import { titleOf, statusOf, openQuestionsOf, readmeStatus, LANG_REPO } from '../../lib/lang';
+import { titleOf, statusOf, openQuestionsOf, readmeStatus, questionDemand, LANG_REPO } from '../../lib/lang';
 import { spell } from '../../data/spell';
 
 const ORDER = [
@@ -34,6 +34,9 @@ const docs = all
 const openTotal = docs.reduce((n, d) => n + d.open, 0);
 const { grammar } = readmeStatus();
 const withOpen = docs.filter((d) => d.open > 0);
+const demand = questionDemand();
+const reached = demand.rows.filter((r) => r.pages > 0);
+const unreached = demand.rows.filter((r) => r.pages === 0);
 ---
 
 <Base
@@ -125,6 +128,43 @@ const withOpen = docs.filter((d) => d.open > 0);
         ))
       }
     </ul>
+
+    {
+      reached.length > 0 && (
+        <>
+          <h3 class="h-sub">Which of them the writing has asked for</h3>
+          <p class="lede">
+            A narrow measure, and the useful one: a page that tried to say something and stopped,
+            recorded at the time in a text's gaps or the phrasebook.
+            {unreached.length > 0 &&
+              ` ${unreached.length} of the questions have never been reached for by anything anyone wrote — an argument about order, not about dropping them.`}
+          </p>
+          <ul class="stack" style="margin-top:1.5rem">
+            {reached.map((r) => (
+              <li>
+                <span class="stack__inert demand">
+                  <span class="demand__question">{r.question}</span>
+                  <span class="demand__count">{r.pages === 1 ? '1 page' : `${r.pages} pages`}</span>
+                  <span class="demand__sources">
+                    {r.sources.map((s, i) => (
+                      <>
+                        {i > 0 && ', '}
+                        {s.href ? <a href={s.href}>{s.label}</a> : s.label}
+                      </>
+                    ))}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p class="source" style="margin-top:1.5rem">
+            Counted upstream{demand.asOf && ` ${demand.asOf}`}, and not machine-checked — the
+            language repository keeps this table by hand and says so. A question absent from it was
+            not blocked while writing; that is not the same as being small.
+          </p>
+        </>
+      )
+    }
     <div class="panel" style="margin-top:2rem">
       <p>
         Decisions are made in the open, in the

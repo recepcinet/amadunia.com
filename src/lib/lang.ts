@@ -235,6 +235,47 @@ export function readmeStatus(): Status {
   return { born, passed, next, grammar };
 }
 
+/**
+ * Which open questions the writing has actually reached for: upstream's own
+ * count of pages that tried to say something and stopped. Its README states
+ * plainly that this table is hand-kept and not machine-checked, so the site
+ * carries that caveat with it rather than presenting it as measured fact.
+ */
+export interface Demand {
+  question: string;
+  pages: number;
+  sources: { label: string; href?: string }[];
+}
+
+export function questionDemand(): { asOf?: string; rows: Demand[] } {
+  const body = readLang('grammar/README.md');
+  const heading = '### What the writing has actually asked for';
+  if (!body.includes(heading)) return { rows: [] };
+  const asOf = body.slice(body.indexOf(heading)).match(/Counted ([^.]+)\./)?.[1];
+
+  const rows = tableRows(body, heading)
+    .filter((r) => r[0] && r[1] !== undefined)
+    .map((r) => {
+      const cell = r[1];
+      const pages = Number(cell.match(/\d+/)?.[0] ?? 0);
+      const sources = [...cell.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)].map((m) => {
+        const id = m[2].match(/([^/]+)\.md$/)?.[1];
+        const href = !id
+          ? undefined
+          : id === 'phrasebook'
+            ? '/phrasebook/'
+            : /^(story|text)-/.test(id)
+              ? `/texts/${id}/`
+              : /^lesson-/.test(id)
+                ? `/learn/${id}/`
+                : `/grammar/${id}/`;
+        return { label: strip(m[1]), href };
+      });
+      return { question: strip(r[0]), pages, sources };
+    });
+  return { asOf, rows };
+}
+
 /* ---------- Texts ---------- */
 
 /** The italic line under a text's title: its English rendering. */
