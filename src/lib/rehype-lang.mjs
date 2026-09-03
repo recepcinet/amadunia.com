@@ -159,15 +159,21 @@ function tagTable(table) {
   // A digit header means Amadunia only when the whole table is numbered that
   // way — the numerals table in numbers.md. Elsewhere a "4" heads a count.
   const allDigits = headers.every((h) => !h || /^\d+$/.test(h)) && headers.some((h) => /^\d+$/.test(h));
-  let cols = headers
+  const cols = headers
     .map((h, i) => (AMADUNIA_HEADERS.has(h) || (allDigits && /^\d+$/.test(h)) ? i : -1))
     .filter((i) => i >= 0);
-  if (!cols.length && headers.every((h) => !h)) cols = [0]; // headerless: first column is the language
+  // A headerless table names no column, so ask the dictionary cell by cell
+  // rather than assuming a position: lessons pair Amadunia with English in
+  // that shape, but so does a briefing pairing an English label with a count.
+  const byDictionary = !cols.length && headers.every((h) => !h);
 
   for (const tr of rows.slice(1)) {
     const tds = cells(tr);
     // Group rows in the dictionary style ("**Numbers** | |") are labels, not words.
     if (tds.length && tds.slice(1).every((td) => !text(td).trim())) continue;
-    for (const i of cols) if (tds[i]) tds[i].properties = { ...tds[i].properties, lang: 'art-x-amadunia' };
+    const wanted = byDictionary
+      ? tds.map((td, i) => (isAmadunia(text(td)) ? i : -1)).filter((i) => i >= 0)
+      : cols;
+    for (const i of wanted) if (tds[i]) tds[i].properties = { ...tds[i].properties, lang: 'art-x-amadunia' };
   }
 }
