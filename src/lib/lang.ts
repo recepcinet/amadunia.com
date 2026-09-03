@@ -21,11 +21,17 @@ export function titleOf(body: string): string {
   return m ? m[1] : '';
 }
 
-/** The "*Status: …*" line, up to its first full stop. */
+/**
+ * How a grammar file states its standing, up to its first full stop. Most use
+ * "*Status: …*"; word-formation.md opens with a bold "**Settled: …**" instead.
+ */
 export function statusOf(body: string): string | undefined {
-  const m = body.match(/^\*Status:\s*(.+?)\*\s*$/m);
+  const m =
+    body.match(/^\*Status:\s*(.+?)\*\s*$/m) ??
+    body.match(/^\*\*(Settled|Proposed|Draft)\b[:.]?\s*([\s\S]*?)\*\*/m);
   if (!m) return undefined;
-  return m[1].split(/\.\s|\.$/)[0].trim();
+  const text = m.length > 2 ? `${m[1].toLowerCase()} — ${m[2]}` : m[1];
+  return text.replace(/\s+/g, ' ').split(/\.\s|\.$/)[0].trim();
 }
 
 /** Bullets under "## Open questions". */

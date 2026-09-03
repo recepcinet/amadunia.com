@@ -128,6 +128,12 @@ export const rules: Rule[] = [
     example: { form: 'Ta anda hayai.', gloss: 'She walks fast.' },
   },
   {
+    claim: 'Two roots join for a number or a plural, and for nothing else',
+    body: 'Every hyphen in the language is one or the other; not one compound word has ever been formed. Three hundred roots go further than three hundred words because things can be described with what is already there, not because new words can be built out of old ones.',
+    href: '/grammar/word-formation/',
+    example: { form: 'Mesin ambil foto korpo anak.', gloss: "A machine takes a photo of the child's body — an X-ray, said with no new root and no new word." },
+  },
+  {
     claim: 'Numbers are built, never irregular',
     body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
     href: '/grammar/numbers/',

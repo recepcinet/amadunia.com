@@ -43,7 +43,9 @@ const { born, passed, next, grammar } = readmeStatus();
       {born ? `Amadunia was born on ${born}.` : 'Amadunia is young.'} The vocabulary stands at {`${roots} roots`}
       {passed.length > 1 && `, past the ${passed.slice(0, -1).join(', ')} and ${passed.at(-1)} milestones`}
       {next && `, and is heading for ${next.roots}${next.level ? ` — enough for ${next.level}` : ''}`}. That
-      is lower than a natural language needs at the same level, because compounding does the rest.
+      is lower than a natural language needs at the same level, because things can be described
+      with what is already there — not, as the project itself long assumed, because words can be
+      compounded. The language has never formed a single compound word.
     </p>
     <p style="margin-top:1.5rem">
       {grammar ?? 'Some of the grammar is settled and some is still being decided.'} What remains
