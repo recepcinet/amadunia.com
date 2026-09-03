@@ -7,11 +7,13 @@ import { titleOf, statusOf, openQuestionsOf, readmeStatus, questionDemand, LANG_
 import { spell } from '../../data/spell';
 
 const ORDER = [
-  'phonology', 'pronunciation', 'numbers', 'tense', 'plural', 'possession', 'definiteness', 'word-formation', 'questions',
+  'phonology', 'stress', 'pronunciation', 'numbers', 'tense', 'plural', 'possession', 'definiteness', 'word-formation', 'questions',
   'pronouns', 'copula', 'negation', 'conjunction', 'demonstratives', 'place', 'verb-chains',
   'comparison', 'subordination', 'adverbs',
 ];
-const all = (await getCollection('grammar')).map((e) => ({
+const entries = await getCollection('grammar');
+const allBodies = new Map(entries.map((e) => [e.id, e.body ?? '']));
+const all = entries.map((e) => ({
   id: e.id,
   title: titleOf(e.body ?? ''),
   status: statusOf(e.body ?? ''),
@@ -21,8 +23,16 @@ const all = (await getCollection('grammar')).map((e) => ({
 
 const proposals = all
   .filter((d) => d.proposal)
-  .map((d) => ({ ...d, title: d.title.replace(/^Proposal:\s*/, '') }))
-  .sort((a, b) => a.title.localeCompare(b.title));
+  .map((d) => ({
+    ...d,
+    title: d.title.replace(/^Proposal:\s*/, ''),
+    // A briefing says so in its own opening once the founder has ruled on it.
+    decided: /\*\*Decided on [^*]+\*\*/.test(
+      (allBodies.get(d.id) ?? '').slice(0, 400),
+    ),
+  }))
+  .sort((a, b) => Number(a.decided) - Number(b.decided) || a.title.localeCompare(b.title));
+const openProposals = proposals.filter((p) => !p.decided);
 
 const docs = all
   .filter((d) => !d.proposal)
@@ -90,11 +100,12 @@ const unreached = demand.rows.filter((r) => r.pages === 0);
     </ol>
   </Band>
 
-  <Band name="Undecided" count={proposals.length === 1 ? '1 proposal' : `${proposals.length} proposals`}>
+  <Band name="Briefings" count={openProposals.length === 1 ? '1 undecided' : `${openProposals.length} undecided`}>
     <h2 class="h-section">Questions with a briefing, waiting on a decision.</h2>
     <p class="lede">
-      Each of these lays out one open question — what the gap costs, what the candidates are, and
-      what each would break — so it can be settled in one sitting. None of them is a rule.
+      Each lays out one question — what the gap costs, what the candidates are, and what each
+      would break — so it can be settled in one sitting. None of them is a rule; a decided one is
+      kept as the record of what the decision was made on.
     </p>
     <ul class="stack" style="margin-top:2rem">
       {
@@ -102,7 +113,7 @@ const unreached = demand.rows.filter((r) => r.pages === 0);
           <li>
             <a href={`/grammar/${d.id}/`}>
               <span class="stack__title">{d.title}</span>
-              <span class="stack__note">proposal</span>
+              <span class="stack__note">{d.decided ? 'decided — kept as the record' : 'undecided'}</span>
             </a>
           </li>
         ))

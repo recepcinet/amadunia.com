@@ -110,6 +110,12 @@ export const rules: Rule[] = [
     example: { form: 'Mi mau kula pan.', gloss: 'I want to eat bread.' },
   },
   {
+    claim: 'Stress falls on the second-to-last syllable, always',
+    body: 'Every word, with no exception and nothing to memorise. A vowel pair counts as one syllable, and a hyphen does not join two words into one for this. Until it was settled, two people could read a line of the poem as two different poems.',
+    href: '/grammar/stress/',
+    example: { form: 'amadunia', gloss: 'a·ma·du·NI·a' },
+  },
+  {
     claim: 'Every letter has one named sound',
     body: 'The plain five vowels — the commonest system on Earth, shared by Spanish, Japanese, Swahili, Indonesian, Greek, Hausa and Turkish. The values were not chosen: three hundred sourced etymologies already committed the language to them, and this reads them back off the vocabulary.',
     href: '/grammar/pronunciation/',
