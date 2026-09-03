@@ -3,10 +3,11 @@ import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
 import { alphabet, letters, vowels, consonants, digraphs, assertMatchesPhonology } from '../data/alphabet';
 import { dictionary } from '../lib/lang';
-import { rules } from '../data/rules';
+import { rules, assertCoversGrammar } from '../data/rules';
 import { Spell, spell } from '../data/spell';
 
 assertMatchesPhonology();
+assertCoversGrammar();
 const roots = dictionary().length;
 
 const sentence = [

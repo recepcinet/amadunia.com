@@ -4,7 +4,7 @@ import Band from '../components/Band.astro';
 import { dictionary, readmeStatus, LANG_REPO } from '../lib/lang';
 
 const roots = dictionary().length;
-const { target, milestones, born, settled } = readmeStatus();
+const { born, passed, next, grammar } = readmeStatus();
 ---
 
 <Base crumbs={[["About", "/about/"]]} title="About" description="Why Amadunia exists, where its words come from, the five rules it holds itself to, and how it is being built in the open.">
@@ -40,13 +40,15 @@ const { target, milestones, born, settled } = readmeStatus();
   <Band name="Status" count={`${roots} roots`}>
     <h2 class="h-section">Under construction, in public.</h2>
     <p class="lede">
-      {born ? `Amadunia was born on ${born}.` : 'Amadunia is young.'} The vocabulary stands at {roots} roots; the
-      target for A1 is {target}, because compounding does the rest.
-      {milestones.length > 0 && ` Milestones: ${milestones.join(' → ')}.`}
+      {born ? `Amadunia was born on ${born}.` : 'Amadunia is young.'} The vocabulary stands at {`${roots} roots`}
+      {passed.length > 1 && `, past the ${passed.slice(0, -1).join(', ')} and ${passed.at(-1)} milestones`}
+      {next && `, and is heading for ${next.roots}${next.level ? ` — enough for ${next.level}` : ''}`}. That
+      is lower than a natural language needs at the same level, because compounding does the rest.
     </p>
     <p style="margin-top:1.5rem">
-      {settled ?? 'Some parts of the grammar are settled and some are still being decided.'} Follow
-      the commits in the language repository to watch a language grow in real time.
+      {grammar ?? 'Some of the grammar is settled and some is still being decided.'} What remains
+      open is gathered on one page, with what each question blocks. Follow the commits in the
+      language repository to watch a language grow in real time.
     </p>
   </Band>
 

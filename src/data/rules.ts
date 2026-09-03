@@ -1,6 +1,10 @@
 // The grammar at a glance: one line per settled rule, each pointing at the
-// page in lang/grammar/ that states it in full. This is a hand-written
-// summary of that folder and has to be updated when it changes.
+// page in lang/grammar/ that states it in full. This is a hand-written summary
+// of that folder, so assertCoversGrammar() below fails the build if the folder
+// gains a settled topic that nothing here links to — the summary cannot drift
+// out of date quietly.
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 export interface Rule {
   claim: string;
   body: string;
@@ -100,6 +104,12 @@ export const rules: Rule[] = [
     example: { form: 'Mi mau kula pan.', gloss: 'I want to eat bread.' },
   },
   {
+    claim: 'Every letter has one named sound',
+    body: 'The plain five vowels — the commonest system on Earth, shared by Spanish, Japanese, Swahili, Indonesian, Greek, Hausa and Turkish. The values were not chosen: three hundred sourced etymologies already committed the language to them, and this reads them back off the vocabulary.',
+    href: '/grammar/pronunciation/',
+    example: { form: 'ca, dunia, kita, dom', gloss: 'from Chinese chá, Arabic dunyā, Indonesian kita, Russian dom — every source reads these letters the same way.' },
+  },
+  {
     claim: 'Comparison is two words, and they never change',
     body: 'lebi more, kurang less, paling most — each in front of the adjective, where cok already stood. Than is dari, which has meant from since Lesson 15, as it does in Arabic, Persian, Turkish, Hindi and Indonesian. No adjective takes an ending, so none can become irregular.',
     href: '/grammar/comparison/',
@@ -130,3 +140,24 @@ export const rules: Rule[] = [
     example: { form: 'Ta go dom.', gloss: 'She goes home. He goes home.' },
   },
 ];
+
+/**
+ * Every settled topic in lang/grammar/ must be linked from a rule above.
+ * Proposals are briefings rather than rules and are listed separately, on
+ * /grammar/, so they are exempt.
+ */
+export function assertCoversGrammar(): void {
+  const dir = join(process.cwd(), 'lang', 'grammar');
+  const topics = readdirSync(dir)
+    .filter((n) => n.endsWith('.md') && n !== 'README.md' && !n.startsWith('proposal-'))
+    .map((n) => n.slice(0, -3));
+  const linked = new Set(rules.map((r) => r.href.replace(/^\/grammar\/|\/$/g, '')));
+  const missing = topics.filter((t) => !linked.has(t));
+  if (missing.length) {
+    throw new Error(
+      `src/data/rules.ts has no rule for ${missing.join(', ')} — lang/grammar/ settled ` +
+        `${missing.length === 1 ? 'a topic' : 'topics'} the site's summary does not mention. ` +
+        `Add a rule linking to /grammar/<topic>/, and order it in src/pages/grammar/index.astro.`,
+    );
+  }
+}

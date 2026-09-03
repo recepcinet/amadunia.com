@@ -32,7 +32,7 @@ const docs = all
     return a.title.localeCompare(b.title);
   });
 const openTotal = docs.reduce((n, d) => n + d.open, 0);
-const { settled } = readmeStatus();
+const { grammar } = readmeStatus();
 const withOpen = docs.filter((d) => d.open > 0);
 ---
 
@@ -45,7 +45,7 @@ const withOpen = docs.filter((d) => d.open > 0);
     <h1 class="h-section">The grammar, topic by topic.</h1>
     <p class="lede">
       One file per decision, each recording what was settled, why, which candidates were rejected
-      and on what ground. {settled}
+      and on what ground. {grammar}
     </p>
     <ul class="stack" style="margin-top:2rem">
       {

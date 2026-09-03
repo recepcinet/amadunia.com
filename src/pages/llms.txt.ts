@@ -11,7 +11,7 @@ import { dictionary, readmeStatus, titleOf, subtitleOf, statusOf, lessonNumber, 
 export const GET: APIRoute = async ({ site }) => {
   const base = site?.toString() ?? 'https://amadunia.com/';
   const words = dictionary();
-  const { target } = readmeStatus();
+  const { next } = readmeStatus();
   const grammar = (await getCollection('grammar')).map((e) => ({ id: e.id, title: titleOf(e.body ?? ''), status: statusOf(e.body ?? '') }));
   const texts = await getCollection('texts');
   const lessons = (await getCollection('lessons'))
@@ -22,7 +22,7 @@ export const GET: APIRoute = async ({ site }) => {
 
 > A constructed world auxiliary language built on one principle: take the easiest feature from every language. ${Spell(letters.length)} letters${digraphs.length ? ` plus the digraph ${digraphs.map((d) => d.glyph).join(', ')}` : ''}, one sound each; no conjugation, no gender, no articles; no exceptions. Its motto is "Mi ama dunia" — "I love the world". Language tag: art-x-amadunia (a constructed language with no ISO code).
 
-The alphabet is ${spell(vowels.length)} vowels and ${spell(consonants.length)} consonants in the Latin script without accents or digraphs (c is the sound of chai and church); spelling and pronunciation never diverge, and syllables never have more than two consonants in a row. Vocabulary is drawn from the largest language families of the world for global balance; words already global (hi, ok, taksi, foto) are kept. The dictionary currently has ${words.length} roots; the target for A1 is ${target}.
+The alphabet is ${spell(vowels.length)} vowels and ${spell(consonants.length)} consonants in the Latin script without accents or digraphs (c is the sound of chai and church); spelling and pronunciation never diverge, and syllables never have more than two consonants in a row. Vocabulary is drawn from the largest language families of the world for global balance; words already global (hi, ok, taksi, foto) are kept. The dictionary currently has ${words.length} roots; the next target is ${next?.roots ?? 600}${next?.level ? ` for ${next.level}` : ''}.
 
 The language is developed in the open at ${LANG_REPO} (CC BY-SA 4.0). This site renders that repository directly.
 

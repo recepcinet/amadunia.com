@@ -128,54 +128,39 @@ export function phonologyInventory(): Inventory {
 /* ---------- README status ---------- */
 
 export interface Status {
-  target: number;
-  milestones: number[];
   born?: string;
-  /** The README's own sentence(s) on what is settled and what is still open. */
-  settled?: string;
+  /** Milestones already passed, e.g. [80, 180, 300]. */
+  passed: number[];
+  /** The next vocabulary target and the level it buys, e.g. { roots: 600, level: 'A2' }. */
+  next?: { roots: number; level?: string };
+  /** The README's own headline claim about the grammar. */
+  grammar?: string;
 }
 
+/**
+ * The Status section of the language README. Its wording is rewritten often —
+ * three of these fields broke silently on 2026-09-03 — so each is read from the
+ * shape of the sentence rather than its exact words, and every one is optional.
+ */
 export function readmeStatus(): Status {
   const body = readLang('README.md');
-  const target = Number(body.match(/target for A1 is \*\*(\d+) roots\*\*/i)?.[1] ?? 300);
-  // "Milestones: 80 roots (survival — reached September 2, 2026) → 180 → 300"
-  // — the numbers that matter are outside the parentheses.
-  const ms = (body.match(/Milestones:\s*(.+)$/m)?.[1] ?? '').replace(/\([^)]*\)/g, '');
-  const milestones = (ms.match(/\d+/g) ?? []).map(Number);
-  const born = body.match(/born on \*\*(.+?)\*\*/)?.[1];
-  const settled = body
-    .match(/^([^\n]*? are settled\.(?:[^\n]*?still being decided\.)?)/m)?.[1]
-    ?.replace(/\*/g, '')
+  const status = section(body, /^##\s+Status\s*$/m) || body;
+
+  const born = status.match(/born on \*\*(.+?)\*\*/)?.[1];
+
+  const passed = (status.match(/Milestones[^.\n]*?:([^.\n]*)/i)?.[1].match(/\d+/g) ?? []).map(Number);
+
+  // The README is hard-wrapped, so every gap here has to tolerate a newline.
+  const nextLine = status.match(/Next is\s+(?:([\w-]+),?\s*)?at\s+around\s+(\d+)/i);
+  const next = nextLine ? { roots: Number(nextLine[2]), level: nextLine[1] } : undefined;
+
+  // The bolded claim, e.g. "The grammar needed for A2 is complete."
+  const grammar = status
+    .match(/\*\*(The grammar[^*]+?)\*\*/)?.[1]
+    ?.replace(/\s+/g, ' ')
     .trim();
-  return { target, milestones, born, settled };
-}
 
-/* ---------- Lessons ---------- */
-
-/** "story-2-safari-por-pahar" and "text-5-uan" both order by their number. */
-export function textNumber(id: string): number {
-  return Number(id.match(/^(?:story|text)-(\d+)/)?.[1] ?? 0);
-}
-
-/** What each text is, as its own index calls it: a story, a poem, a dialogue. */
-export function textKinds(): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const row of tableRows(readLang('texts/README.md'))) {
-    const id = row[0]?.match(/\(([^)]+)\.md\)/)?.[1];
-    const kind = row[2]?.split('—').pop()?.trim();
-    if (id && kind) out[id] = kind.replace(/^an? /, '').split(',')[0].trim();
-  }
-  return out;
-}
-
-export function lessonNumber(id: string): number {
-  return Number(id.match(/lesson-(\d+)/)?.[1] ?? 0);
-}
-
-/** "Lesson 1 — Greetings" → { label: "Lesson 1", name: "Greetings" } */
-export function splitLessonTitle(title: string): { label: string; name: string } {
-  const [label, ...rest] = title.split(/\s+—\s+/);
-  return { label: label.trim(), name: rest.join(' — ').trim() || label.trim() };
+  return { born, passed, next, grammar };
 }
 
 /* ---------- Texts ---------- */
@@ -213,6 +198,34 @@ export function gapsOf(body: string): { total: number; open: number } {
     .split('\n')
     .filter((l) => /^\s*\d+\.\s+/.test(l) || /^\*\*/.test(l));
   return { total: items.length, open: items.filter((l) => !/~~/.test(l)).length };
+}
+
+/** "story-2-safari-por-pahar" and "text-5-uan" both order by their number. */
+export function textNumber(id: string): number {
+  return Number(id.match(/^(?:story|text)-(\d+)/)?.[1] ?? 0);
+}
+
+/** What each text is, as its own index calls it: a story, a poem, a dialogue. */
+export function textKinds(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const row of tableRows(readLang('texts/README.md'))) {
+    const id = row[0]?.match(/\(([^)]+)\.md\)/)?.[1];
+    const kind = row[2]?.split('—').pop()?.trim();
+    if (id && kind) out[id] = kind.replace(/^an? /, '').split(',')[0].trim();
+  }
+  return out;
+}
+
+/* ---------- Lessons ---------- */
+
+export function lessonNumber(id: string): number {
+  return Number(id.match(/lesson-(\d+)/)?.[1] ?? 0);
+}
+
+/** "Lesson 1 — Greetings" → { label: "Lesson 1", name: "Greetings" } */
+export function splitLessonTitle(title: string): { label: string; name: string } {
+  const [label, ...rest] = title.split(/\s+—\s+/);
+  return { label: label.trim(), name: rest.join(' — ').trim() || label.trim() };
 }
 
 export function newWordsOf(body: string): number {

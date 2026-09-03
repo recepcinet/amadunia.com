@@ -5,8 +5,7 @@ import { dictionaryGroups, readmeStatus, LANG_REPO } from '../lib/lang';
 
 const groups = dictionaryGroups();
 const roots = groups.reduce((n, g) => n + g.entries.length, 0);
-const { target, milestones } = readmeStatus();
-const nextMilestone = milestones.find((m) => m > roots);
+const { next } = readmeStatus();
 
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const ld = [
@@ -39,9 +38,9 @@ const ld = [
   <Band name="Dictionary" count={`${roots} roots`}>
     <h1 class="h-section">Every word settled so far.</h1>
     <p class="lede">
-      {roots} roots, on the way to {target} for A1. The source languages are listed with each word
-      because global balance is a rule, and this is where it gets checked.
-      {nextMilestone && ` Next milestone: ${nextMilestone}.`}
+      {roots} roots{next && `, on the way to ${next.roots}${next.level ? ` for ${next.level}` : ''}`}. The
+      source languages are listed with each word because global balance is a rule, and this is
+      where it gets checked.
     </p>
 
     <form style="margin-top:2rem" role="search" onsubmit="return false">

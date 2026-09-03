@@ -4,11 +4,11 @@ import { dictionary, readmeStatus, LANG_REPO } from '../lib/lang';
 
 export const GET: APIRoute = ({ site }) => {
   const entries = dictionary();
-  const { target } = readmeStatus();
+  const { next } = readmeStatus();
   const body = {
     language: { name: 'Amadunia', tag: 'art-x-amadunia' },
     roots: entries.length,
-    target,
+    next_target: next?.roots ?? null,
     license: 'CC BY-SA 4.0',
     source: `${LANG_REPO}/blob/main/dictionary/dictionary.md`,
     site: site?.toString(),
