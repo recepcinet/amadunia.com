@@ -6,14 +6,26 @@ import { rules } from '../../data/rules';
 import { titleOf, statusOf, openQuestionsOf, readmeStatus, LANG_REPO } from '../../lib/lang';
 import { spell } from '../../data/spell';
 
-const ORDER = ['phonology', 'numbers', 'tense', 'plural', 'possession', 'questions', 'pronouns', 'copula', 'negation', 'conjunction', 'demonstratives', 'place', 'verb-chains'];
-const docs = (await getCollection('grammar'))
-  .map((e) => ({
-    id: e.id,
-    title: titleOf(e.body ?? ''),
-    status: statusOf(e.body ?? ''),
-    open: openQuestionsOf(e.body ?? ''),
-  }))
+const ORDER = [
+  'phonology', 'pronunciation', 'numbers', 'tense', 'plural', 'possession', 'questions',
+  'pronouns', 'copula', 'negation', 'conjunction', 'demonstratives', 'place', 'verb-chains',
+  'comparison', 'subordination', 'adverbs',
+];
+const all = (await getCollection('grammar')).map((e) => ({
+  id: e.id,
+  title: titleOf(e.body ?? ''),
+  status: statusOf(e.body ?? ''),
+  open: openQuestionsOf(e.body ?? ''),
+  proposal: e.id.startsWith('proposal-'),
+}));
+
+const proposals = all
+  .filter((d) => d.proposal)
+  .map((d) => ({ ...d, title: d.title.replace(/^Proposal:\s*/, '') }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+
+const docs = all
+  .filter((d) => !d.proposal)
   .sort((a, b) => {
     const ia = ORDER.indexOf(a.id), ib = ORDER.indexOf(b.id);
     if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
@@ -31,8 +43,8 @@ const { settled } = readmeStatus();
   <Band name="Grammar" count={`${docs.length} topics`}>
     <h1 class="h-section">The grammar, topic by topic.</h1>
     <p class="lede">
-      Each topic is written once, marked settled or open, and applies without exception. What is
-      not on these pages has not been decided yet.
+      One file per decision, each recording what was settled, why, which candidates were rejected
+      and on what ground. {settled}
     </p>
     <ul class="stack" style="margin-top:2rem">
       {
@@ -74,13 +86,33 @@ const { settled } = readmeStatus();
     </ol>
   </Band>
 
+  <Band name="Undecided" count={proposals.length === 1 ? '1 proposal' : `${proposals.length} proposals`}>
+    <h2 class="h-section">Questions with a briefing, waiting on a decision.</h2>
+    <p class="lede">
+      Each of these lays out one open question — what the gap costs, what the candidates are, and
+      what each would break — so it can be settled in one sitting. None of them is a rule.
+    </p>
+    <ul class="stack" style="margin-top:2rem">
+      {
+        proposals.map((d) => (
+          <li>
+            <a href={`/grammar/${d.id}/`}>
+              <span class="stack__title">{d.title}</span>
+              <span class="stack__note">proposal</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </Band>
+
   <Band name="Still open" count={`${openTotal} questions`}>
-    <h2 class="h-section">Not decided yet.</h2>
+    <h2 class="h-section">Loose ends inside settled rules.</h2>
     <div class="panel">
       <p>
-        {settled && `${settled} `}{spell(openTotal).replace(/^./, (c) => c.toUpperCase())} smaller
-        questions are listed at the foot of the topics above. Decisions are made in the open, in the
-        <a href={`${LANG_REPO}/issues`}>language repository</a>.
+        {spell(openTotal).replace(/^./, (c) => c.toUpperCase())} smaller questions are listed at
+        the foot of the topics above — details a settled rule has not had to answer yet. Decisions
+        are made in the open, in the <a href={`${LANG_REPO}/issues`}>language repository</a>.
       </p>
     </div>
   </Band>

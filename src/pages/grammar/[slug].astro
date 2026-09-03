@@ -11,7 +11,8 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const body = entry.body ?? '';
 const title = titleOf(body);
-const status = statusOf(body);
+const isProposal = entry.id.startsWith('proposal-');
+const status = statusOf(body) ?? (isProposal ? 'proposal — not a rule' : undefined);
 const open = openQuestionsOf(body);
 const { Content } = await render(entry);
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';

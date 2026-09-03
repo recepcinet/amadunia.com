@@ -84,22 +84,12 @@ const strip = (s: string) =>
     .trim();
 
 export function dictionary(): Entry[] {
-  const body = readLang('dictionary/dictionary.md');
-  const entries: Entry[] = [];
-  let group = '';
-  for (const cells of tableRows(body)) {
-    const [word, meaning, sources] = cells;
-    // A group heading fills only the first cell. Some carry a note after the
-    // bold name ("**Prepositions** — before the noun"), so match the opening
-    // bold rather than the whole cell.
-    if (/^\*\*/.test(word) && !meaning && !sources) {
-      group = strip(word).replace(/\s+[—-]\s+.*$/, '');
-      continue;
-    }
-    if (!word) continue;
-    entries.push({ word: strip(word), meaning: strip(meaning ?? ''), sources: strip(sources ?? ''), group });
-  }
-  return entries;
+  // dictionary.json is generated upstream from dictionary.md and check.py fails
+  // if the two disagree, so it is a better source than parsing the table here.
+  const raw = JSON.parse(readLang('dictionary/dictionary.json')) as {
+    words: { word: string; meaning: string; group: string; sources: string }[];
+  };
+  return raw.words.map((w) => ({ ...w, sources: w.sources || '—' }));
 }
 
 export function dictionaryGroups(): { name: string; entries: Entry[] }[] {
@@ -162,6 +152,22 @@ export function readmeStatus(): Status {
 
 /* ---------- Lessons ---------- */
 
+/** "story-2-safari-por-pahar" and "text-5-uan" both order by their number. */
+export function textNumber(id: string): number {
+  return Number(id.match(/^(?:story|text)-(\d+)/)?.[1] ?? 0);
+}
+
+/** What each text is, as its own index calls it: a story, a poem, a dialogue. */
+export function textKinds(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const row of tableRows(readLang('texts/README.md'))) {
+    const id = row[0]?.match(/\(([^)]+)\.md\)/)?.[1];
+    const kind = row[2]?.split('—').pop()?.trim();
+    if (id && kind) out[id] = kind.replace(/^an? /, '').split(',')[0].trim();
+  }
+  return out;
+}
+
 export function lessonNumber(id: string): number {
   return Number(id.match(/lesson-(\d+)/)?.[1] ?? 0);
 }
@@ -198,7 +204,8 @@ export function rootsUsedOf(body: string): { used: number; of: number } | undefi
 
 /** Gaps a text records; a struck-through one has since been closed. */
 export function gapsOf(body: string): { total: number; open: number } {
-  const items = section(body, /^##\s+What the language could not say\s*$/m)
+  // The heading has been written four ways across the five texts.
+  const items = section(body, /^##\s+What (?:the language|this text)[^\n]*could not[^\n]*$/m)
     .split('\n')
     .filter((l) => /^\s*\d+\.\s+/.test(l));
   return { total: items.length, open: items.filter((l) => !/~~/.test(l)).length };

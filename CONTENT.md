@@ -8,9 +8,10 @@ lessons or the dictionary; it renders them at build time.
 |---|---|---|
 | `/grammar/<topic>/` | `lang/grammar/*.md` | content collection, rendered as-is |
 | `/learn/<lesson>/` | `lang/lessons/lesson-*.md` | content collection, rendered as-is |
-| `/texts/<story>/` | `lang/texts/story-*.md` | content collection; roots-used and gap counts parsed |
+| `/texts/<text>/` | `lang/texts/*.md` | content collection; roots used, gap counts and each text's kind parsed |
 | `/writing/`, `/writing/<page>/` | `lang/writing/*.md` | content collection; the whole section disappears when the folder is absent |
-| `/dictionary/` | `lang/dictionary/dictionary.md` | table parsed in `src/lib/lang.ts` |
+| `/dictionary/` | `lang/dictionary/dictionary.json` | read directly; upstream generates it from the markdown and `check.py` fails if they disagree |
+| `/phrasebook/` | `lang/phrasebook.md` | content collection, rendered as-is |
 | letter list | `lang/grammar/phonology.md` | checked against `src/data/alphabet.ts` at build; mismatch fails the build |
 | roots count, A1 target, milestones, birth date | dictionary rows, `lang/README.md` | parsed |
 | `/llms.txt` | all of the above | generated |
@@ -19,8 +20,10 @@ lessons or the dictionary; it renders them at build time.
 
 - `src/data/alphabet.ts` — IPA values, "as in" hints and example words per letter. The letter
   list must match phonology.md (enforced); the rest is the site's reading.
-- `src/data/rules.ts` — the eight-line summary of `lang/grammar/`. When a topic is settled,
-  changed or added there, this list has to be updated by hand.
+- `src/data/rules.ts` — the one-line-per-rule summary of `lang/grammar/`. When a topic is
+  settled, changed or added there, this list and the `ORDER` array in
+  `src/pages/grammar/index.astro` have to be updated by hand. Files named `proposal-*.md` are
+  listed apart on that page and need nothing here — they are briefings, not rules.
 - `src/pages/about.astro` — the "why" prose and the five design rules, paraphrased from the
   language README.
 - `src/pages/texts/index.astro` — the framing prose, which names the gaps the first story found.

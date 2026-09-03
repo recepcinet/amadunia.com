@@ -1,0 +1,33 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { titleOf, dictionary, LANG_REPO } from '../lib/lang';
+
+const [entry] = await getCollection('phrasebook');
+const { Content } = await render(entry);
+const roots = dictionary().length;
+---
+
+<Base
+  title="Phrasebook"
+  description="Things to say in Amadunia, from a first greeting to asking directions — every line obeying the settled rules and using only settled words."
+  crumbs={[['Phrasebook', '/phrasebook/']]}
+>
+  <section class="band">
+    <div class="wrap band__grid">
+      <p class="rail">
+        <span class="rail__name">Phrasebook</span>
+        <span class="rail__count">{roots} roots</span>
+      </p>
+      <div>
+        <h1 class="h-section">Things to say.</h1>
+        <article class="prose" style="margin-top:1.5rem">
+          <Content />
+        </article>
+        <p class="source">
+          Source: <a href={`${LANG_REPO}/blob/main/phrasebook.md`}>phrasebook.md</a> in the language repository.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

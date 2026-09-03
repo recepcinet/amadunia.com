@@ -100,6 +100,24 @@ export const rules: Rule[] = [
     example: { form: 'Mi mau kula pan.', gloss: 'I want to eat bread.' },
   },
   {
+    claim: 'Comparison is two words, and they never change',
+    body: 'lebi more, kurang less, paling most — each in front of the adjective, where cok already stood. Than is dari, which has meant from since Lesson 15, as it does in Arabic, Persian, Turkish, Hindi and Indonesian. No adjective takes an ending, so none can become irregular.',
+    href: '/grammar/comparison/',
+    example: { form: 'Dom mi lebi kabir dari dom yu.', gloss: 'My house is bigger than your house.' },
+  },
+  {
+    claim: 'There is no word for "that"',
+    body: 'A whole sentence simply stands where an object would stand — the slot was empty, so the language took it for nothing, exactly as it did with verb chains. Because, when and if reuse porke, kab and agar, already known as question words.',
+    href: '/grammar/subordination/',
+    example: { form: 'Mi bil ta suda lai.', gloss: 'I know she came.' },
+  },
+  {
+    claim: 'An adverb is the adjective, unchanged',
+    body: 'No suffix, no separate word class. Where English adds -ly, Amadunia adds nothing and lets position do the work.',
+    href: '/grammar/adverbs/',
+    example: { form: 'Ta anda hayai.', gloss: 'She walks fast.' },
+  },
+  {
     claim: 'Numbers are built, never irregular',
     body: 'Ten digits, des for ten, sen for a hundred. Larger numbers join smaller ones, largest unit first.',
     href: '/grammar/numbers/',

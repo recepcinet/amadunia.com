@@ -2,9 +2,10 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Band from '../../components/Band.astro';
-import { titleOf, subtitleOf, rootsUsedOf, gapsOf, LANG_REPO } from '../../lib/lang';
+import { titleOf, subtitleOf, rootsUsedOf, gapsOf, textNumber, textKinds, LANG_REPO } from '../../lib/lang';
 import { dictionary } from '../../lib/lang';
 
+const kinds = textKinds();
 const texts = (await getCollection('texts'))
   .map((e) => ({
     id: e.id,
@@ -12,8 +13,9 @@ const texts = (await getCollection('texts'))
     subtitle: subtitleOf(e.body ?? ''),
     roots: rootsUsedOf(e.body ?? ''),
     gaps: gapsOf(e.body ?? ''),
+    kind: kinds[e.id],
   }))
-  .sort((a, b) => a.id.localeCompare(b.id));
+  .sort((a, b) => textNumber(a.id) - textNumber(b.id));
 
 const openGaps = texts.reduce((n, t) => n + t.gaps.open, 0);
 const roots = dictionary().length;
@@ -29,7 +31,7 @@ const roots = dictionary().length;
     <p class="lede">
       Original writing, not translation. Every text uses only the {roots} settled roots and only
       settled grammar — nothing is invented to make a sentence work. Where a text cannot say
-      something, it says so at the end.
+      something, it says so at the end, and those endings are where several of the rules came from.
     </p>
     <ul class="stack" style="margin-top:2rem">
       {
@@ -38,8 +40,8 @@ const roots = dictionary().length;
             <a href={`/texts/${t.id}/`}>
               <span class="stack__title" lang="art-x-amadunia">{t.title}</span>
               <span class="stack__note">
-                {t.subtitle}
-                {t.roots && ` · ${t.roots.used} of ${t.roots.of} roots`}
+                {t.kind ? `${t.kind} · ` : ''}{t.subtitle}
+                {t.roots && ` · ${t.roots.used} roots`}
               </span>
             </a>
           </li>
@@ -51,9 +53,11 @@ const roots = dictionary().length;
   <Band name="Why texts" count={openGaps > 0 ? `${openGaps} open gaps` : undefined}>
     <h2 class="h-section">A lesson shows what the language can do. A text finds out what it cannot.</h2>
     <p class="lede">
-      Writing the first story turned up four things thirteen lessons had missed — no word for
-      <em>and</em>, no word for <em>not</em>, no <em>again</em>, no way to mark place. Two were
-      settled the same day; the story is left as it was written, from before those words existed.
+      The first story turned up four things thirteen lessons had missed — no word for <em>and</em>,
+      no word for <em>not</em>, no <em>again</em>, no way to mark place. All four are now settled
+      rules, and the story is left as it was written, from before those words existed. The poem
+      found the one that still matters most: nothing in the language says where the stress falls,
+      so two people can read the same line as two different poems.
     </p>
     <div class="panel" style="margin-top:2rem">
       <p>

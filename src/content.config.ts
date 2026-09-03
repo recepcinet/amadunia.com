@@ -8,9 +8,10 @@ import { existsSync } from 'node:fs';
 const doc = z.object({}).passthrough();
 
 export const collections = {
-  grammar: defineCollection({ loader: glob({ pattern: '*.md', base: './lang/grammar' }), schema: doc }),
+  grammar: defineCollection({ loader: glob({ pattern: ['*.md', '!README.md'], base: './lang/grammar' }), schema: doc }),
   lessons: defineCollection({ loader: glob({ pattern: 'lesson-*.md', base: './lang/lessons' }), schema: doc }),
-  texts: defineCollection({ loader: glob({ pattern: 'story-*.md', base: './lang/texts' }), schema: doc }),
+  texts: defineCollection({ loader: glob({ pattern: ['*.md', '!README.md'], base: './lang/texts' }), schema: doc }),
+  phrasebook: defineCollection({ loader: glob({ pattern: 'phrasebook.md', base: './lang' }), schema: doc }),
   // writing/ is a proposal upstream. The collection is empty until it lands on
   // main, and every page that uses it disappears with it.
   writing: defineCollection({
