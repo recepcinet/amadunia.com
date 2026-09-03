@@ -1,11 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
-import { dictionaryGroups, readmeStatus, LANG_REPO } from '../lib/lang';
+import { dictionaryGroups, readmeStatus, wantedWords, markAmadunia, LANG_REPO } from '../lib/lang';
 
 const groups = dictionaryGroups();
 const roots = groups.reduce((n, g) => n + g.entries.length, 0);
 const { next } = readmeStatus();
+const wanted = wantedWords();
 
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const ld = [
@@ -73,6 +74,36 @@ const ld = [
       <a href={`${LANG_REPO}/issues`}>language repository</a>.
     </p>
   </Band>
+
+  {
+    wanted.length > 0 && (
+      <Band name="Wanted" count={`${wanted.length} words`}>
+        <h2 class="h-section">Words the writing has asked for.</h2>
+        <p class="lede">
+          Not suggestions. Each one is a place where a text or the phrasebook tried to say
+          something ordinary and stopped, and the sentence that stopped is on record. A gap found
+          by writing is worth more than a gap found by reading a wordlist.
+        </p>
+        <ul class="stack" style="margin-top:2rem">
+          {wanted.map((w) => (
+            <li>
+              <span class="stack__inert entry">
+                <span class="entry__word">{w.word}</span>
+                <span class="entry__meaning">
+                  {markAmadunia(w.sentence).map((p) =>
+                    p.am ? <span lang="art-x-amadunia">{p.text}</span> : p.text,
+                  )}
+                </span>
+                <span class="entry__sources">
+                  {w.foundByHref ? <a href={w.foundByHref}>{w.foundBy}</a> : w.foundBy}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Band>
+    )
+  }
 
   <Band name="Contributing">
     <h2 class="h-section">Add a word.</h2>

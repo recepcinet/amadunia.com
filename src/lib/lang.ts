@@ -102,6 +102,72 @@ export function dictionaryGroups(): { name: string; entries: Entry[] }[] {
   return out;
 }
 
+/**
+ * Split a run of prose into Amadunia and English pieces, by the same test the
+ * Markdown pipeline uses: a fragment is Amadunia when at least three quarters
+ * of its words are settled roots. For markup the site builds by hand, so the
+ * colour rule holds there too.
+ */
+export function markAmadunia(text: string): { text: string; am: boolean }[] {
+  const lex = new Set(dictionary().flatMap((e) => e.word.split('-')));
+  const isAm = (s: string) => {
+    const words = s.toLowerCase().match(/[a-z]+(?:-[a-z]+)*/g);
+    if (!words) return false;
+    const parts = words.flatMap((w) => w.split('-'));
+    return parts.filter((w) => lex.has(w)).length / parts.length >= 0.75;
+  };
+
+  const out: { text: string; am: boolean }[] = [];
+  const push = (text: string, am: boolean) => {
+    if (!text) return;
+    const last = out.at(-1);
+    if (last && last.am === am) last.text += text;
+    else out.push({ text, am });
+  };
+
+  // Emphasis is the author's own mark for a word in the language, and it is the
+  // only signal when Amadunia sits inside an English clause with no punctuation
+  // between them. Outside it, fall back to splitting on punctuation.
+  for (const [i, chunk] of text.split(/\*([^*\n]+)\*/g).entries()) {
+    if (i % 2 === 1) { push(chunk, isAm(chunk)); continue; }
+    for (const piece of chunk.split(/(\s[—–-]\s|[;,]\s|["“”])/)) {
+      if (piece === '') continue;
+      push(piece, isAm(piece) && !/^(\s[—–-]\s|[;,]\s|["“”])$/.test(piece));
+    }
+  }
+  return out;
+}
+
+/**
+ * Gaps the writing has found: words a text or the phrasebook reached for and
+ * did not have, with the sentence that stopped. Recorded in the dictionary's
+ * own README, so the site does not have to keep its own list.
+ */
+export interface Wanted {
+  word: string;
+  foundBy: string;
+  foundByHref?: string;
+  sentence: string;
+}
+
+export function wantedWords(): Wanted[] {
+  const body = readLang('dictionary/README.md');
+  const rows = tableRows(body, '## Words the writing has asked for');
+  return rows
+    .filter((r) => r[0] && r[2])
+    .map((r) => {
+      const link = r[1]?.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      const id = link?.[2].match(/([^/]+)\.md$/)?.[1];
+      const href = id
+        ? id === 'phrasebook'
+          ? '/phrasebook/'
+          : `/texts/${id}/`
+        : undefined;
+      const sentence = (r[2] ?? '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/\*\*/g, '').trim();
+      return { word: strip(r[0]), foundBy: link ? link[1] : strip(r[1] ?? ''), foundByHref: href, sentence };
+    });
+}
+
 /* ---------- Alphabet, as phonology.md states it ---------- */
 
 export interface Inventory {
