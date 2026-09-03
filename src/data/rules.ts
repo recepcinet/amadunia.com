@@ -17,7 +17,7 @@ export const rules: Rule[] = [
     claim: 'One letter, one sound',
     body: 'No silent letters, none that change value by position, none that can be read two ways. A word is pronounced exactly as written.',
     href: '/grammar/phonology/',
-    example: { form: 'dunia', gloss: 'du-ni-a — world' },
+    example: { form: 'dunia', gloss: 'world — read exactly as written, every letter sounded.' },
   },
   {
     claim: 'Syllables stay simple',
@@ -119,7 +119,7 @@ export const rules: Rule[] = [
     claim: 'Stress falls on the second-to-last syllable, always',
     body: 'Every word, with no exception and nothing to memorise. A vowel pair counts as one syllable, and a hyphen does not join two words into one for this. Until it was settled, two people could read a line of the poem as two different poems.',
     href: '/grammar/stress/',
-    example: { form: 'amadunia', gloss: 'a·ma·du·NI·a' },
+    example: { form: 'amadunia', gloss: 'a·ma·DU·nia — four syllables, because ia is one vowel group.' },
   },
   {
     claim: 'Every letter has one named sound',
