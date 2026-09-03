@@ -26,6 +26,12 @@ export const rules: Rule[] = [
     example: { form: 'taksi', gloss: 'tak-si — taxi' },
   },
   {
+    claim: 'No two words are a single sound apart',
+    body: 'The rule that kills most candidates, and between l and r it is absolute: telling beli from beri is the hardest contrast on Earth for well over a billion speakers, and a world language cannot rest a distinction on it. It outranks how widely a word travels — dom replaced ruma, after eighty-four uses, because ruma stood against luma.',
+    href: '/grammar/phonology/',
+    example: { form: 'ruma → dom', gloss: 'replaced, because luma is light and the pair differs only in l against r.' },
+  },
+  {
     claim: 'The verb never changes',
     body: 'Time is one particle placed before the verb: suda for the past, saufa for the future. Nothing to conjugate, no agreement with the subject.',
     href: '/grammar/tense/',
