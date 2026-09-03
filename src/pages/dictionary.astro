@@ -1,12 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
-import { dictionaryGroups, readmeStatus, wantedWords, markAmadunia, LANG_REPO } from '../lib/lang';
+import { getCollection } from 'astro:content';
+import { dictionaryGroups, readmeStatus, wantedWords, markAmadunia, titleOf, LANG_REPO } from '../lib/lang';
 
 const groups = dictionaryGroups();
 const roots = groups.reduce((n, g) => n + g.entries.length, 0);
 const { next } = readmeStatus();
 const wanted = wantedWords();
+const docs = (await getCollection('dictionaryDocs'))
+  .map((e) => ({ id: e.id, title: titleOf(e.body ?? ''), proposal: e.id.startsWith('proposal-') }))
+  .sort((a, b) => Number(a.proposal) - Number(b.proposal));
 
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const ld = [
@@ -98,6 +102,29 @@ const ld = [
                   {w.foundByHref ? <a href={w.foundByHref}>{w.foundBy}</a> : w.foundBy}
                 </span>
               </span>
+            </li>
+          ))}
+        </ul>
+      </Band>
+    )
+  }
+
+  {
+    docs.length > 0 && (
+      <Band name="Counted" count={`${docs.length} papers`}>
+        <h2 class="h-section">The word list, measured.</h2>
+        <p class="lede">
+          Global balance is design rule 4, and the one easiest to claim without keeping. It is
+          counted over the whole dictionary rather than batch by batch, and what the next three
+          hundred roots should be made of is argued from those numbers.
+        </p>
+        <ul class="stack" style="margin-top:2rem">
+          {docs.map((d) => (
+            <li>
+              <a href={`/dictionary/${d.id}/`}>
+                <span class="stack__title">{d.title}</span>
+                <span class="stack__note">{d.proposal ? 'briefing — nothing adopted' : 'measured'}</span>
+              </a>
             </li>
           ))}
         </ul>

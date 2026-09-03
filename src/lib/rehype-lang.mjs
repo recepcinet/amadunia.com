@@ -100,7 +100,8 @@ function rewriteHref(href) {
     if (slug === 'README') return `${SECTION[dir] ?? '/about/'}${anchor}`;
     if (slug.startsWith('lesson-')) return `/learn/${slug}/${anchor}`;
     if (slug.startsWith('story-') || slug.startsWith('text-')) return `/texts/${slug}/${anchor}`;
-    if (slug === 'dictionary' || slug === 'index-english' || slug === 'balance') return `/dictionary/${anchor}`;
+    if (slug === 'dictionary' || slug === 'index-english') return `/dictionary/${anchor}`;
+    if (dir === 'dictionary') return `/dictionary/${slug}/${anchor}`;
     if (slug === 'phrasebook') return `/phrasebook/${anchor}`;
     if (dir === 'writing') return `/writing/${slug}/${anchor}`;
     return `/grammar/${slug}/${anchor}`;
@@ -155,8 +156,11 @@ function tagTable(table) {
   const cells = (tr) => (tr.children ?? []).filter((c) => c.type === 'element');
   const headers = cells(rows[0]).map((th) => text(th).trim().toLowerCase());
 
+  // A digit header means Amadunia only when the whole table is numbered that
+  // way — the numerals table in numbers.md. Elsewhere a "4" heads a count.
+  const allDigits = headers.every((h) => !h || /^\d+$/.test(h)) && headers.some((h) => /^\d+$/.test(h));
   let cols = headers
-    .map((h, i) => (AMADUNIA_HEADERS.has(h) || /^\d+$/.test(h) ? i : -1))
+    .map((h, i) => (AMADUNIA_HEADERS.has(h) || (allDigits && /^\d+$/.test(h)) ? i : -1))
     .filter((i) => i >= 0);
   if (!cols.length && headers.every((h) => !h)) cols = [0]; // headerless: first column is the language
 

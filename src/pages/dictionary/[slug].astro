@@ -1,0 +1,43 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { titleOf, LANG_REPO } from '../../lib/lang';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('dictionaryDocs');
+  return docs.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const title = titleOf(entry.body ?? '');
+const isProposal = entry.id.startsWith('proposal-');
+const { Content } = await render(entry);
+---
+
+<Base
+  title={title}
+  description={
+    isProposal
+      ? `${title} for Amadunia: what has been measured about the next three hundred roots, and the decisions it does not make.`
+      : `${title} — every root in Amadunia counted by language family, by origin and by reach.`
+  }
+  crumbs={[['Dictionary', '/dictionary/'], [title, `/dictionary/${entry.id}/`]]}
+>
+  <section class="band">
+    <div class="wrap band__grid">
+      <p class="rail">
+        <span class="rail__name"><a href="/dictionary/">Dictionary</a></span>
+        <span class="rail__count">{isProposal ? 'briefing — nothing adopted' : 'measured'}</span>
+      </p>
+      <div>
+        <h1 class="h-section">{title}</h1>
+        <article class="prose">
+          <Content />
+        </article>
+        <p class="source">
+          Source: <a href={`${LANG_REPO}/blob/main/dictionary/${entry.id}.md`}>dictionary/{entry.id}.md</a> in the language repository.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
