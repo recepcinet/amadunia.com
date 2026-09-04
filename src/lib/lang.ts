@@ -502,6 +502,12 @@ export function textsClaims(): { lead: string; rest: string }[] {
     const clean = (t: string) =>
       t
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        // Emphasis markers, not text. The colour on an Amadunia word here comes
+        // from the dictionary, not from upstream's italics, so dropping them
+        // loses nothing and printing them would show a reader an asterisk.
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1')
+        .replace(/`([^`]+)`/g, '$1')
         .replace(/\s+/g, ' ')
         .trim();
     out.push({ lead: clean(m[1]), rest: clean(m[2]) });
