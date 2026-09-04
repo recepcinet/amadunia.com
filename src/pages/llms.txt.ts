@@ -49,6 +49,8 @@ ${texts.map((t) => `- [${titleOf(t.body ?? '')}](${base}texts/${t.id}/) — ${su
 - [Data](${base}data/) — the corpus, the dictionary and the full reference as downloadable files, CC BY-SA 4.0
 - [Grammar](${base}grammar/)
 - [Dictionary](${base}dictionary/): ${words.length} roots, searchable
+- [Translate](${base}translate/) — English into Amadunia: the dictionary index and every
+  sentence in the corpus, searched together. Machine data at ${base}index-english.json.
 - [Learn](${base}learn/)
 - [About](${base}about/)
 

@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
-import { corpus, dictionary, corpusTsv, corpusJsonl, fullReference, dictionaryJson, readmeStatus, langFileSize, bytes, LANG_REPO } from '../lib/lang';
+import { corpus, dictionary, corpusTsv, corpusJsonl, fullReference, dictionaryJson, englishIndex, englishIndexJson, readmeStatus, langFileSize, bytes, LANG_REPO } from '../lib/lang';
 
 const pairs = corpus();
 const words = dictionary();
@@ -40,6 +40,15 @@ const files = [
     what: 'The same roots as a spreadsheet',
     detail: 'Imports straight into a flashcard deck. Generated upstream and checked against the Markdown on every push.',
     size: langFileSize('dictionary/dictionary.csv'),
+  },
+  {
+    href: '/index-english.json',
+    format: 'application/json',
+    what: `English into Amadunia — ${englishIndex().length} entries`,
+    detail:
+      'The index that runs the other way to the dictionary, for writing rather than reading. ' +
+      'What the translate page looks words up in.',
+    size: bytes(englishIndexJson(site)),
   },
   {
     href: '/llms-full.txt',

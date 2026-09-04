@@ -174,6 +174,17 @@ export function wantedWords(): Wanted[] {
     });
 }
 
+/**
+ * English → Amadunia, as upstream derives it from the dictionary. One English
+ * word can name more than one root; the dictionary says which is which.
+ */
+export function englishIndex(): { en: string; am: string[] }[] {
+  const rows = tableRows(readLang('dictionary/index-english.md'));
+  return rows
+    .map((r) => ({ en: strip(r[0] ?? '').toLowerCase(), am: strip(r[1] ?? '').split(/[,;]\s*/).filter(Boolean) }))
+    .filter((r) => r.en && r.am.length);
+}
+
 /* ---------- Alphabet, as phonology.md states it ---------- */
 
 export interface Inventory {
@@ -464,6 +475,28 @@ export function dictionaryJson(site: string, nextTarget: number | null): string 
         group: e.group,
         sources: e.sources === '—' ? null : e.sources,
       })),
+    },
+    null,
+    2,
+  );
+}
+
+/**
+ * The English index as one document. Serialised here so the page that reports
+ * its size and the route that serves it cannot disagree about a single byte.
+ */
+export function englishIndexJson(site: string): string {
+  const entries = englishIndex();
+  return JSON.stringify(
+    {
+      language: { name: 'Amadunia', tag: 'art-x-amadunia' },
+      direction: 'en -> art-x-amadunia',
+      entries_count: entries.length,
+      note: 'Derived from the dictionary. One English word may name more than one root; the dictionary entry says which is which. Verbs are keyed as "to speak".',
+      license: 'CC BY-SA 4.0',
+      source: `${LANG_REPO}/blob/main/dictionary/index-english.md`,
+      site,
+      entries,
     },
     null,
     2,
