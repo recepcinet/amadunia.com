@@ -452,17 +452,26 @@ export interface LangFile {
   body: string;
 }
 
-/** Every Markdown file the site renders or parses, in a stable order. */
+/**
+ * Every Markdown file of the language, in reading order: the front page, the
+ * grammar, the lessons, the texts, the phrasebook, the dictionary. This feeds
+ * both /llms-full.txt and the corpus, so a folder missing here is a folder
+ * missing from both — texts were, for a fortnight, which made the full
+ * reference incomplete and left the corpus with no sentence from any text.
+ */
 export function allLangFiles(): LangFile[] {
+  const ordinal = (n: string) => Number(n.match(/(?:lesson|story|text)-(\d+)/)?.[1] ?? NaN);
   const files: LangFile[] = [{ rel: 'README.md', body: readLang('README.md') }];
-  for (const dir of ['grammar', 'lessons', 'dictionary']) {
+
+  for (const dir of ['grammar', 'lessons', 'texts', 'dictionary']) {
     const names = readdirSync(join(LANG, dir))
       .filter((n) => n.endsWith('.md'))
       .sort((a, b) => {
-        const na = a.match(/lesson-(\d+)/), nb = b.match(/lesson-(\d+)/);
-        return na && nb ? Number(na[1]) - Number(nb[1]) : a.localeCompare(b);
+        const na = ordinal(a), nb = ordinal(b);
+        return Number.isNaN(na) || Number.isNaN(nb) ? a.localeCompare(b) : na - nb;
       });
     for (const n of names) files.push({ rel: `${dir}/${n}`, body: readLang(`${dir}/${n}`) });
+    if (dir === 'texts') files.push({ rel: 'phrasebook.md', body: readLang('phrasebook.md') });
   }
   return files;
 }
@@ -494,7 +503,9 @@ export function corpus(): Pair[] {
   };
 
   for (const { rel, body } of allLangFiles()) {
-    if (rel === 'README.md' || rel.startsWith('dictionary/')) continue;
+    // The dictionary is a word list, and a folder's README is prose about a
+    // collection; neither pairs a sentence with its translation.
+    if (rel.endsWith('README.md') || rel.startsWith('dictionary/')) continue;
     const lines = body.split('\n');
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -505,7 +516,9 @@ export function corpus(): Pair[] {
       if (!/^\s*\|/.test(line) || !/^\s*\|/.test(lines[i + 1] ?? '') || !/-{2,}/.test(lines[i + 1])) continue;
       const headers = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim().toLowerCase());
       let amIdx = headers.indexOf('amadunia'), enIdx = headers.indexOf('english');
-      if (amIdx === -1 && enIdx === -1 && headers.length === 2 && headers.every((h) => !h) && rel.startsWith('lessons/')) {
+      // A headerless two-column table pairs Amadunia with English wherever the
+      // language is taught or used — the phrasebook and the texts do it too.
+      if (amIdx === -1 && enIdx === -1 && headers.length === 2 && headers.every((h) => !h) && !rel.startsWith('grammar/')) {
         amIdx = 0; enIdx = 1;
       }
       if (amIdx === -1 || enIdx === -1) continue;
