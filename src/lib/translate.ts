@@ -17,6 +17,8 @@ export type Lexicon = {
   pos: Record<string, Pos>;
   /** Value to root, e.g. { '1': 'uan', '10': 'des' } — read off the dictionary. */
   num: Record<string, string>;
+  /** Names the writing uses that are not roots, read off the corpus. */
+  names: string[];
 };
 
 const ARTICLES = new Set(['a', 'an', 'the']);
@@ -47,7 +49,7 @@ const QUANT: Record<string, string> = { many: 'cok', much: 'cok', some: 'cok', a
 // one form for both (grammar/adverbs.md).
 const SYN: Record<string, string> = {
   well: 'good', has: 'have', had: 'have', with: 'together', lots: 'many',
-  cannot: 'can', tell: 'say', okay: 'ok', hello: 'hi', sure: 'ok',
+  cannot: 'can', tell: 'say', okay: 'ok', hello: 'hi', sure: 'ok', thanks: 'thank you',
 };
 // Compounds read off the corpus, not invented: din ini is attested for "today".
 const PHRASE: Record<string, string> = {
@@ -171,7 +173,22 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     }
     const base = IRREG[w] ?? w;
     const f = lookup(lex, base);
-    if (!f) { out.push({ t, p: /^[A-Z]/.test(t) ? 'NAME' : 'UNK', r: /^[A-Z]/.test(t) ? t : null }); continue; }
+    if (!f) {
+      // A capital at the start of a sentence says nothing — every sentence has
+      // one — so it is not evidence of a name. Treating it as one dressed an
+      // English word up in the language's own colour, which is a claim this
+      // page must not make. A name is a word the writing already uses as one,
+      // or a capital somewhere a capital had to be chosen.
+      const lower = t.toLowerCase();
+      // A word the English index cannot answer may still be Amadunia: Sol is a
+      // name in the writing and sol is the root for sun, and someone typing
+      // either means the same word.
+      if (lower in lex.pos) { out.push({ t, p: lex.pos[lower], r: lower }); continue; }
+      const known = lex.names.some((n) => n.toLowerCase() === lower);
+      const isName = known || (/^[A-Z]/.test(t) && out.some((x) => x.p !== 'DROP'));
+      out.push({ t, p: isName ? 'NAME' : 'UNK', r: isName ? t : null });
+      continue;
+    }
     const [root, pos, stem] = f;
     const past = (w in IRREG && IRREG[w] !== w) || (pos === 'V' && w.endsWith('ed') && stem !== w);
     // A plural noun doubles; nothing inside the word changes.
@@ -346,6 +363,8 @@ export function translate(lex: Lexicon, sentence: string): string {
       .replace(/\b(\w+)'ll\b/gi, '$1 will')
       .replace(/\b(\w+)'re\b/gi, '$1 are')
       .replace(/\b(\w+)n't\b/gi, '$1 not')
+      .replace(/\bI'm\b/gi, 'I am')
+      .replace(/\b(\w+)'ve\b/gi, '$1 have')
       .replace(/\bcan not\b/gi, 'can');
     const raw2 = chunk.match(/[A-Za-z]+'s|[A-Za-z']+|\d+/g) ?? [];
     const toks: string[] = [];

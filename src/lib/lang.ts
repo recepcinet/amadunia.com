@@ -252,15 +252,33 @@ export function assertNumerals(): void {
   }
 }
 
+/**
+ * Names the writing actually uses: a capitalised word inside an Amadunia
+ * sentence that is not one of the roots. Today that is Amadunia itself. Read
+ * off the corpus so the list cannot be a guess, and so a name the language
+ * starts using arrives here on its own.
+ */
+export function corpusNames(): string[] {
+  const roots = new Set(dictionary().map((e) => e.word));
+  const out = new Set<string>();
+  for (const p of corpus()) {
+    for (const w of p.am.match(/[A-Z][A-Za-z]*/g) ?? []) {
+      if (!roots.has(w.toLowerCase())) out.add(w);
+    }
+  }
+  return [...out].sort();
+}
+
 /** The lexicon the rule translator reads: English key to root, root to class. */
 export function lexicon(): {
   en: Record<string, string>;
   pos: Record<string, string>;
   num: Record<string, string>;
+  names: string[];
 } {
   const en: Record<string, string> = {};
   for (const row of englishIndex()) if (!(row.en in en)) en[row.en] = row.am[0];
-  return { en, pos: posIndex(), num: numerals() };
+  return { en, pos: posIndex(), num: numerals(), names: corpusNames() };
 }
 
 /* ---------- Per-root facts, all counted rather than restated ---------- */
@@ -698,6 +716,7 @@ export function englishIndexJson(site: string): string {
         'Word class per root, read off the headings in dictionary.md. N noun, V verb, ADJ adjective, Q question word, P preposition, LOC place word, NUM number, DEM demonstrative, G particle.',
       pos: posIndex(),
       numerals: numerals(),
+      names: corpusNames(),
       entries,
     },
     null,

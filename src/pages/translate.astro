@@ -263,7 +263,7 @@ const ld = [
         ]);
         const en: Record<string, string> = {};
         for (const e of idx.entries as { en: string; am: string[] }[]) en[e.en] ??= e.am[0];
-        lex = { en, pos: idx.pos, num: idx.numerals };
+        lex = { en, pos: idx.pos, num: idx.numerals, names: idx.names };
         sentences = tsv
           .split('\n')
           .slice(1)
