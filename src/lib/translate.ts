@@ -220,7 +220,43 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
 
 const NP = ['POSS', 'NUM', 'DEM', 'ADJ', 'N', 'PRON', 'NAME', 'QUANT', 'DEG', 'CMP'];
 
+// Verbs that hand something over. Their recipient takes por, because two nouns
+// side by side already mean possession: Mi beri pan dugu mi would read as "I
+// give my sibling's bread" (grammar/place.md).
+const RECIPIENT = new Set(['beri', 'kirim', 'leta', 'beca']);
+
+/**
+ * English can say "gives the mother medicine" with no preposition at all, and
+ * Amadunia cannot: the thing comes first and the recipient takes por. Rewrites
+ * the two bare phrases into that order when English left them adjacent.
+ */
+function ditransitive(tg: Tok[]): Tok[] {
+  const v = tg.findIndex((x) => x.p === 'V' && x.r && RECIPIENT.has(x.r));
+  if (v < 0) return tg;
+
+  // Take the run of phrases after the verb, one phrase per noun head. A
+  // possessive marker anywhere in it means the two nouns belong together —
+  // "the mother's medicine" — and the sentence is not ditransitive at all.
+  const phrases: Tok[][] = [];
+  let cur: Tok[] = [];
+  let j = v + 1;
+  for (; j < tg.length; j++) {
+    const x = tg[j];
+    if (x.p === 'DROP') continue;
+    if (x.p === 'OF') return tg;
+    if (!NP.includes(x.p)) break;
+    cur.push(x);
+    if (['N', 'PRON', 'NAME'].includes(x.p)) { phrases.push(cur); cur = []; }
+  }
+  // Only two whole phrases and nothing after them is unambiguous; English puts
+  // the recipient first and Amadunia puts the thing first, with por between.
+  if (cur.length || phrases.length !== 2 || j < tg.length) return tg;
+  const [recipient, thing] = phrases;
+  return [...tg.slice(0, v + 1), ...thing, { t: 'to', p: 'TO', r: null }, ...recipient];
+}
+
 function clause(tg: Tok[], question: boolean): string {
+  tg = ditransitive(tg);
   let tail: string | null = null;
 
   // "A question is the answer with one word swapped": the question word goes
