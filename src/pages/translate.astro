@@ -206,12 +206,22 @@ const ld = [
         actually matters. <span lang="art-x-amadunia">Ain ta kabir</span> — her eyes are big —
         does not double, and is not wrong for leaving it out.
       </dd>
-      <dt>Where a frequency adverb stands is still open</dt>
+      <dt>Two words are not written at all, on purpose</dt>
       <dd>
-        <a href="/grammar/adverbs/">Upstream has measured the question and not yet decided it</a>,
-        so nothing here places <span lang="art-x-amadunia">daima</span> or
-        <span lang="art-x-amadunia">kadang</span> with confidence. A tool that guessed would be
-        settling a question by accident.
+        <strong>very</strong> and <strong>sometimes</strong> come back in English rather than as
+        <span lang="art-x-amadunia">cok</span> and <span lang="art-x-amadunia">kadang</span>.
+        Whether <span lang="art-x-amadunia">cok</span> carries <em>very</em> is
+        <a href="/grammar/adverbs/">an open question</a>, and until the frequency-adverb question
+        is decided <span lang="art-x-amadunia">kadang</span> cannot be written at all, because any
+        sentence using it would answer that question by accident. A tool that wrote them would be
+        settling what the language has not.
+      </dd>
+      <dt>And where a frequency adverb stands is still open</dt>
+      <dd>
+        <span lang="art-x-amadunia">daima</span> is written, because the language writes it — but
+        it is placed where the English put it, and
+        <a href="/grammar/adverbs/">which slot is correct has been measured and not decided</a>.
+        Treat its position as unsettled rather than as an answer.
       </dd>
       <dt>A word the dictionary does not hold stays in English</dt>
       <dd>
@@ -273,6 +283,8 @@ const ld = [
             return { am: cell[0], en: cell[1], src: cell[2] };
           });
       })());
+
+    const OPEN_WORDS = new Set(['very', 'sometimes', 'occasionally']);
 
     const esc = (s: string) =>
       s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
@@ -345,8 +357,14 @@ const ld = [
             )}</a></p>`
           : '',
         missing.length
-          ? `<p class="stack__note">Left in English, because the dictionary has no entry for
-             <strong>${missing.map(esc).join(', ')}</strong>.</p>`
+          ? `<p class="stack__note">Left in English: ${missing
+              .map((w) =>
+                OPEN_WORDS.has(w.toLowerCase())
+                  ? `<strong>${esc(w)}</strong> is not written because the language has not
+                     settled it — see <a href="/grammar/adverbs/">the open question</a>`
+                  : `the dictionary has no entry for <strong>${esc(w)}</strong>`,
+              )
+              .join('; ')}.</p>`
           : '',
         found.length
           ? `<h3 class="h-sub">Sentences already written</h3>

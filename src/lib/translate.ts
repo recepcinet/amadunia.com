@@ -44,6 +44,15 @@ const NUMVALUE: Record<string, number> = {
 };
 const QUANT: Record<string, string> = { many: 'cok', much: 'cok', some: 'cok', all: 'cok' };
 
+/**
+ * Words the language has not settled, which this does not write. Whether cok
+ * carries "very" is an open question in grammar/adverbs.md, and kadang cannot
+ * be written at all until the frequency-adverb question is decided, because
+ * any sentence using it would answer that question by accident. Writing either
+ * would be this page settling something the language has not.
+ */
+const UNSETTLED = new Set(['very', 'sometimes', 'occasionally']);
+
 // English-side only: which English word the index already answers. No Amadunia
 // word is added here — "well" is the adverb of "good", and the language uses
 // one form for both (grammar/adverbs.md).
@@ -161,11 +170,11 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     if (w === 'of') { out.push({ t, p: 'OF', r: null }); continue; }
     if (w === 'and') { out.push({ t, p: 'CONJ', r: 'aur' }); continue; }
     if (w === 'or') { out.push({ t, p: 'CONJ', r: 'o' }); continue; }
-    if (w === 'very') { out.push({ t, p: 'DEG', r: 'cok' }); continue; }
     if (w === 'more') { out.push({ t, p: 'DEG', r: 'lebi' }); continue; }
     if (w === 'less') { out.push({ t, p: 'DEG', r: 'kurang' }); continue; }
     if (w === 'most') { out.push({ t, p: 'DEG', r: 'paling' }); continue; }
     if (w === 'than') { out.push({ t, p: 'W', r: 'dari' }); continue; }
+    if (UNSETTLED.has(w)) { out.push({ t, p: 'OPEN', r: null }); continue; }
     if (w in SYN) w = SYN[w];
     if (w in IRREG_PL) {
       const f = lookup(lex, IRREG_PL[w]);
@@ -247,7 +256,7 @@ function clause(tg: Tok[], question: boolean): string {
   while (i < n) {
     const { t, p, r, past, cmp } = tg[i];
     if (p === 'DROP') { i++; continue; }
-    if (p === 'UNK') { out.push(`⟨${t}⟩`); i++; continue; }
+    if (p === 'UNK' || p === 'OPEN') { out.push(`⟨${t}⟩`); i++; continue; }
     if (p === 'NEG') { neg = true; i++; continue; }
     if (p === 'AUX') { tense = r; i++; continue; }
     if (p === 'PHRASE') { out.push(r!); i++; continue; }
