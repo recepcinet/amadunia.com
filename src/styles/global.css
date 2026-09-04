@@ -509,6 +509,8 @@ img, svg { max-width: 100%; }
   gap: 0.35rem 1.5rem;
 }
 .entry__word { font-family: var(--sans); font-weight: 600; font-size: var(--t-base); }
+.entry__word a { color: var(--am); text-decoration: none; box-shadow: 0 1px 0 var(--rule); }
+.entry__word a:hover { box-shadow: 0 1px 0 var(--am); }
 .entry__meaning { color: var(--ink); }
 .entry__sources { font-size: var(--t-xs); color: var(--ink-soft); overflow-wrap: anywhere; }
 @media (max-width: 640px) {
@@ -600,3 +602,15 @@ img, svg { max-width: 100%; }
   cursor: pointer;
 }
 .try:hover { border-color: var(--ink); }
+
+/* ---------- A single word's page ---------- */
+
+.word-head {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-stretch: 118%;
+  font-size: clamp(2.5rem, 9vw, 4.5rem);
+  line-height: 1;
+  margin: 0;
+  color: var(--am);
+}

@@ -2,7 +2,9 @@
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
 import { rules } from '../data/rules';
+import { translate as ruleTranslate } from '../lib/translate';
 import {
+  lexicon,
   corpus,
   englishIndex,
   dictionary,
@@ -19,6 +21,27 @@ const words = englishIndex().length;
 const roots = dictionary().length;
 
 const pc = (o: { ok: number; n: number }) => Math.round((100 * o.ok) / o.n);
+
+// Worked examples, rendered into the page rather than produced in the browser:
+// the English is chosen, the Amadunia is whatever the rules actually output, so
+// these cannot drift away from what the tool does. They are also the only part
+// of this page a reader without JavaScript — or a crawler — can see.
+const lex = lexicon() as never;
+const SHOWCASE: [string, string][] = [
+  ['I eat bread', 'Word order is English\u2019s. Nothing is added.'],
+  ['The child did not sleep', 'no goes in front of the predicate, before the tense particle'],
+  ['My friend\u2019s house is big', 'the owner follows the thing owned, and no copula before an adjective'],
+  ['your friend\u2019s child\u2019s name', 'possession chains to any depth, innermost owner last'],
+  ['I want to eat bread', 'two verbs in a row need nothing between them'],
+  ['Where is the market?', 'the question word stands where the answer would'],
+  ['Who are you?', 'and es returns, because the answer is a noun'],
+  ['I read a book well', 'an adverb comes before the object'],
+  ['I read a good book', 'the same word after it is an adjective instead'],
+  ['She will speak tomorrow', 'one particle before the verb carries the future'],
+  ['I see three children', 'after a number the noun stays single'],
+  ['I see the children', 'and doubles when the number is not said'],
+];
+const examples = SHOWCASE.map(([en, why]) => ({ en, why, am: ruleTranslate(lex, en) }));
 
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const ld = [
@@ -75,6 +98,13 @@ const ld = [
 
     <div id="out" style="margin-top:2rem"></div>
 
+    <noscript>
+      <p class="stack__note">
+        The box above needs JavaScript. The worked examples below are rendered into the page and
+        need none.
+      </p>
+    </noscript>
+
     <p class="stack__note try-row">
       Try
       <button class="try" type="button">I want to eat bread</button>
@@ -83,6 +113,27 @@ const ld = [
       <button class="try" type="button">The children did not sleep</button>
       <button class="try" type="button">Who are you?</button>
     </p>
+  </Band>
+
+  <Band name="Worked" count={`${examples.length} rules`}>
+    <h2 class="h-section">What it does, one rule at a time.</h2>
+    <p class="lede">
+      The English is chosen; the Amadunia is whatever the rules produce at build time. If a rule
+      changes, these change with it.
+    </p>
+    <dl class="gloss-list gloss-list--wide" style="margin-top:2rem">
+      {
+        examples.map((e) => (
+          <>
+            <dt>{e.en}</dt>
+            <dd>
+              <span lang="art-x-amadunia">{e.am}</span>
+              <span class="gloss-list__none"> — {e.why}</span>
+            </dd>
+          </>
+        ))
+      }
+    </dl>
   </Band>
 
   <Band name="Measured" count={`${acc.exact} of ${acc.total}`}>
@@ -313,6 +364,9 @@ const ld = [
       ].join('');
     };
 
+    const preset = new URLSearchParams(location.search).get('q');
+    if (preset) q.value = preset;
+
     let timer: number | undefined;
     const run = async () => {
       await load();
@@ -322,6 +376,7 @@ const ld = [
       window.clearTimeout(timer);
       timer = window.setTimeout(run, 120);
     });
+    if (preset) run();
     for (const b of document.querySelectorAll('.try')) {
       b.addEventListener('click', () => {
         q.value = b.textContent?.trim() ?? '';

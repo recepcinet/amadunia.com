@@ -320,7 +320,9 @@ function clause(tg: Tok[], question: boolean): string {
 }
 
 export function translate(lex: Lexicon, sentence: string): string {
-  const text = sentence.trim();
+  // A typed apostrophe and the one a word processor substitutes are the same
+  // apostrophe, and friend\u2019s must not become friend + s.
+  const text = sentence.replace(/[\u2018\u2019\u02BC]/g, "'").trim();
   const parts = text.split(/([.?!,;])/);
   const pieces: [string, string][] = [];
   let buf = '';

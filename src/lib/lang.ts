@@ -1,7 +1,7 @@
 // Build-time readers for the parts of lang/ that are not rendered as pages
 // but parsed into data: the dictionary table, the alphabet in phonology.md,
 // and the status line in the README. Everything here runs at build only.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { translate as ruleTranslate } from './translate';
 
@@ -236,6 +236,81 @@ export function lexicon(): { en: Record<string, string>; pos: Record<string, str
   const en: Record<string, string> = {};
   for (const row of englishIndex()) if (!(row.en in en)) en[row.en] = row.am[0];
   return { en, pos: posIndex() };
+}
+
+/* ---------- Per-root facts, all counted rather than restated ---------- */
+
+/** Which lesson first teaches each root, read off the lessons' own tables. */
+export function taughtIn(): Record<string, { id: string; n: number }> {
+  const out: Record<string, { id: string; n: number }> = {};
+  const names = readdirSync(join(LANG, 'lessons'))
+    .filter((n) => /^lesson-\d+/.test(n))
+    .sort((a, b) => lessonNumber(a) - lessonNumber(b));
+  for (const name of names) {
+    const id = name.replace(/\.md$/, '');
+    const rows = tableRows(readLang(`lessons/${name}`), '## New words');
+    for (const r of rows) {
+      const w = strip(r[0] ?? '');
+      if (/^[a-z-]+$/.test(w) && !(w in out)) out[w] = { id, n: lessonNumber(name) };
+    }
+  }
+  return out;
+}
+
+/**
+ * The frequency table frequency.md publishes, quoted rather than recomputed.
+ * Upstream counts every word inside an Amadunia sentence across the lessons,
+ * texts and phrasebook — 5321 words. This site cannot reproduce that from the
+ * corpus, which holds only the sentences that carry an English gloss, so where
+ * upstream has a number this uses upstream's.
+ */
+export function frequencyTable(): Record<string, { uses: number; share: string; rank: number }> {
+  const rows = tableRows(readLang('dictionary/frequency.md'), '## The forty commonest');
+  const out: Record<string, { uses: number; share: string; rank: number }> = {};
+  for (const r of rows) {
+    const rank = Number(strip(r[0] ?? ''));
+    const word = strip(r[1] ?? '');
+    const uses = Number(strip(r[3] ?? ''));
+    const share = strip(r[4] ?? '');
+    if (word && Number.isFinite(rank) && Number.isFinite(uses)) out[word] = { uses, share, rank };
+  }
+  return out;
+}
+
+/**
+ * A different measure, and labelled as one: how many of the glossed sentence
+ * pairs use a root. The corpus is what this site publishes and what the
+ * translator is scored against, so it is the number a reader here can check.
+ */
+export function pairsUsing(): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const p of corpus()) {
+    const seen = new Set<string>();
+    for (const w of p.am.toLowerCase().match(/[a-z]+(?:-[a-z]+)*/g) ?? []) {
+      const parts = w.split('-');
+      // A doubled noun is one root in its plural form, not two words.
+      const root = parts.length === 2 && parts[0] === parts[1] ? parts[0] : w;
+      for (const piece of root.split('-')) seen.add(piece);
+    }
+    for (const piece of seen) counts[piece] = (counts[piece] ?? 0) + 1;
+  }
+  return counts;
+}
+
+/** Every corpus sentence that uses a root, newest material last. */
+export function sentencesUsing(root: string, limit = 12): Pair[] {
+  const re = new RegExp(`(^|[^a-z-])${root}(-${root})?([^a-z-]|$)`, 'i');
+  return corpus()
+    .filter((p) => re.test(p.am))
+    .sort((a, b) => a.am.split(/\s+/).length - b.am.split(/\s+/).length)
+    .slice(0, limit);
+}
+
+/** The English words the index sends to a root — what a writer would look up. */
+export function englishFor(root: string): string[] {
+  return englishIndex()
+    .filter((r) => r.am.includes(root))
+    .map((r) => r.en);
 }
 
 /* ---------- Alphabet, as phonology.md states it ---------- */
@@ -604,7 +679,6 @@ export function bytes(text: string): number {
 
 /* ---------- Whole-repository readers: full text and parallel corpus ---------- */
 
-import { readdirSync } from 'node:fs';
 
 export interface LangFile {
   rel: string; // e.g. "grammar/tense.md"

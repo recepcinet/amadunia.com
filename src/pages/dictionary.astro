@@ -62,7 +62,7 @@ const ld = [
               {g.entries.map((e) => (
                 <li data-word={`${e.word} ${e.meaning} ${e.sources}`.toLowerCase()}>
                   <span class="stack__inert entry">
-                    <span class="entry__word" lang="art-x-amadunia">{e.word}</span>
+                    <span class="entry__word"><a href={`/dictionary/word/${e.word}/`} lang="art-x-amadunia">{e.word}</a></span>
                     <span class="entry__meaning">{e.meaning}</span>
                     <span class="entry__sources">{e.sources && e.sources !== '—' ? e.sources : 'source not yet documented'}</span>
                   </span>

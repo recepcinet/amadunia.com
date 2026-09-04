@@ -1,0 +1,192 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Band from '../../../components/Band.astro';
+import {
+  dictionary,
+  taughtIn,
+  frequencyTable,
+  pairsUsing,
+  sentencesUsing,
+  englishFor,
+  markAmadunia,
+  corpus,
+  LANG_REPO,
+} from '../../../lib/lang';
+
+export async function getStaticPaths() {
+  return dictionary().map((entry) => ({ params: { root: entry.word }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const root = entry.word;
+
+const lesson = taughtIn()[root];
+const freq = frequencyTable()[root];
+const pairs = pairsUsing()[root] ?? 0;
+const corpusSize = corpus().length;
+const examples = sentencesUsing(root);
+const english = englishFor(root);
+const total = dictionary().length;
+
+// Words in the same thematic group, for somebody who arrived here on one word
+// and wants the rest of the shelf.
+const neighbours = dictionary()
+  .filter((e) => e.group === entry.group && e.word !== root)
+  .slice(0, 12);
+
+const sourceLink = (src: string) => {
+  const id = src.replace(/^.*\//, '').replace(/\.md$/, '');
+  if (src.startsWith('lessons/')) return `/learn/${id}/`;
+  if (src.startsWith('texts/')) return `/texts/${id}/`;
+  if (src.startsWith('grammar/')) return `/grammar/${id}/`;
+  return '/phrasebook/';
+};
+
+const site = Astro.site?.toString() ?? 'https://amadunia.com/';
+
+const ld = [
+  {
+    '@type': 'DefinedTerm',
+    '@id': `${site}dictionary/word/${root}/#term`,
+    name: root,
+    description: entry.meaning,
+    inLanguage: 'art-x-amadunia',
+    termCode: root,
+    inDefinedTermSet: { '@id': `${site}dictionary/#terms` },
+    ...(english.length ? { alternateName: english } : {}),
+  },
+];
+
+const plural = `${root}-${root}`;
+---
+
+<Base
+  title={`${root} — ${entry.meaning}`}
+  description={`${root} means "${entry.meaning}" in Amadunia.${
+    freq ? ` It is the ${freq.rank} commonest root, ${freq.share} of every word written.` : ''
+  }${lesson ? ` Taught in Lesson ${lesson.n}.` : ''} Etymology, examples and the sentences that use it.`}
+  crumbs={[
+    ['Dictionary', '/dictionary/'],
+    [root, `/dictionary/word/${root}/`],
+  ]}
+  ld={ld}
+>
+  <Band name="Word" count={freq ? `${freq.share} of everything written` : `in ${pairs} sentences`}>
+    <p class="word-head"><span lang="art-x-amadunia">{root}</span></p>
+    <p class="lede" style="margin-top:0.5rem">{entry.meaning}</p>
+
+    <dl class="notes">
+      <dt>Where it comes from</dt>
+      <dd>{entry.sources && entry.sources !== '—' ? entry.sources : 'Not yet sourced.'}</dd>
+
+      <dt>Group</dt>
+      <dd>{entry.group}</dd>
+
+      {
+        lesson && (
+          <>
+            <dt>First taught</dt>
+            <dd>
+              <a href={`/learn/${lesson.id}/`}>Lesson {lesson.n}</a>
+            </dd>
+          </>
+        )
+      }
+
+      {
+        freq && (
+          <>
+            <dt>How often it is used</dt>
+            <dd>
+              {freq.uses} times in running Amadunia — {freq.share} of every word written, the
+              {' '}{freq.rank}
+              {freq.rank === 1 ? 'st' : freq.rank === 2 ? 'nd' : freq.rank === 3 ? 'rd' : 'th'}
+              {' '}commonest root. Counted upstream over the lessons, texts and phrasebook;
+              <a href="/dictionary/frequency/"> the whole curve</a>.
+            </dd>
+          </>
+        )
+      }
+
+      <dt>In the published corpus</dt>
+      <dd>
+        {pairs} of the {corpusSize} glossed sentence pairs use it. That is a narrower measure than
+        the one above — only sentences carrying an English translation are in
+        <a href="/data/"> the corpus</a> — and it is the one you can check for yourself.
+      </dd>
+
+      {
+        english.length > 0 && (
+          <>
+            <dt>Looked up in English as</dt>
+            <dd>{english.join(', ')}</dd>
+          </>
+        )
+      }
+
+      <dt>More than one</dt>
+      <dd>
+        <span lang="art-x-amadunia">{plural}</span> — the noun said twice, joined by a hyphen.
+        Nothing is added and nothing inside the word changes, so nothing can become irregular.
+        <a href="/grammar/plural/"> The rule</a>.
+      </dd>
+    </dl>
+  </Band>
+
+  {
+    examples.length > 0 && (
+      <Band name="In use" count={`${examples.length} shown`}>
+        <h2 class="h-section">Sentences that use it.</h2>
+        <p class="lede">
+          Every one written by hand and checked against the rules. Shortest first.
+        </p>
+        <ul class="stack" style="margin-top:2rem">
+          {examples.map((p) => (
+            <li>
+              <span class="stack__inert entry">
+                <span class="entry__word">
+                  {markAmadunia(p.am).map((s) =>
+                    s.am ? <span lang="art-x-amadunia">{s.text}</span> : <span>{s.text}</span>,
+                  )}
+                </span>
+                <span class="entry__meaning">{p.en}</span>
+                <span class="entry__sources">
+                  <a href={sourceLink(p.source)}>{p.source.replace(/\.md$/, '')}</a>
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p class="stack__note" style="margin-top:1.5rem">
+          You can also <a href={`/translate/?q=${encodeURIComponent(entry.meaning.split(/[,;]/)[0])}`}>
+            put English in and get Amadunia out</a>, or take
+          <a href="/data/"> the whole corpus</a> as a file.
+        </p>
+      </Band>
+    )
+  }
+
+  {
+    neighbours.length > 0 && (
+      <Band name="Nearby" count={entry.group}>
+        <h2 class="h-section">The rest of the shelf.</h2>
+        <ul class="stack" style="margin-top:2rem">
+          {neighbours.map((e) => (
+            <li>
+              <a href={`/dictionary/word/${e.word}/`}>
+                <span class="stack__title" lang="art-x-amadunia">
+                  {e.word}
+                </span>
+                <span class="stack__note">{e.meaning}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="stack__note" style="margin-top:1.5rem">
+          <a href="/dictionary/">All {total} roots</a>, or
+          <a href={`${LANG_REPO}/blob/main/dictionary/dictionary.md`}> the source table</a>.
+        </p>
+      </Band>
+    )
+  }
+</Base>
