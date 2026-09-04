@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Masthead from '../components/Masthead.astro';
 import Colophon from '../components/Colophon.astro';
+import { countEndpoint } from '../lib/analytics';
 
 interface Props {
   title: string;
@@ -115,6 +116,16 @@ const jsonLd = {
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@85..125,400..700&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&display=swap"
     />
+    {
+      countEndpoint && (
+        <script
+          data-goatcounter={countEndpoint}
+          data-goatcounter-settings='{"allow_local": false}'
+          async
+          src="https://gc.zgo.at/count.js"
+        />
+      )
+    }
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>

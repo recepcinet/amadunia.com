@@ -64,6 +64,24 @@ is marked `lang="art-x-amadunia"` (BCP 47 for a constructed language with no cod
 colour follows from that. Archivo for display, Newsreader for reading, on paper `#faf7f0`.
 Colour pairs are checked against WCAG AA; tokens are at the top of `src/styles/global.css`.
 
+## Counting readers
+
+One third-party script, [GoatCounter](https://www.goatcounter.com), set in
+[`src/lib/analytics.ts`](src/lib/analytics.ts). It sets no cookie, keeps no IP
+address and follows nobody between sites, which is why the site carries no
+consent banner. Setting the constant there to `''` removes the script from
+every page; nothing else in the site depends on it.
+
+What it can see is the point of it, and what it cannot see is worth saying:
+
+- It counts by running JavaScript in a browser, and crawlers do not run
+  JavaScript. So GPTBot, ClaudeBot and Googlebot are absent from it rather than
+  miscounted, and roughly, what it reports is people.
+- Which also means it cannot show you those crawlers at all. That lives in
+  Google Search Console's crawl-stats report, or in something that sees every
+  request server-side — which GitHub Pages is not.
+- It misses readers who block scripts, so the number is a floor, not a total.
+
 ## Deploying
 
 `.github/workflows/deploy.yml` builds on every push to `main` and publishes to GitHub Pages.
