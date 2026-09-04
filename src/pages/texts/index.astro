@@ -51,7 +51,7 @@ const claims = textsClaims();
     </ul>
   </Band>
 
-  <Band name="Why texts" count={openGaps > 0 ? `${openGaps} open gaps` : undefined}>
+  <Band name="Why texts" count={openGaps > 0 ? `${openGaps} open gap${openGaps === 1 ? '' : 's'}` : undefined}>
     <h2 class="h-section">A lesson shows what the language can do. A text finds out what it cannot.</h2>
     <p class="lede">
       The first story turned up four things thirteen lessons had missed — no word for <em>and</em>,

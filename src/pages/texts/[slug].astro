@@ -44,7 +44,7 @@ const ld = [
         <span class="rail__name"><a href="/texts/">Texts</a></span>
         <span class="rail__count">
           {roots && `${roots.used} of ${roots.of} roots`}
-          {gaps.open > 0 && ` · ${gaps.open} open gaps`}
+          {gaps.open > 0 && ` · ${gaps.open} open gap${gaps.open === 1 ? '' : 's'}`}
         </span>
       </p>
       <div>
