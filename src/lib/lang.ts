@@ -211,11 +211,16 @@ export function posIndex(): Record<string, string> {
   ]);
   const out: Record<string, string> = {};
   let group = '';
-  for (const line of body.split('\n')) {
+  // The roots table ends at the first prose heading. What follows — the
+  // counting section and the blocked candidates — holds rows in the same shape,
+  // and reading them would overwrite a real root: hi is hello here and a
+  // rejected word for sun down there.
+  const table = body.split(/^## /m)[0];
+  for (const line of table.split('\n')) {
     const head = line.match(/^\|\s*\*\*(.+?)\*\*/);
     if (head) { group = head[1].split('**')[0].trim(); continue; }
     const row = line.match(/^\|\s*([a-z-]+)\s*\|\s*([^|]+?)\s*\|/);
-    if (!row || row[1] === 'word') continue;
+    if (!row || row[1] === 'word' || /^-+$/.test(row[1]) || row[1] in out) continue;
     const [, word, gloss] = row;
     out[word] =
       gloss.startsWith('to ') || gloss.startsWith('can,') || gloss.startsWith('must,')
