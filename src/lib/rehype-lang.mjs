@@ -81,36 +81,79 @@ const hasLink = (node) =>
 const text = (node) =>
   node.type === 'text' ? node.value : (node.children ?? []).map(text).join('');
 
-function rewriteHref(href) {
+const LANG_REPO = 'https://github.com/recepcinet/amadunia-lang';
+
+// Where each folder's index lives on the site.
+const SECTION = {
+  '': '/about/',
+  grammar: '/grammar/',
+  lessons: '/learn/',
+  texts: '/texts/',
+  dictionary: '/dictionary/',
+  writing: '/writing/',
+};
+
+// A file whose whole content is folded into another page, so a link to it
+// belongs on that page rather than on a route of its own.
+const FOLDED = new Set(['dictionary/dictionary.md', 'dictionary/index-english.md']);
+
+/**
+ * Resolve an upstream link against the file it appears in, then map the
+ * repository path to a site route. Guessing from the last two segments used to
+ * send `README.md` beside a1-checklist.md to /about/ and `../check.py` to a
+ * 404; resolving first means the answer comes from the real path.
+ */
+function rewriteHref(href, fromDir = '') {
   if (!href || /^(https?:|mailto:|#)/.test(href)) return href;
   const [path, hash = ''] = href.split('#');
   const anchor = hash ? `#${hash}` : '';
-  const base = path.split('/').pop() ?? '';
-  const dir = path.includes('/') ? path.split('/').slice(-2, -1)[0] : '';
+  if (!path) return href;
 
-  if (/^\.\.\/grammar\/?$/.test(path)) return `/grammar/${anchor}`;
-  if (/^\.\.\/lessons\/?$/.test(path)) return `/learn/${anchor}`;
-  if (/^\.\.\/dictionary\/?$/.test(path)) return `/dictionary/${anchor}`;
-
-  // A folder's README is its index; the site's equivalent is that section.
-  const SECTION = { grammar: '/grammar/', lessons: '/learn/', texts: '/texts/', dictionary: '/dictionary/', writing: '/writing/' };
-
-  if (base.endsWith('.md')) {
-    const slug = base.slice(0, -3);
-    if (slug === 'README') return `${SECTION[dir] ?? '/about/'}${anchor}`;
-    if (slug.startsWith('lesson-')) return `/learn/${slug}/${anchor}`;
-    if (slug.startsWith('story-') || slug.startsWith('text-')) return `/texts/${slug}/${anchor}`;
-    if (slug === 'dictionary' || slug === 'index-english') return `/dictionary/${anchor}`;
-    if (dir === 'dictionary') return `/dictionary/${slug}/${anchor}`;
-    if (slug === 'phrasebook') return `/phrasebook/${anchor}`;
-    if (dir === 'writing') return `/writing/${slug}/${anchor}`;
-    return `/grammar/${slug}/${anchor}`;
+  // Resolve ./ and ../ against the folder the document lives in.
+  const parts = fromDir ? fromDir.split('/') : [];
+  for (const seg of path.split('/')) {
+    if (seg === '' || seg === '.') continue;
+    if (seg === '..') parts.pop();
+    else parts.push(seg);
   }
-  return href;
+  const rel = parts.join('/');
+  const trailing = path.endsWith('/');
+
+  // A folder link, with or without the slash: grammar/, ../texts/, lessons.
+  if (trailing || !rel.includes('.')) {
+    const section = SECTION[rel];
+    if (section) return `${section}${anchor}`;
+  }
+
+  if (rel.endsWith('.md')) {
+    const dir = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : '';
+    const slug = rel.slice(rel.lastIndexOf('/') + 1, -3);
+    if (slug === 'README') {
+      const section = SECTION[dir];
+      if (section) return `${section}${anchor}`;
+    } else if (FOLDED.has(rel)) {
+      return `/dictionary/${anchor}`;
+    } else if (rel === 'phrasebook.md') {
+      return `/phrasebook/${anchor}`;
+    } else if (rel === 'GUARANTEES.md') {
+      return `/guarantees/${anchor}`;
+    } else if (dir && SECTION[dir]) {
+      return `${SECTION[dir]}${slug}/${anchor}`;
+    }
+  }
+
+  // Everything else is a repository file with no page: check.py, CONTRIBUTING.md,
+  // the generated CSV. Send it to the file it actually is.
+  return `${LANG_REPO}/blob/main/${rel}${anchor}`;
 }
 
 export default function rehypeLang() {
-  return (tree) => {
+  return (tree, file) => {
+    // Links resolve against the folder the source file lives in.
+    const from = String(file?.path ?? '');
+    const i = from.indexOf('/lang/');
+    const rel = i >= 0 ? from.slice(i + 6) : '';
+    const fromDir = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : '';
     const kids = tree.children ?? [];
 
     // 1 + 2: drop the H1 and the status line, wherever they sit at top level.
@@ -133,7 +176,7 @@ export default function rehypeLang() {
     const walk = (node) => {
       if (node.type !== 'element' && node.type !== 'root') return;
       if (node.tagName === 'a' && node.properties?.href) {
-        node.properties.href = rewriteHref(String(node.properties.href));
+        node.properties.href = rewriteHref(String(node.properties.href), fromDir);
       }
       if (node.tagName === 'table') tagTable(node);
       for (const c of node.children ?? []) walk(c);

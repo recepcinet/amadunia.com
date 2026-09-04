@@ -164,11 +164,15 @@ export function wantedWords(): Wanted[] {
     .map((r) => {
       const link = r[1]?.match(/\[([^\]]+)\]\(([^)]+)\)/);
       const id = link?.[2].match(/([^/]+)\.md$/)?.[1];
-      const href = id
-        ? id === 'phrasebook'
+      // The list is mostly texts, but a gap can be found by a lesson or the
+      // phrasebook, and one was found by a question nobody wrote down at all.
+      const href = !id
+        ? undefined
+        : id === 'phrasebook'
           ? '/phrasebook/'
-          : `/texts/${id}/`
-        : undefined;
+          : id.startsWith('lesson-')
+            ? `/learn/${id}/`
+            : `/texts/${id}/`;
       const sentence = (r[2] ?? '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/\*\*/g, '').trim();
       return { word: strip(r[0]), foundBy: link ? link[1] : strip(r[1] ?? ''), foundByHref: href, sentence };
     });
