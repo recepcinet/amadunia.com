@@ -79,6 +79,11 @@ const unreached = demand.rows.filter((r) => r.pages === 0);
 
   <Band name="At a glance" count={`${rules.length} rules`}>
     <h2 class="h-section">Every rule holds. That is the whole design.</h2>
+    <p class="stack__note" style="margin-top:1rem">
+      {rules.length} claims across the {docs.length} pages above — a page can settle more than one
+      thing, as tense.md settles both the particle and the unmarked present. The build fails if a
+      page here is not covered by one of them.
+    </p>
     <ol class="rules" style="margin-top:1.5rem">
       {
         rules.map((rule) => (
@@ -181,8 +186,8 @@ const unreached = demand.rows.filter((r) => r.pages === 0);
     <div class="panel" style="margin-top:2rem">
       <p>
         Decisions are made in the open, in the
-        <a href={`${LANG_REPO}/issues`}>language repository</a>, and the four with a briefing are
-        listed above.
+        <a href={`${LANG_REPO}/issues`}>language repository</a>, and the{' '}
+        {spell(openProposals.length)} with a briefing are listed above.
       </p>
     </div>
   </Band>
