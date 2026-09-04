@@ -20,7 +20,7 @@
  * Set to '' to serve no script at all; the site works exactly the same without
  * it, and one empty string is the whole opt-out.
  */
-export const GOATCOUNTER = 'amadunia';
+export const GOATCOUNTER = 'utopiarc';
 
 export const countEndpoint = GOATCOUNTER
   ? `https://${GOATCOUNTER}.goatcounter.com/count`
