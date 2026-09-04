@@ -10,6 +10,12 @@ const doc = z.object({}).passthrough();
 export const collections = {
   grammar: defineCollection({ loader: glob({ pattern: ['*.md', '!README.md'], base: './lang/grammar' }), schema: doc }),
   lessons: defineCollection({ loader: glob({ pattern: 'lesson-*.md', base: './lang/lessons' }), schema: doc }),
+  // Prose in lessons/ that is not a lesson: the reading ladder, and whatever
+  // joins it. Rendered under /learn/ beside the lessons themselves.
+  lessonDocs: defineCollection({
+    loader: glob({ pattern: ['*.md', '!lesson-*.md', '!README.md'], base: './lang/lessons' }),
+    schema: doc,
+  }),
   texts: defineCollection({ loader: glob({ pattern: ['*.md', '!README.md'], base: './lang/texts' }), schema: doc }),
   // Prose in dictionary/ that rewards reading: how the words are distributed,
   // and the briefing for the next three hundred. The word list itself is read

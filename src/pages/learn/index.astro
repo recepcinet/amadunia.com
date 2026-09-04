@@ -2,13 +2,14 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Band from '../../components/Band.astro';
-import { titleOf, lessonNumber, splitLessonTitle, newWordsOf } from '../../lib/lang';
+import { titleOf, lessonNumber, splitLessonTitle, newWordsOf, readingLadder } from '../../lib/lang';
 import { dictionary } from '../../lib/lang';
 
 const lessons = (await getCollection('lessons'))
   .map((e) => ({ id: e.id, n: lessonNumber(e.id), ...splitLessonTitle(titleOf(e.body ?? '')), words: newWordsOf(e.body ?? '') }))
   .sort((a, b) => a.n - b.n);
 const roots = dictionary().length;
+const ladder = readingLadder();
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const ld = [
   {
@@ -48,6 +49,25 @@ const ld = [
       }
     </ol>
   </Band>
+
+  {
+    ladder.firstLessonShare && (
+      <Band name="Reading" count={`${ladder.firstLessonShare} after one lesson`}>
+        <h2 class="h-section">When you can start reading.</h2>
+        <p class="lede">
+          After the first lesson you already know {ladder.firstLessonShare} of every word in the
+          texts — the frequency curve doing the work, since ten roots carry a third of everything
+          written.
+          {ladder.earliest && ladder.earliestText &&
+            ` ${ladder.earliestText} opens after Lesson ${ladder.earliest}, well before any other.`}
+        </p>
+        <p style="margin-top:1.5rem">
+          <a href="/learn/reading-ladder/">See the reading ladder</a> — measured from the course
+          itself, lesson by lesson.
+        </p>
+      </Band>
+    )
+  }
 
   <Band name="Before you start">
     <h2 class="h-section">Two pages worth reading first.</h2>

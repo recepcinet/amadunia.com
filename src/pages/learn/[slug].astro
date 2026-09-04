@@ -5,13 +5,19 @@ import { titleOf, lessonNumber, splitLessonTitle, LANG_REPO } from '../../lib/la
 
 export async function getStaticPaths() {
   const docs = (await getCollection('lessons')).sort((a, b) => lessonNumber(a.id) - lessonNumber(b.id));
-  return docs.map((entry, i) => ({
-    params: { slug: entry.id },
-    props: { entry, prev: docs[i - 1] ?? null, next: docs[i + 1] ?? null },
-  }));
+  const extras = await getCollection('lessonDocs');
+  return [
+    ...docs.map((entry, i) => ({
+      params: { slug: entry.id },
+      props: { entry, prev: docs[i - 1] ?? null, next: docs[i + 1] ?? null },
+    })),
+    // Prose that lives with the lessons but is not one of them.
+    ...extras.map((entry) => ({ params: { slug: entry.id }, props: { entry, prev: null, next: null } })),
+  ];
 }
 
 const { entry, prev, next } = Astro.props;
+const isLesson = /^lesson-\d/.test(entry.id);
 const { label, name } = splitLessonTitle(titleOf(entry.body ?? ''));
 const { Content } = await render(entry);
 const nameOf = (e: typeof entry) => splitLessonTitle(titleOf(e.body ?? '')).name;
@@ -33,22 +39,33 @@ const ld = [
 ];
 ---
 
-<Base title={`${label}: ${name}`} description={`${label} of Amadunia — ${name}. New words, the pattern, a conversation, and practice.`} ld={ld} crumbs={[['Learn', '/learn/'], [label, `/learn/${entry.id}/`]]}>
+<Base
+  title={isLesson ? `${label}: ${name}` : name}
+  description={
+    isLesson
+      ? `${label} of Amadunia — ${name}. New words, the pattern, a conversation, and practice.`
+      : `${name} — how much of the writing in Amadunia a learner can read after each lesson, measured from the course itself.`
+  }
+  ld={isLesson ? ld : undefined}
+  crumbs={[['Learn', '/learn/'], [isLesson ? label : name, `/learn/${entry.id}/`]]}
+>
   <section class="band">
     <div class="wrap band__grid">
       <p class="rail">
         <span class="rail__name"><a href="/learn/">Learn</a></span>
-        <span class="rail__count">{label}</span>
+        <span class="rail__count">{isLesson ? label : 'measured'}</span>
       </p>
       <div>
         <h1 class="h-section">{name}</h1>
         <article class="prose">
           <Content />
         </article>
+        {isLesson && (
         <nav class="pager" aria-label="Lessons">
           {prev ? <a href={`/learn/${prev.id}/`}>Previous: {nameOf(prev)}</a> : <span />}
           {next ? <a href={`/learn/${next.id}/`}>Next: {nameOf(next)}</a> : <a href="/dictionary/">Next: the dictionary</a>}
         </nav>
+        )}
         <p class="source">
           Source: <a href={`${LANG_REPO}/blob/main/lessons/${entry.id}.md`}>lessons/{entry.id}.md</a> in the language repository.
         </p>

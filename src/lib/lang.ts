@@ -361,6 +361,26 @@ export function textKinds(): Record<string, string> {
   return out;
 }
 
+/**
+ * The reading ladder's own headline figures: what share of the texts a learner
+ * knows after the first lesson, and the earliest lesson after which any text
+ * becomes readable. Parsed from its tables so they cannot drift from the page.
+ */
+export function readingLadder(): { firstLessonShare?: string; earliest?: number; earliestText?: string } {
+  let body: string;
+  try {
+    body = readLang('lessons/reading-ladder.md');
+  } catch {
+    return {};
+  }
+  const firstLessonShare = tableRows(body, '## After each lesson')[0]?.[1]?.trim();
+  const opens = tableRows(body, '## When each text opens')
+    .map((r) => ({ text: strip(r[0] ?? ''), after: Number(r[1]) }))
+    .filter((r) => r.text && Number.isFinite(r.after))
+    .sort((a, b) => a.after - b.after);
+  return { firstLessonShare, earliest: opens[0]?.after, earliestText: opens[0]?.text };
+}
+
 /* ---------- Lessons ---------- */
 
 export function lessonNumber(id: string): number {
