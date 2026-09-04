@@ -570,28 +570,33 @@ img, svg { max-width: 100%; }
 }
 .notes dd { margin: 0.2rem 0 0; color: var(--ink-soft); max-width: var(--measure); }
 
-/* ---------- Translate: an English word above its roots ---------- */
+/* ---------- Translate ---------- */
 
-.gloss-list {
-  display: grid;
-  grid-template-columns: 8rem minmax(0, 1fr);
-  gap: 0 1.5rem;
-}
-.gloss-list dt {
-  border-top: 1px solid var(--rule);
-  padding-block: 0.75rem;
-  margin: 0;
-}
-.gloss-list dd {
-  border-top: 1px solid var(--rule);
-  padding-block: 0.75rem;
-  margin: 0;
+.result {
   font-family: var(--sans);
   font-weight: 600;
-  color: var(--am);
-  max-width: none;
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  line-height: 1.3;
+  margin: 0;
+  min-height: 1.3em;
 }
-.gloss-list dd:last-of-type, .gloss-list dt:last-of-type { border-bottom: 1px solid var(--rule); }
-.gloss-list__none { font-family: var(--serif); font-weight: 400; color: var(--ink-soft); }
-.gloss-list dd.gloss-list__none { font-family: var(--serif); font-weight: 400; color: var(--ink-soft); }
-@media (max-width: 640px) { .gloss-list { grid-template-columns: 6rem minmax(0, 1fr); } }
+/* A word the language has no root for stays English, so it stays grey. */
+.result .gap {
+  color: var(--ink-soft);
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+}
+.result + .stack__note { margin-top: 0.9rem; }
+.result + .stack__note + .stack__note { margin-top: 0.4rem; }
+
+.try-row { margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; }
+.try {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+.try:hover { border-color: var(--ink); }

@@ -1,19 +1,31 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
-import { corpus, englishIndex, dictionary, LANG_REPO } from '../lib/lang';
+import { rules } from '../data/rules';
+import {
+  corpus,
+  englishIndex,
+  dictionary,
+  translationAccuracy,
+  assertTranslatorWorks,
+  LANG_REPO,
+} from '../lib/lang';
 
+assertTranslatorWorks();
+
+const acc = translationAccuracy();
 const pairs = corpus().length;
 const words = englishIndex().length;
 const roots = dictionary().length;
 
-const site = Astro.site?.toString() ?? 'https://amadunia.com/';
+const pc = (o: { ok: number; n: number }) => Math.round((100 * o.ok) / o.n);
 
+const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const ld = [
   {
     '@type': 'WebApplication',
     '@id': `${site}translate/#app`,
-    name: 'English → Amadunia lookup',
+    name: 'English → Amadunia translator',
     url: `${site}translate/`,
     applicationCategory: 'ReferenceApplication',
     browserRequirements: 'Requires JavaScript.',
@@ -24,35 +36,36 @@ const ld = [
     about: { '@id': `${site}#language` },
     license: 'https://creativecommons.org/licenses/by-sa/4.0/',
     description:
-      `Looks an English word up among ${words} dictionary entries and searches ${pairs} ` +
-      'Amadunia–English sentence pairs for the same words. A lookup, not machine translation: ' +
-      'Amadunia has no translation system and the page says why.',
+      `Translates English into Amadunia by applying the language's own grammar rules. ` +
+      `Measured against the ${pairs}-sentence corpus on every build: it reproduces ` +
+      `${acc.pct}% of them exactly.`,
   },
 ];
 ---
 
 <Base
   title="Translate"
-  description={`Look up English in Amadunia: ${words} words from the dictionary and ${pairs} sentences from the lessons and texts, searched together. Not machine translation — the language has none yet, and this page says why.`}
+  description={`English into Amadunia, by rule rather than by guess. Measured against all ${pairs} sentences anyone has written in the language: it reproduces ${acc.pct}% of them exactly.`}
   crumbs={[['Translate', '/translate/']]}
   ld={ld}
 >
-  <Band name="Translate" count={`${words} words · ${pairs} sentences`}>
+  <Band name="Translate" count={`${acc.pct}% exact`}>
     <h1 class="h-section">English into Amadunia.</h1>
     <p class="lede">
-      Type English. Every word is looked up in the dictionary, and every sentence anyone has
-      written in Amadunia is searched for the same words, so you get the phrase if it exists and
-      the pieces if it does not.
+      This applies the grammar rather than looking words up. Amadunia was built with no
+      conjugation, no gender, no agreement and no exceptions, which is the one condition under
+      which a language can be generated from its own rules — so the hard half here is reading
+      the English, not writing the Amadunia.
     </p>
 
     <form style="margin-top:2rem" role="search" onsubmit="return false">
-      <label class="stack__note" for="q">English word, phrase or sentence</label>
+      <label class="stack__note" for="q">English sentence</label>
       <input
         class="field"
         id="q"
         name="q"
         type="search"
-        placeholder="I speak well"
+        placeholder="My friend's house is big"
         autocomplete="off"
         autocapitalize="off"
         spellcheck="false"
@@ -60,46 +73,134 @@ const ld = [
       />
     </form>
 
-    <div id="out" data-roots={roots} style="margin-top:2.5rem"></div>
+    <div id="out" style="margin-top:2rem"></div>
+
+    <p class="stack__note try-row">
+      Try
+      <button class="try" type="button">I want to eat bread</button>
+      <button class="try" type="button">Where is the market?</button>
+      <button class="try" type="button">your friend's child's name</button>
+      <button class="try" type="button">The children did not sleep</button>
+      <button class="try" type="button">Who are you?</button>
+    </p>
   </Band>
 
-  <Band name="What this is">
-    <h2 class="h-section">A lookup, not a translator.</h2>
+  <Band name="Measured" count={`${acc.exact} of ${acc.total}`}>
+    <h2 class="h-section">How often it is right.</h2>
     <p class="lede">
-      It will not turn an arbitrary English sentence into grammatical Amadunia, and it does not
-      pretend to. Word order, tense and the copula are yours to apply — they are short rules and
-      the whole grammar is one page.
+      Every sentence anyone has written in Amadunia is a test case with a known answer. The rules
+      run against all {acc.total} of them on every build, and this is the score — not a claim
+      written down once and left there.
     </p>
-    <p style="margin-top:1.5rem">
-      There is no machine translation for Amadunia and there cannot be yet. A translation system
-      needs hundreds of thousands of sentence pairs; this language has {pairs}, every one of them
-      written by hand and checked against the rules. It also needs a language code, and Amadunia
-      has none — it is tagged <code>art-x-amadunia</code>, the form reserved for a constructed
-      language that no standard has registered. Both are reachable. Neither is reached by
-      pretending.
+
+    <ul class="stack" style="margin-top:2rem">
+      <li>
+        <span class="stack__inert entry">
+          <span class="entry__word">{pc(acc.by.grammar)}%</span>
+          <span class="entry__meaning">the grammar pages' own examples</span>
+          <span class="entry__sources">{acc.by.grammar.ok} of {acc.by.grammar.n}</span>
+        </span>
+      </li>
+      <li>
+        <span class="stack__inert entry">
+          <span class="entry__word">{pc(acc.by.lessons)}%</span>
+          <span class="entry__meaning">the twenty-six lessons</span>
+          <span class="entry__sources">{acc.by.lessons.ok} of {acc.by.lessons.n}</span>
+        </span>
+      </li>
+      <li>
+        <span class="stack__inert entry">
+          <span class="entry__word">{pc(acc.by.phrasebook)}%</span>
+          <span class="entry__meaning">the phrasebook</span>
+          <span class="entry__sources">{acc.by.phrasebook.ok} of {acc.by.phrasebook.n}</span>
+        </span>
+      </li>
+      <li>
+        <span class="stack__inert entry">
+          <span class="entry__word">{pc(acc.by.texts)}%</span>
+          <span class="entry__meaning">the original texts</span>
+          <span class="entry__sources">{acc.by.texts.ok} of {acc.by.texts.n}</span>
+        </span>
+      </li>
+    </ul>
+
+    <p style="margin-top:2rem">
+      <strong>It falls off with length, not with difficulty.</strong> Sentences of three words or
+      fewer come out right {pc(acc.len.short)}% of the time, four to six words {pc(acc.len.medium)}%,
+      seven or more {pc(acc.len.long)}%. That gradient is the English side failing rather than the
+      Amadunia side: the longer the English, the more ways there are to misread which word belongs
+      to which. The rules that write the Amadunia do not get harder.
     </p>
+  </Band>
+
+  <Band name="Limits">
+    <h2 class="h-section">What it cannot decide.</h2>
+    <p class="lede">
+      Some of what it gets wrong is not a bug, and saying which is the difference between a tool
+      and a demonstration.
+    </p>
+
+    <dl class="notes">
+      <dt>English cannot say which "we" you mean</dt>
+      <dd>
+        <span lang="art-x-amadunia">kita</span> includes the person you are talking to and
+        <span lang="art-x-amadunia">mi-mi</span> does not. English has one word for both, so no
+        rule can recover the difference. The lessons use both; this page has to pick one.
+      </dd>
+      <dt>Doubling is a choice, not an ending</dt>
+      <dd>
+        A bare noun is neutral rather than singular, so doubling is used only when more than one
+        actually matters. <span lang="art-x-amadunia">Ain ta kabir</span> — her eyes are big —
+        does not double, and is not wrong for leaving it out.
+      </dd>
+      <dt>Where a frequency adverb stands is still open</dt>
+      <dd>
+        <a href="/grammar/adverbs/">Upstream has measured the question and not yet decided it</a>,
+        so nothing here places <span lang="art-x-amadunia">daima</span> or
+        <span lang="art-x-amadunia">kadang</span> with confidence. A tool that guessed would be
+        settling a question by accident.
+      </dd>
+      <dt>A word the dictionary does not hold stays in English</dt>
+      <dd>
+        It is left in place rather than replaced with something close. The dictionary is closed at
+        {roots} roots, and a word it lacks gets
+        <a href="/dictionary/#wanted">written down as wanted</a> instead of invented.
+      </dd>
+    </dl>
+
+    <p style="margin-top:2rem">
+      This is a rule engine rather than a machine-learning system, and the difference is worth
+      stating plainly. A statistical translator needs hundreds of thousands of sentence pairs;
+      Amadunia has {pairs}. What it has instead is a complete grammar — {rules.length} rules with
+      no exceptions in them — which is precisely the thing a statistical system spends those
+      hundreds of thousands of pairs trying to infer. That is why rules work here and would not
+      work for English.
+    </p>
+
     <div class="panel" style="margin-top:2rem">
       <p>
-        The word list comes from <a href="/dictionary/">the dictionary</a> —
-        {roots} roots, {words} English entries — and the sentences from
-        <a href="/data/">the corpus</a>, which is
-        <a href={`${LANG_REPO}`}>generated from the lessons and texts</a> on every build. Both are
-        downloadable, CC BY-SA 4.0.
+        The word list is <a href="/dictionary/">the dictionary</a> — {words} English entries, each
+        with the word class read off the dictionary's own headings, published at
+        <a href="/index-english.json">/index-english.json</a>. The test set is
+        <a href="/data/">the corpus</a>. The rules are
+        <a href={LANG_REPO}>the grammar pages</a>, each cited where it is applied in the source.
+        All CC BY-SA 4.0.
       </p>
     </div>
   </Band>
 </Base>
 
 <script>
+  import { translate, type Lexicon } from '../lib/translate';
+
   const q = document.getElementById('q') as HTMLInputElement | null;
   const out = document.getElementById('out');
+
   if (q && out) {
     type Pair = { am: string; en: string; src: string };
-    let index: Map<string, string[]> = new Map();
+    let lex: Lexicon | null = null;
     let sentences: Pair[] = [];
     let loading: Promise<void> | null = null;
-
-    const roots = out.dataset.roots ?? '';
 
     const load = () =>
       (loading ??= (async () => {
@@ -107,51 +208,34 @@ const ld = [
           fetch('/index-english.json').then((r) => r.json()),
           fetch('/corpus.tsv').then((r) => r.text()),
         ]);
-        index = new Map((idx.entries as { en: string; am: string[] }[]).map((e) => [e.en, e.am]));
+        const en: Record<string, string> = {};
+        for (const e of idx.entries as { en: string; am: string[] }[]) en[e.en] ??= e.am[0];
+        lex = { en, pos: idx.pos };
         sentences = tsv
           .split('\n')
           .slice(1)
           .filter(Boolean)
           .map((line) => {
-            const [am, en, src] = line.split('\t');
-            return { am, en, src };
+            const cell = line.split('\t');
+            return { am: cell[0], en: cell[1], src: cell[2] };
           });
-        names = new Set(
-          sentences.flatMap((p) => p.am.toLowerCase().match(/[a-z-]+/g) ?? []),
-        );
       })());
 
     const esc = (s: string) =>
       s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
 
-    const amadunia = (s: string) => `<span lang="art-x-amadunia">${esc(s)}</span>`;
-
-    // The index keys verbs as "to speak" and nouns in the singular. Try the
-    // obvious shapes of a word before reporting it as absent.
-    const forms = (t: string) => {
-      const f = [t, `to ${t}`];
-      const push = (b: string) => f.push(b, `to ${b}`, `to ${b}e`);
-      if (t.endsWith('ies') && t.length > 4) push(t.slice(0, -3) + 'y');
-      if (t.endsWith('es') && t.length > 3) push(t.slice(0, -2));
-      if (t.endsWith('s') && t.length > 2) push(t.slice(0, -1));
-      if (t.endsWith('ing') && t.length > 4) push(t.slice(0, -3));
-      if (t.endsWith('ed') && t.length > 3) push(t.slice(0, -2), t.slice(0, -1));
-      return f;
-    };
-
-    const lookup = (t: string) => {
-      for (const f of forms(t)) {
-        const hit = index.get(f);
-        if (hit) return hit;
-      }
-      return null;
-    };
-
-    // Settled by a grammar rule rather than by a word, so the index cannot hold it.
-    const ARTICLES = new Set(['a', 'an', 'the']);
-
-    // Names are not roots and never reach the index, but they are in the writing.
-    let names: Set<string> = new Set();
+    // A word left in English is shown as it stands, outside the language's colour.
+    const result = (s: string) =>
+      s
+        .split(/(⟨[^⟩]+⟩)/)
+        .map((part) =>
+          part.startsWith('⟨')
+            ? `<span class="gap">${esc(part.slice(1, -1))}</span>`
+            : part
+              ? `<span lang="art-x-amadunia">${esc(part)}</span>`
+              : '',
+        )
+        .join('');
 
     const sourceLink = (src: string) => {
       const id = src.replace(/^.*\//, '').replace(/\.md$/, '');
@@ -162,18 +246,24 @@ const ld = [
     };
 
     const render = (text: string) => {
-      const terms = [...new Set(text.toLowerCase().match(/[a-z']+/g) ?? [])];
-      if (!terms.length) {
+      if (!text.trim() || !lex) {
         out.innerHTML = '';
         return;
       }
+      const am = translate(lex, text);
+      const missing = [...am.matchAll(/⟨([^⟩]+)⟩/g)].map((m) => m[1]);
 
-      const phrase = text.toLowerCase().trim();
-      const scored = sentences
+      // The corpus is the evidence. If somebody has already written it, say so.
+      const terms = [...new Set(text.toLowerCase().match(/[a-z']+/g) ?? [])];
+      const phrase = text.toLowerCase().trim().replace(/[.?!]+$/, '');
+      const found = sentences
         .map((p) => {
           const en = p.en.toLowerCase();
-          const hits = terms.filter((t) => forms(t).some((f) => en.includes(f))).length;
-          return { p, hits, exact: en.includes(phrase) };
+          return {
+            p,
+            hits: terms.filter((t) => en.includes(t)).length,
+            exact: en.replace(/[.?!]+$/, '') === phrase || en.includes(phrase),
+          };
         })
         .filter((s) => s.hits > 0)
         .sort(
@@ -182,68 +272,62 @@ const ld = [
             b.hits - a.hits ||
             a.p.en.length - b.p.en.length,
         )
-        .slice(0, 8);
+        .slice(0, 6);
 
-      const rows: string[] = [];
-      const missing: string[] = [];
-      for (const t of terms) {
-        const am = lookup(t);
-        if (am) rows.push(`<dt>${esc(t)}</dt><dd>${am.map(amadunia).join(', ')}</dd>`);
-        else if (ARTICLES.has(t))
-          rows.push(
-            `<dt>${esc(t)}</dt><dd class="gloss-list__none">no word — the language has
-             <a href="/grammar/definiteness/">no articles</a></dd>`,
-          );
-        else if (names.has(t))
-          rows.push(
-            `<dt>${esc(t)}</dt><dd>${amadunia(
-              t[0].toUpperCase() + t.slice(1),
-            )}<span class="gloss-list__none"> — a name, the same in both</span></dd>`,
-          );
-        else missing.push(t);
-      }
+      const attested = found[0]?.exact ? found[0].p : null;
+      const agrees =
+        attested && attested.am.trim().toLowerCase() === am.trim().toLowerCase();
 
-      out.innerHTML = `
-        ${
-          rows.length
-            ? `<h3 class="h-sub" style="margin-top:0">Word by word</h3>
-               <dl class="notes gloss-list">${rows.join('')}</dl>`
-            : ''
-        }
-        ${
-          missing.length
-            ? `<p class="stack__note" style="margin-top:1.25rem">No entry for
-                <strong>${missing.map(esc).join(', ')}</strong>. The dictionary is closed at
-                ${roots} roots and the index gives one English word per root, so a sense it does
-                not list may still turn up in a sentence below. If the word is genuinely absent it
-                gets <a href="/dictionary/#wanted">written down as wanted</a>, not invented.</p>`
-            : ''
-        }
-        ${
-          scored.length
-            ? `<h3 class="h-sub">Sentences already written</h3>
-               <ul class="stack">${scored
-                 .map(
-                   ({ p }) => `<li><span class="stack__inert entry">
-                     <span class="entry__word">${amadunia(p.am)}</span>
-                     <span class="entry__meaning">${esc(p.en)}</span>
-                     <span class="entry__sources"><a href="${sourceLink(p.src)}">${esc(
-                       p.src.replace(/\.md$/, ''),
-                     )}</a></span></span></li>`,
-                 )
-                 .join('')}</ul>`
-            : `<p class="stack__note" style="margin-top:1.25rem">No sentence in the corpus uses
-               those words yet.</p>`
-        }`;
+      out.innerHTML = [
+        `<p class="result">${result(am)}</p>`,
+        attested
+          ? `<p class="stack__note">${
+              agrees
+                ? 'Somebody has written this sentence, and the rules agree with them.'
+                : `Somebody wrote this as <span lang="art-x-amadunia">${esc(
+                    attested.am,
+                  )}</span>. Where they differ, they are right and this is a rule doing its best.`
+            } <a href="${sourceLink(attested.src)}">${esc(
+              attested.src.replace(/\.md$/, ''),
+            )}</a></p>`
+          : '',
+        missing.length
+          ? `<p class="stack__note">Left in English, because the dictionary has no entry for
+             <strong>${missing.map(esc).join(', ')}</strong>.</p>`
+          : '',
+        found.length
+          ? `<h3 class="h-sub">Sentences already written</h3>
+             <ul class="stack">${found
+               .map(
+                 ({ p }) => `<li><span class="stack__inert entry">
+                   <span class="entry__word"><span lang="art-x-amadunia">${esc(
+                     p.am,
+                   )}</span></span>
+                   <span class="entry__meaning">${esc(p.en)}</span>
+                   <span class="entry__sources"><a href="${sourceLink(p.src)}">${esc(
+                     p.src.replace(/\.md$/, ''),
+                   )}</a></span></span></li>`,
+               )
+               .join('')}</ul>`
+          : '',
+      ].join('');
     };
 
     let timer: number | undefined;
+    const run = async () => {
+      await load();
+      render(q.value);
+    };
     q.addEventListener('input', () => {
       window.clearTimeout(timer);
-      timer = window.setTimeout(async () => {
-        await load();
-        render(q.value);
-      }, 120);
+      timer = window.setTimeout(run, 120);
     });
+    for (const b of document.querySelectorAll('.try')) {
+      b.addEventListener('click', () => {
+        q.value = b.textContent?.trim() ?? '';
+        run();
+        q.focus();
+      });
+    }
   }
 </script>

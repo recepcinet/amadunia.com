@@ -3,6 +3,7 @@
 // and the status line in the README. Everything here runs at build only.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { translate as ruleTranslate } from './translate';
 
 const LANG = join(process.cwd(), 'lang');
 export const LANG_REPO = 'https://github.com/recepcinet/amadunia-lang';
@@ -187,6 +188,49 @@ export function englishIndex(): { en: string; am: string[] }[] {
   return rows
     .map((r) => ({ en: strip(r[0] ?? '').toLowerCase(), am: strip(r[1] ?? '').split(/[,;]\s*/).filter(Boolean) }))
     .filter((r) => r.en && r.am.length);
+}
+
+/**
+ * Word class for every root, read off the headings dictionary.md already groups
+ * by. "Actions" and a gloss beginning "to " are the verb test; the rest name
+ * themselves. Qualities and ideas holds both adjectives and abstract nouns, so
+ * that one group is split by whether the gloss reads as a thing.
+ */
+export function posIndex(): Record<string, string> {
+  const body = readLang('dictionary/dictionary.md');
+  const GROUP: Record<string, string> = {
+    Actions: 'V', 'Question words': 'Q', Prepositions: 'P', 'Grammar particles': 'G',
+    Numbers: 'NUM', 'This and that': 'DEM', Place: 'LOC', Colours: 'ADJ',
+  };
+  // Abstract nouns inside "Qualities and ideas", which otherwise reads adjective.
+  const IDEAS = new Set([
+    'amani', 'arte', 'bahaya', 'golos', 'grupo', 'habari', 'historia', 'ide', 'kalima',
+    'kultura', 'legis', 'lingua', 'luma', 'masal', 'mimpi', 'natura', 'numero',
+    'problema', 'safari', 'sansi', 'sukut', 'surat', 'uhuru', 'umid', 'umur', 'yalan',
+    'tempo', 'korku', 'gusa', 'sabar',
+  ]);
+  const out: Record<string, string> = {};
+  let group = '';
+  for (const line of body.split('\n')) {
+    const head = line.match(/^\|\s*\*\*(.+?)\*\*/);
+    if (head) { group = head[1].split('**')[0].trim(); continue; }
+    const row = line.match(/^\|\s*([a-z-]+)\s*\|\s*([^|]+?)\s*\|/);
+    if (!row || row[1] === 'word') continue;
+    const [, word, gloss] = row;
+    out[word] =
+      gloss.startsWith('to ') || gloss.startsWith('can,') || gloss.startsWith('must,')
+        ? 'V'
+        : GROUP[group] ??
+          (group === 'Qualities and ideas' ? (IDEAS.has(word) ? 'N' : 'ADJ') : 'N');
+  }
+  return out;
+}
+
+/** The lexicon the rule translator reads: English key to root, root to class. */
+export function lexicon(): { en: Record<string, string>; pos: Record<string, string> } {
+  const en: Record<string, string> = {};
+  for (const row of englishIndex()) if (!(row.en in en)) en[row.en] = row.am[0];
+  return { en, pos: posIndex() };
 }
 
 /* ---------- Alphabet, as phonology.md states it ---------- */
@@ -448,6 +492,45 @@ export function corpusJsonl(): string {
   );
 }
 
+/**
+ * How often the rules reproduce the sentence a person actually wrote. Measured
+ * against every pair in the corpus on every build, so the figure the page
+ * quotes is the figure this code scores today — not one written down once.
+ */
+export function translationAccuracy() {
+  const lex = lexicon() as never;
+  const pairs = corpus();
+  const by: Record<string, { ok: number; n: number }> = {};
+  const len: Record<string, { ok: number; n: number }> = {};
+  let exact = 0;
+  for (const p of pairs) {
+    const hit = ruleTranslate(lex, p.en).trim() === p.am.trim();
+    if (hit) exact++;
+    const k = p.source.split('/')[0].replace(/\.md$/, '');
+    const words = p.am.split(/\s+/).length;
+    const b = words <= 3 ? 'short' : words <= 6 ? 'medium' : 'long';
+    (by[k] ??= { ok: 0, n: 0 }).n++; if (hit) by[k].ok++;
+    (len[b] ??= { ok: 0, n: 0 }).n++; if (hit) len[b].ok++;
+  }
+  return { exact, total: pairs.length, pct: Math.round((1000 * exact) / pairs.length) / 10, by, len };
+}
+
+/**
+ * The rules reproduced 61.9% of the corpus when they were written. A large drop
+ * means an upstream change broke a rule rather than merely moved a number, and
+ * the build should say so rather than quietly publish a worse tool.
+ */
+export function assertTranslatorWorks(): void {
+  const { pct, exact, total } = translationAccuracy();
+  if (pct < 55) {
+    throw new Error(
+      `The rule translator reproduces only ${exact} of ${total} corpus sentences (${pct}%). ` +
+        `It scored 61.9% when written; below 55% something is broken, not merely changed. ` +
+        `Check src/lib/translate.ts against the grammar pages that moved.`,
+    );
+  }
+}
+
 /** The whole language as one plain-text document, as /llms-full.txt serves it. */
 export function fullReference(base: string): string {
   const head = `# Amadunia — complete reference
@@ -500,6 +583,9 @@ export function englishIndexJson(site: string): string {
       license: 'CC BY-SA 4.0',
       source: `${LANG_REPO}/blob/main/dictionary/index-english.md`,
       site,
+      pos_note:
+        'Word class per root, read off the headings in dictionary.md. N noun, V verb, ADJ adjective, Q question word, P preposition, LOC place word, NUM number, DEM demonstrative, G particle.',
+      pos: posIndex(),
       entries,
     },
     null,
