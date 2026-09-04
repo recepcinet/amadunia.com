@@ -752,9 +752,31 @@ const clean = (s: string) =>
 export function corpus(): Pair[] {
   const pairs: Pair[] = [];
   const seen = new Set<string>();
+  const roots = new Set(dictionary().map((e) => e.word));
+  // Is the left cell actually Amadunia? A headerless two-column table is
+  // usually a translation, but Lesson 23 summarises the grammar in one —
+  // "Adjectives | after the noun" — and that is not a sentence pair.
+  const isAmadunia = (text: string) => {
+    const words = text.match(/[A-Za-z]+(?:-[A-Za-z]+)*/g) ?? [];
+    const isRoot = (w: string) =>
+      w.toLowerCase().split('-').every((piece) => roots.has(piece));
+    // A capitalised word the dictionary does not hold is a name — Sol, Luma,
+    // Amadunia itself — and a name is neither Amadunia nor English, so it
+    // votes for neither side.
+    const judged = words.filter((w) => isRoot(w) || !/^[A-Z]/.test(w));
+    if (!judged.length) return false;
+    return judged.filter(isRoot).length / judged.length >= 0.6;
+  };
+
   const push = (am: string, en: string, source: string) => {
     am = clean(am); en = clean(en);
     if (!am || !en || am === '—' || en === '—') return;
+    if (!isAmadunia(am)) return;
+    // An em dash on the English side alone opens a note, not a translation:
+    // "My head is hot. — the nearest the language gets to my head hurts".
+    // Where both sides carry one it is dialogue or punctuation, and stays.
+    if (!am.includes(' — ') && en.includes(' — ')) en = en.split(' — ')[0].trim();
+    if (!en) return;
     const key = `${am}\t${en}`;
     if (seen.has(key)) return;
     seen.add(key);
