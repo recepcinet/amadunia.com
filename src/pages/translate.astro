@@ -10,9 +10,11 @@ import {
   dictionary,
   translationAccuracy,
   assertTranslatorWorks,
+  assertNumerals,
   LANG_REPO,
 } from '../lib/lang';
 
+assertNumerals();
 assertTranslatorWorks();
 
 const acc = translationAccuracy();
@@ -261,7 +263,7 @@ const ld = [
         ]);
         const en: Record<string, string> = {};
         for (const e of idx.entries as { en: string; am: string[] }[]) en[e.en] ??= e.am[0];
-        lex = { en, pos: idx.pos };
+        lex = { en, pos: idx.pos, num: idx.numerals };
         sentences = tsv
           .split('\n')
           .slice(1)

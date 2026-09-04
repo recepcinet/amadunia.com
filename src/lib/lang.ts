@@ -197,7 +197,6 @@ export function englishIndex(): { en: string; am: string[] }[] {
  * that one group is split by whether the gloss reads as a thing.
  */
 export function posIndex(): Record<string, string> {
-  const body = readLang('dictionary/dictionary.md');
   const GROUP: Record<string, string> = {
     Actions: 'V', 'Question words': 'Q', Prepositions: 'P', 'Grammar particles': 'G',
     Numbers: 'NUM', 'This and that': 'DEM', Place: 'LOC', Colours: 'ADJ',
@@ -210,32 +209,58 @@ export function posIndex(): Record<string, string> {
     'tempo', 'korku', 'gusa', 'sabar',
   ]);
   const out: Record<string, string> = {};
-  let group = '';
-  // The roots table ends at the first prose heading. What follows — the
-  // counting section and the blocked candidates — holds rows in the same shape,
-  // and reading them would overwrite a real root: hi is hello here and a
-  // rejected word for sun down there.
-  const table = body.split(/^## /m)[0];
-  for (const line of table.split('\n')) {
-    const head = line.match(/^\|\s*\*\*(.+?)\*\*/);
-    if (head) { group = head[1].split('**')[0].trim(); continue; }
-    const row = line.match(/^\|\s*([a-z-]+)\s*\|\s*([^|]+?)\s*\|/);
-    if (!row || row[1] === 'word' || /^-+$/.test(row[1]) || row[1] in out) continue;
-    const [, word, gloss] = row;
+  for (const { word, meaning, group } of dictionary()) {
     out[word] =
-      gloss.startsWith('to ') || gloss.startsWith('can,') || gloss.startsWith('must,')
+      meaning.startsWith('to ') || meaning.startsWith('can,') || meaning.startsWith('must,')
         ? 'V'
-        : GROUP[group] ??
-          (group === 'Qualities and ideas' ? (IDEAS.has(word) ? 'N' : 'ADJ') : 'N');
+        : (GROUP[group] ??
+          (group === 'Qualities and ideas' ? (IDEAS.has(word) ? 'N' : 'ADJ') : 'N'));
   }
   return out;
 }
 
+/**
+ * The digits, taken from the dictionary rather than written out again. A root
+ * glossed with nothing but digits is a number and is worth what it says —
+ * upstream's own rule, adopted here after it found the same values living in
+ * four places at once. This was the fifth: the translator had them typed out.
+ */
+export function numerals(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const e of dictionary()) {
+    if (/^\d+$/.test(e.meaning.trim())) out[e.meaning.trim()] = e.word;
+  }
+  return out;
+}
+
+/**
+ * Eleven digits and bases plus mila. If the dictionary ever glosses a root "7"
+ * by accident it joins the arithmetic silently, so the shape is stated.
+ */
+export function assertNumerals(): void {
+  const n = numerals();
+  const want = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '100', '1000'];
+  const missing = want.filter((v) => !(v in n));
+  const extra = Object.keys(n).filter((v) => !want.includes(v));
+  if (missing.length || extra.length) {
+    throw new Error(
+      `The number system changed shape. Expected ${want.length} roots glossed as digits; ` +
+        (missing.length ? `missing ${missing.join(', ')}. ` : '') +
+        (extra.length ? `unexpected ${extra.join(', ')}. ` : '') +
+        `Check dictionary.md against grammar/numbers.md.`,
+    );
+  }
+}
+
 /** The lexicon the rule translator reads: English key to root, root to class. */
-export function lexicon(): { en: Record<string, string>; pos: Record<string, string> } {
+export function lexicon(): {
+  en: Record<string, string>;
+  pos: Record<string, string>;
+  num: Record<string, string>;
+} {
   const en: Record<string, string> = {};
   for (const row of englishIndex()) if (!(row.en in en)) en[row.en] = row.am[0];
-  return { en, pos: posIndex() };
+  return { en, pos: posIndex(), num: numerals() };
 }
 
 /* ---------- Per-root facts, all counted rather than restated ---------- */
@@ -666,6 +691,7 @@ export function englishIndexJson(site: string): string {
       pos_note:
         'Word class per root, read off the headings in dictionary.md. N noun, V verb, ADJ adjective, Q question word, P preposition, LOC place word, NUM number, DEM demonstrative, G particle.',
       pos: posIndex(),
+      numerals: numerals(),
       entries,
     },
     null,

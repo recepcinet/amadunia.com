@@ -12,7 +12,12 @@
  */
 
 export type Pos = 'N' | 'V' | 'ADJ' | 'Q' | 'P' | 'LOC' | 'G' | 'NUM' | 'DEM';
-export type Lexicon = { en: Record<string, string>; pos: Record<string, Pos> };
+export type Lexicon = {
+  en: Record<string, string>;
+  pos: Record<string, Pos>;
+  /** Value to root, e.g. { '1': 'uan', '10': 'des' } — read off the dictionary. */
+  num: Record<string, string>;
+};
 
 const ARTICLES = new Set(['a', 'an', 'the']);
 const MOTION = new Set(['go', 'lai', 'kimbia', 'anda']);
@@ -29,9 +34,11 @@ const POSS_PRON: Record<string, string> = {
   mine: 'mi', yours: 'yu', hers: 'ta', ours: 'mi-mi', theirs: 'ta-ta',
 };
 const DEM: Record<string, string> = { this: 'ini', that: 'itu', these: 'ini', those: 'itu' };
-const NUMWORD: Record<string, string> = {
-  one: 'uan', two: 'du', three: 'tri', four: 'pat', five: 'fai', six: 'sis',
-  seven: 'seti', eight: 'ba', nine: 'nau', ten: 'des', hundred: 'sen', thousand: 'mila',
+// The English side of the numbers. The Amadunia side is never written here:
+// it is looked up by value in the lexicon, which reads it off the dictionary.
+const NUMVALUE: Record<string, number> = {
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9,
+  ten: 10, eleven: 11, twelve: 12, twenty: 20, hundred: 100, thousand: 1000,
 };
 const QUANT: Record<string, string> = { many: 'cok', much: 'cok', some: 'cok', all: 'cok' };
 
@@ -66,18 +73,19 @@ const IRREG_PL: Record<string, string> = {
   children: 'child', people: 'person', men: 'man', women: 'woman', feet: 'foot', teeth: 'tooth',
 };
 
-/** Numbers are built, never irregular: a digit before a base multiplies it, a
- *  digit after it adds (grammar/numbers.md). */
-export function numeral(n: number): string {
-  const d = ['uan', 'du', 'tri', 'pat', 'fai', 'sis', 'seti', 'ba', 'nau'];
-  if (n >= 1 && n <= 9) return d[n - 1];
-  if (n === 10) return 'des';
-  if (n === 100) return 'sen';
-  if (n === 1000) return 'mila';
-  if (n > 10 && n < 20) return `des-${numeral(n - 10)}`;
-  if (n < 100 && n % 10 === 0) return `${numeral(n / 10)}-des`;
-  if (n < 100) return `${numeral(Math.floor(n / 10))}-des-${numeral(n % 10)}`;
-  if (n < 10000 && n % 1000 === 0) return `${numeral(n / 1000)}-mila`;
+/**
+ * Numbers are built, never irregular: a digit before a base multiplies it, a
+ * digit after it adds, so du-des is twenty and des-du is twelve
+ * (grammar/numbers.md). Every root comes from the lexicon; none is typed here.
+ */
+export function numeral(lex: Lexicon, n: number): string {
+  const r = (v: number) => lex.num[String(v)];
+  if (n >= 1 && n <= 10) return r(n) ?? String(n);
+  if (n === 100 || n === 1000) return r(n) ?? String(n);
+  if (n > 10 && n < 20) return `${r(10)}-${numeral(lex, n - 10)}`;
+  if (n < 100 && n % 10 === 0) return `${numeral(lex, n / 10)}-${r(10)}`;
+  if (n < 100) return `${numeral(lex, Math.floor(n / 10))}-${r(10)}-${numeral(lex, n % 10)}`;
+  if (n < 10000 && n % 1000 === 0) return `${numeral(lex, n / 1000)}-${r(1000)}`;
   return String(n);
 }
 
@@ -139,8 +147,8 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     if (w in POSS_PRON) { out.push({ t, p: 'PRON', r: POSS_PRON[w] }); continue; }
     if (w in PRON) { out.push({ t, p: 'PRON', r: PRON[w] }); continue; }
     if (w in DEM) { out.push({ t, p: 'DEM', r: DEM[w] }); continue; }
-    if (w in NUMWORD) { out.push({ t, p: 'NUM', r: NUMWORD[w] }); continue; }
-    if (/^\d+$/.test(w)) { out.push({ t, p: 'NUM', r: numeral(Number(w)) }); continue; }
+    if (w in NUMVALUE) { out.push({ t, p: 'NUM', r: numeral(lex, NUMVALUE[w]) }); continue; }
+    if (/^\d+$/.test(w)) { out.push({ t, p: 'NUM', r: numeral(lex, Number(w)) }); continue; }
     if (w === 'not' || w === 'no') { out.push({ t, p: 'NEG', r: 'no' }); continue; }
     if (w === 'do' || w === 'does') { out.push({ t, p: 'DROP', r: null }); continue; }
     if (w === 'did') { out.push({ t, p: 'AUX', r: 'suda' }); continue; }
