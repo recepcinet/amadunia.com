@@ -174,6 +174,17 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     if (w === 'less') { out.push({ t, p: 'DEG', r: 'kurang' }); continue; }
     if (w === 'most') { out.push({ t, p: 'DEG', r: 'paling' }); continue; }
     if (w === 'than') { out.push({ t, p: 'W', r: 'dari' }); continue; }
+    // "There is a hotel" is not the place word: the existential is es at the
+    // front with no subject at all (grammar/copula.md). Only a clause-initial
+    // there followed by the verb to be is it; "the hotel is there" is situ.
+    if (
+      w === 'there' &&
+      !out.some((x) => x.p !== 'DROP') &&
+      ['is', 'are', 'was', 'were', "'s", "'re"].includes((tokens[i] ?? '').toLowerCase())
+    ) {
+      out.push({ t, p: 'EXIST', r: null });
+      continue;
+    }
     if (UNSETTLED.has(w)) { out.push({ t, p: 'OPEN', r: null }); continue; }
     if (w in SYN) w = SYN[w];
     if (w in IRREG_PL) {
@@ -251,11 +262,15 @@ function clause(tg: Tok[], question: boolean): string {
 
   const out: string[] = [];
   let i = 0, neg = false, tense: string | null = null;
+  // "There is..." has no subject, and es stands whatever the predicate is —
+  // Es cok badal, there are many clouds (grammar/copula.md).
+  let existential = false;
   const n = tg.length;
 
   while (i < n) {
     const { t, p, r, past, cmp } = tg[i];
     if (p === 'DROP') { i++; continue; }
+    if (p === 'EXIST') { existential = true; i++; continue; }
     if (p === 'UNK' || p === 'OPEN') { out.push(`⟨${t}⟩`); i++; continue; }
     if (p === 'NEG') { neg = true; i++; continue; }
     if (p === 'AUX') { tense = r; i++; continue; }
@@ -308,11 +323,14 @@ function clause(tg: Tok[], question: boolean): string {
       let j = i + 1;
       while (j < n && tg[j].p === 'DROP') j++;
       const nxt = tg[j]?.p;
+      // A denial of the existential comes first: No es ca, there is no tea.
+      if (existential && nxt === 'NEG') { out.push('no'); tg[j].p = 'DROP'; }
       if (neg) { out.push('no'); neg = false; }
       if (tense) { out.push(tense); tense = null; }
       // es stands before a noun predicate only; an adjective or a place word
       // is the sentence and takes the particle directly (grammar/copula.md).
-      if ((nxt && ['N', 'PRON', 'NUM', 'POSS', 'NAME'].includes(nxt)) || tail === 'kim') out.push('es');
+      if (existential || (nxt && ['N', 'PRON', 'NUM', 'POSS', 'NAME'].includes(nxt)) || tail === 'kim')
+        out.push('es');
       i++; continue;
     }
 
