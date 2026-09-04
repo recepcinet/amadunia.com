@@ -72,6 +72,42 @@ function tableRows(body: string, heading?: string): string[][] {
   return rows.slice(1); // drop the header row
 }
 
+/**
+ * Every table in a section, not just the first. A lesson's "New words" can hold
+ * two — the words it teaches, then "Also introduced here" for the ones its
+ * sentences reach for — and reading only the first left eight roots looking as
+ * though no lesson taught them.
+ */
+function lessonWords(body: string, heading: string): string[] {
+  const i = body.indexOf(heading);
+  if (i === -1) return [];
+  let src = body.slice(i + heading.length);
+  const next = src.search(/\n##? /);
+  if (next !== -1) src = src.slice(0, next);
+
+  // A section holds more than one table — the words a lesson teaches, then
+  // "Also introduced here" for the ones its sentences reach for — and a table
+  // may lay two word columns side by side to save height, as Lesson 20 does.
+  // Take every column its own header calls Word.
+  const words: string[] = [];
+  let cols: number[] | null = null;
+  for (const line of src.split('\n')) {
+    if (!/^\s*\|/.test(line)) { cols = null; continue; }
+    const cells = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+    if (cells.every((c) => /^:?-{2,}:?$/.test(c) || !c)) continue;
+    if (cols === null) {
+      cols = cells.map((c, k) => (c.toLowerCase() === 'word' ? k : -1)).filter((k) => k >= 0);
+      if (!cols.length) cols = [0];
+      continue;
+    }
+    for (const k of cols) {
+      const w = strip(cells[k] ?? '');
+      if (/^[a-z-]+$/.test(w)) words.push(w);
+    }
+  }
+  return words;
+}
+
 /* ---------- Dictionary ---------- */
 
 export interface Entry {
@@ -291,10 +327,8 @@ export function taughtIn(): Record<string, { id: string; n: number }> {
     .sort((a, b) => lessonNumber(a) - lessonNumber(b));
   for (const name of names) {
     const id = name.replace(/\.md$/, '');
-    const rows = tableRows(readLang(`lessons/${name}`), '## New words');
-    for (const r of rows) {
-      const w = strip(r[0] ?? '');
-      if (/^[a-z-]+$/.test(w) && !(w in out)) out[w] = { id, n: lessonNumber(name) };
+    for (const w of lessonWords(readLang(`lessons/${name}`), '## New words')) {
+      if (!(w in out)) out[w] = { id, n: lessonNumber(name) };
     }
   }
   return out;
