@@ -305,6 +305,10 @@ function clause(tg: Tok[], question: boolean): string {
           else if (['N', 'PRON', 'NAME'].includes(x.p)) owner.push(x.r!);
           else if (x.p === 'ADJ') adjs.push(x.r!);
         }
+        // ini and itu stand alone as subjects — Ini es ke, what is this
+        // (grammar/demonstratives.md, taught in Lesson 15). With nothing to
+        // follow, the demonstrative is the phrase.
+        if (head === null && dem) { head = dem; dem = null; }
         if (head === null) { out.push(...pre, ...adjs); continue; }
         // After a number the noun stays single: the number has done the work.
         let rest = pre;
@@ -329,7 +333,12 @@ function clause(tg: Tok[], question: boolean): string {
       if (tense) { out.push(tense); tense = null; }
       // es stands before a noun predicate only; an adjective or a place word
       // is the sentence and takes the particle directly (grammar/copula.md).
-      if (existential || (nxt && ['N', 'PRON', 'NUM', 'POSS', 'NAME'].includes(nxt)) || tail === 'kim')
+      // The answer to what and who is a noun, so the copula stands before it —
+      // Ini es ke, Yu es kim — but only where the sentence has no verb of its
+      // own. "What are you doing" is Yu suru ke, and es never joins a verb.
+      const answerIsNoun =
+        (tail === 'kim' || tail === 'ke') && !tg.some((x) => x.p === 'V');
+      if (existential || (nxt && ['N', 'PRON', 'NUM', 'POSS', 'NAME'].includes(nxt)) || answerIsNoun)
         out.push('es');
       i++; continue;
     }
