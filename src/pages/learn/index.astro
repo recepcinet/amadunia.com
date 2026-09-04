@@ -59,7 +59,9 @@ const ld = [
           texts — the frequency curve doing the work, since ten roots carry a third of everything
           written.
           {ladder.earliest && ladder.earliestText &&
-            ` ${ladder.earliestText} opens after Lesson ${ladder.earliest}, well before any other.`}
+            ` ${ladder.earliestText} opens first, after Lesson ${ladder.earliest}${
+              ladder.nextEarliest ? `, and the next after Lesson ${ladder.nextEarliest}` : ''
+            }.`}
         </p>
         <p style="margin-top:1.5rem">
           <a href="/learn/reading-ladder/">See the reading ladder</a> — measured from the course

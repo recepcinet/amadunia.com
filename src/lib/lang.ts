@@ -366,7 +366,12 @@ export function textKinds(): Record<string, string> {
  * knows after the first lesson, and the earliest lesson after which any text
  * becomes readable. Parsed from its tables so they cannot drift from the page.
  */
-export function readingLadder(): { firstLessonShare?: string; earliest?: number; earliestText?: string } {
+export function readingLadder(): {
+  firstLessonShare?: string;
+  earliest?: number;
+  earliestText?: string;
+  nextEarliest?: number;
+} {
   let body: string;
   try {
     body = readLang('lessons/reading-ladder.md');
@@ -378,7 +383,13 @@ export function readingLadder(): { firstLessonShare?: string; earliest?: number;
     .map((r) => ({ text: strip(r[0] ?? ''), after: Number(r[1]) }))
     .filter((r) => r.text && Number.isFinite(r.after))
     .sort((a, b) => a.after - b.after);
-  return { firstLessonShare, earliest: opens[0]?.after, earliestText: opens[0]?.text };
+  const next = opens.find((o) => o.after > (opens[0]?.after ?? 0));
+  return {
+    firstLessonShare,
+    earliest: opens[0]?.after,
+    earliestText: opens[0]?.text,
+    nextEarliest: next?.after,
+  };
 }
 
 /* ---------- Lessons ---------- */
