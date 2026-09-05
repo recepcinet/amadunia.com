@@ -5,6 +5,15 @@
 // out of date quietly.
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { numerals } from '../lib/lang';
+import { spell, Spell } from './spell';
+
+// Four pages upstream stated the size of the number system and three had gone
+// stale, because settling mila moved a ceiling without breaking a sentence.
+// This one is counted off the dictionary instead of written down.
+const num = numerals();
+const digits = Object.keys(num).filter((v) => Number(v) < 10).length;
+const bases = Object.keys(num).length - digits;
 export interface Rule {
   claim: string;
   body: string;
@@ -159,7 +168,7 @@ export const rules: Rule[] = [
   },
   {
     claim: 'Numbers are built, never irregular',
-    body: 'Ten digits, des for ten, sen for a hundred, mila for a thousand. Position carries the arithmetic: a digit before a base multiplies it, a digit after it adds. So du-des is twenty and des-du is twelve, and which side the du stands on is the only difference.',
+    body: `${Spell(digits)} digits and ${spell(bases)} bases — des for ten, sen for a hundred, mila for a thousand — ${spell(digits + bases)} roots in all. Position carries the arithmetic: a digit before a base multiplies it, a digit after it adds. So du-des is twenty and des-du is twelve, and which side the du stands on is the only difference.`,
     href: '/grammar/numbers/',
     example: { form: 'du-des · des-du', gloss: 'twenty · twelve' },
   },
