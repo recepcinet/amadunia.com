@@ -244,13 +244,19 @@ export function posIndex(): Record<string, string> {
     'problema', 'safari', 'sansi', 'sukut', 'surat', 'uhuru', 'umid', 'umur', 'yalan',
     'tempo', 'korku', 'gusa', 'sabar',
   ]);
+  // tempat sits in the Place group and is a plain noun: es tempat is legal
+  // where es sini is not. check.py draws the same line, taking tempat back out
+  // of the Place group when it reads what may not follow es.
+  const PLACE_NOUN = new Set(['tempat']);
   const out: Record<string, string> = {};
   for (const { word, meaning, group } of dictionary()) {
     out[word] =
       meaning.startsWith('to ') || meaning.startsWith('can,') || meaning.startsWith('must,')
         ? 'V'
-        : (GROUP[group] ??
-          (group === 'Qualities and ideas' ? (IDEAS.has(word) ? 'N' : 'ADJ') : 'N'));
+        : PLACE_NOUN.has(word)
+          ? 'N'
+          : (GROUP[group] ??
+            (group === 'Qualities and ideas' ? (IDEAS.has(word) ? 'N' : 'ADJ') : 'N'));
   }
   return out;
 }

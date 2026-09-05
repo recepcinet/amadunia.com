@@ -283,6 +283,13 @@ function clause(tg: Tok[], question: boolean): string {
   // "A question is the answer with one word swapped": the question word goes
   // back to the slot the answer would fill (grammar/questions.md). kim before
   // a verb is already in that slot, as the subject.
+  // A sentence that opens with a question word is a question whether or not
+  // the mark was typed. Without this, "Where is the hotel" came out
+  // *Nali es hotel* — es before a noun, so nothing forbids it, but copula.md
+  // illustrates the place question as *Hotel nali?*, place word, no es, and
+  // all ten place questions in the corpus are shaped that way.
+  if (tg[0]?.p === 'Q') question = true;
+
   const kimSubject = tg[0]?.p === 'Q' && tg[0].r === 'kim' && !tg.slice(0, 3).some((x) => x.p === 'BE');
   if (question && tg[0]?.p === 'Q' && !kimSubject) { tail = tg[0].r; tg = tg.slice(1); }
 
