@@ -248,15 +248,22 @@ export function posIndex(): Record<string, string> {
   // where es sini is not. check.py draws the same line, taking tempat back out
   // of the Place group when it reads what may not follow es.
   const PLACE_NOUN = new Set(['tempat']);
+  // Grammar words the dictionary files under thematic headings, so the heading
+  // is not the word class: kadar under Qualities and ideas, no under Greetings,
+  // tena under Actions, sasa under Time. check.py lists the same words for the
+  // same reason, and found kadar missing from its own list.
+  const FUNCTION = new Set(['kadar', 'no', 'tena', 'sasa']);
   const out: Record<string, string> = {};
   for (const { word, meaning, group } of dictionary()) {
     out[word] =
       meaning.startsWith('to ') || meaning.startsWith('can,') || meaning.startsWith('must,')
         ? 'V'
-        : PLACE_NOUN.has(word)
-          ? 'N'
-          : (GROUP[group] ??
-            (group === 'Qualities and ideas' ? (IDEAS.has(word) ? 'N' : 'ADJ') : 'N'));
+        : FUNCTION.has(word)
+          ? 'G'
+          : PLACE_NOUN.has(word)
+            ? 'N'
+            : (GROUP[group] ??
+              (group === 'Qualities and ideas' ? (IDEAS.has(word) ? 'N' : 'ADJ') : 'N'));
   }
   return out;
 }
@@ -787,7 +794,8 @@ export function englishIndexJson(site: string): string {
       site,
       pos_note:
         'Word class per root, read off the headings in dictionary.md. N noun, V verb, ADJ adjective, Q question word, P preposition, LOC place word, NUM number, DEM demonstrative, G particle. ' +
-        'This reports where the dictionary files a root, not a ruling on it. Two roots hold two jobs and are filed under one here: madad, glossed \u201chelp; to help\u201d, and rabota, glossed \u201cwork\u201d and used both ways. Which job each takes is an open question and the grouping is not the answer. ' +
+        'Five roots are filed under a heading that is not their class and are corrected here, on check.py\u2019s authority and for its reasons: kadar (the equality particle), no (negation), tena (\u201cagain\u201d) and sasa (\u201cnow\u201d) are particles filed under Qualities and ideas, Greetings, Actions and Time; tempat is a plain noun filed under Place. ' +
+        'Otherwise this reports where the dictionary files a root, not a ruling on it. Two roots hold two jobs and are filed under one here: madad, glossed \u201chelp; to help\u201d, and rabota, glossed \u201cwork\u201d and used both ways. Which job each takes is an open question and the grouping is not the answer. ' +
         `See ${LANG_REPO}/blob/main/grammar/proposal-two-jobs.md`,
       pos: posIndex(),
       numerals: numerals(),
