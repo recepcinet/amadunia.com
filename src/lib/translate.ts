@@ -58,7 +58,7 @@ const UNSETTLED = new Set(['very', 'sometimes', 'occasionally']);
 // one form for both (grammar/adverbs.md).
 const SYN: Record<string, string> = {
   well: 'good', has: 'have', had: 'have', with: 'together', lots: 'many',
-  cannot: 'can', tell: 'say', okay: 'ok', hello: 'hi', sure: 'ok', thanks: 'thank you',
+  tell: 'say', okay: 'ok', hello: 'hi', sure: 'ok', thanks: 'thank you',
 };
 // Compounds read off the corpus, not invented: din ini is attested for "today".
 const PHRASE: Record<string, string> = {
@@ -345,7 +345,13 @@ function clause(tg: Tok[], question: boolean): string {
         // (grammar/demonstratives.md, taught in Lesson 15). With nothing to
         // follow, the demonstrative is the phrase.
         if (head === null && dem) { head = dem; dem = null; }
-        if (head === null) { out.push(...pre, ...adjs); continue; }
+        if (head === null) {
+          // "five years old" splits: the number stands alone here and tahun
+          // follows as its own piece. Dropping it lost the five.
+          if (num) out.push(num);
+          out.push(...pre, ...adjs);
+          continue;
+        }
         // After a number the noun stays single: the number has done the work.
         let rest = pre;
         if (num) { out.push(num); head = head.split('-')[0]; }
@@ -434,10 +440,17 @@ export function translate(lex: Lexicon, sentence: string): string {
     let chunk = raw
       .replace(/\b(\w+)'ll\b/gi, '$1 will')
       .replace(/\b(\w+)'re\b/gi, '$1 are')
+      // can't and won't keep a letter the generic rule would eat: can't split
+      // as "ca" + "n't" gave ca, which is tea.
+      .replace(/\bcan't\b/gi, 'can not')
+      .replace(/\bwon't\b/gi, 'will not')
+      .replace(/\bshan't\b/gi, 'will not')
       .replace(/\b(\w+)n't\b/gi, '$1 not')
       .replace(/\bI'm\b/gi, 'I am')
       .replace(/\b(\w+)'ve\b/gi, '$1 have')
-      .replace(/\bcan not\b/gi, 'can');
+      // "cannot come" denies being able, so the no goes in front of bisa —
+      // Ta no bisa lai. Folding it to "can" threw the negation away.
+      .replace(/\b(?:cannot|can not)\b/gi, 'not can');
     const raw2 = chunk.match(/[A-Za-z]+'s|[A-Za-z']+|\d+/g) ?? [];
     const toks: string[] = [];
     for (const t of raw2) {
