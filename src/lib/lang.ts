@@ -781,7 +781,7 @@ export function englishIndexJson(site: string): string {
       site,
       pos_note:
         'Word class per root, read off the headings in dictionary.md. N noun, V verb, ADJ adjective, Q question word, P preposition, LOC place word, NUM number, DEM demonstrative, G particle. ' +
-        'This reports where the dictionary files a root, not a ruling on it: where a root\u2019s class is itself an open question — rabota is used both ways — the grouping is not the answer. ' +
+        'This reports where the dictionary files a root, not a ruling on it. Two roots hold two jobs and are filed under one here: madad, glossed \u201chelp; to help\u201d, and rabota, glossed \u201cwork\u201d and used both ways. Which job each takes is an open question and the grouping is not the answer. ' +
         `See ${LANG_REPO}/blob/main/grammar/proposal-two-jobs.md`,
       pos: posIndex(),
       numerals: numerals(),
