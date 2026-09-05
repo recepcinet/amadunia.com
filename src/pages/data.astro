@@ -1,10 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
-import { corpus, dictionary, corpusTsv, corpusJsonl, fullReference, dictionaryJson, englishIndex, englishIndexJson, readmeStatus, langFileSize, bytes, LANG_REPO } from '../lib/lang';
+import { corpus, dictionary, corpusTsv, corpusJsonl, fullReference, dictionaryJson, englishIndex, englishIndexJson, readmeStatus, langFileSize, bytes, materialCounts, LANG_REPO } from '../lib/lang';
 
 const pairs = corpus();
 const words = dictionary();
+const material = materialCounts();
+const spell = (n: number) =>
+  ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty','twenty-one','twenty-two','twenty-three','twenty-four','twenty-five','twenty-six','twenty-seven','twenty-eight','twenty-nine','thirty'][n] ?? String(n);
 
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const fullTextBytes = bytes(fullReference(site));
@@ -65,8 +68,9 @@ const ld = [
     '@id': `${site}data/#dataset`,
     name: 'Amadunia: parallel corpus, dictionary and complete reference',
     description:
-      `A constructed world auxiliary language with ${words.length} roots, an eighteen-rule grammar, ` +
-      `twenty-five lessons and ten original texts. This dataset contains ${pairs.length} Amadunia–English ` +
+      `A constructed world auxiliary language with ${words.length} roots, a ${spell(material.rules)}-rule ` +
+      `grammar, ${spell(material.lessons)} lessons and ${spell(material.texts)} original texts. ` +
+      `This dataset contains ${pairs.length} Amadunia–English ` +
       'sentence pairs drawn from that material, the full dictionary with sourced etymologies, and the ' +
       'complete reference as plain text. Every sentence obeys the settled grammar and uses only settled ' +
       'words; a checker in the language repository verifies that on every change.',

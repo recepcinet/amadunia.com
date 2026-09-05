@@ -317,6 +317,21 @@ export function lexicon(): {
   return { en, pos: posIndex(), num: numerals(), names: corpusNames() };
 }
 
+/**
+ * How many rule pages, lessons and texts there are, counted off the folders.
+ * A dataset description is read by machines and nobody proofreads it, which is
+ * exactly where a hand-typed number goes stale unseen.
+ */
+export function materialCounts(): { rules: number; lessons: number; texts: number } {
+  const md = (dir: string, keep: (n: string) => boolean) =>
+    readdirSync(join(LANG, dir)).filter((n) => n.endsWith('.md') && keep(n)).length;
+  return {
+    rules: md('grammar', (n) => n !== 'README.md' && !n.startsWith('proposal-')),
+    lessons: md('lessons', (n) => /^lesson-\d+/.test(n)),
+    texts: md('texts', (n) => /^(text|story)-\d+/.test(n)),
+  };
+}
+
 /* ---------- Per-root facts, all counted rather than restated ---------- */
 
 /** Which lesson first teaches each root, read off the lessons' own tables. */

@@ -11,12 +11,14 @@ import {
   translationAccuracy,
   assertTranslatorWorks,
   assertNumerals,
+  materialCounts,
   LANG_REPO,
 } from '../lib/lang';
 
 assertNumerals();
 assertTranslatorWorks();
 
+const material = materialCounts();
 const acc = translationAccuracy();
 const pairs = corpus().length;
 const words = englishIndex().length;
@@ -157,7 +159,7 @@ const ld = [
       <li>
         <span class="stack__inert entry">
           <span class="entry__word">{pc(acc.by.lessons)}%</span>
-          <span class="entry__meaning">the twenty-six lessons</span>
+          <span class="entry__meaning">the {material.lessons} lessons</span>
           <span class="entry__sources">{acc.by.lessons.ok} of {acc.by.lessons.n}</span>
         </span>
       </li>
