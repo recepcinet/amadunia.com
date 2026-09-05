@@ -5,9 +5,9 @@ import { corpus, dictionary, corpusTsv, corpusJsonl, fullReference, dictionaryJs
 
 const pairs = corpus();
 const words = dictionary();
+import { spell } from '../data/spell';
+
 const material = materialCounts();
-const spell = (n: number) =>
-  ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty','twenty-one','twenty-two','twenty-three','twenty-four','twenty-five','twenty-six','twenty-seven','twenty-eight','twenty-nine','thirty'][n] ?? String(n);
 
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const fullTextBytes = bytes(fullReference(site));
