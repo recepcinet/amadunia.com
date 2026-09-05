@@ -193,6 +193,11 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     if (w === 'less') { out.push({ t, p: 'DEG', r: 'kurang' }); continue; }
     if (w === 'most') { out.push({ t, p: 'DEG', r: 'paling' }); continue; }
     if (w === 'than') { out.push({ t, p: 'W', r: 'dari' }); continue; }
+    // "as big as" is kadar, settled in grammar/comparison.md and used seven
+    // times in the writing: Dom mi kabir kadar dom yu, Mi hayai kadar yu — the
+    // quality first, then kadar, then what it is measured against. Marked here
+    // and paired below, because only the second "as" carries the word.
+    if (w === 'as') { out.push({ t, p: 'AS', r: null }); continue; }
     // "There is a hotel" is not the place word: the existential is es at the
     // front with no subject at all (grammar/copula.md). Only a clause-initial
     // there followed by the verb to be is it; "the hotel is there" is situ.
@@ -240,6 +245,18 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     const plural = pos === 'N' && stem !== base && base.endsWith('s') && !stem.endsWith('s');
     out.push({ t, p: pos, r: plural ? `${root}-${root}` : root, past });
   }
+  // The first of a pair of "as" drops and the second becomes kadar. An "as"
+  // with no partner is not this construction and stays unknown rather than
+  // being quietly deleted.
+  const asAt = out.map((x, i) => (x.p === 'AS' ? i : -1)).filter((i) => i >= 0);
+  for (let k = 0; k + 1 < asAt.length; k += 2) {
+    const [a, b] = [asAt[k], asAt[k + 1]];
+    if (b - a < 2) continue;
+    out[a] = { t: out[a].t, p: 'DROP', r: null };
+    out[b] = { t: out[b].t, p: 'W', r: 'kadar' };
+  }
+  for (const x of out) if (x.p === 'AS') x.p = 'UNK';
+
   // Two degree words in one slot is the open question above. A word scaling
   // another degree word is marked open rather than written, the same as very.
   // bigger and best carry their degree in cmp rather than in r — lebi and
