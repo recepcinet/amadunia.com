@@ -4,7 +4,8 @@
 // build if this file and that one ever disagree. The IPA values and the
 // "as in" hints are the site's reading of "one letter, one sound" and are
 // not (yet) stated in phonology.md.
-import { phonologyInventory } from '../lib/lang';
+import { dictionary, phonologyInventory } from '../lib/lang';
+import { spell } from './spell';
 
 export interface Letter {
   glyph: string;
@@ -59,6 +60,35 @@ export function assertMatchesPhonology(): void {
   if (mismatch.length) {
     throw new Error(
       `src/data/alphabet.ts disagrees with lang/grammar/phonology.md — ${mismatch.join('; ')}. Update alphabet.ts.`,
+    );
+  }
+
+  // The letter list above has been checked against phonology.md since this file
+  // was written; the examples beside it were prose. phonology.md illustrated its
+  // ua row with una, which contains no ua, for exactly that reason — the
+  // sequences were checked and their illustrations were not. These are: every
+  // example is a real root, contains the letter it illustrates, and is glossed
+  // the way the dictionary glosses it.
+  const meaning = new Map(dictionary().map((e) => [e.word.toLowerCase(), e.meaning]));
+  const wrong: string[] = [];
+  for (const l of [...vowels, ...consonants, ...digraphs]) {
+    const ex = l.example.toLowerCase();
+    const m = meaning.get(ex);
+    if (m === undefined) { wrong.push(`${l.glyph}: "${l.example}" is not a root`); continue; }
+    if (!ex.includes(l.glyph.toLowerCase())) {
+      wrong.push(`${l.glyph}: "${l.example}" does not contain it`);
+      continue;
+    }
+    // The dictionary glosses a numeral with its digit and the site spells it.
+    const d = /^\d+$/.test(m) ? spell(Number(m)) : m;
+    const a = d.toLowerCase(), b = l.gloss.toLowerCase();
+    if (!a.includes(b) && !b.includes(a)) {
+      wrong.push(`${l.glyph}: "${l.example}" is glossed "${l.gloss}" here and "${m}" in the dictionary`);
+    }
+  }
+  if (wrong.length) {
+    throw new Error(
+      `src/data/alphabet.ts illustrates a letter with something that does not bear it out — ${wrong.join('; ')}.`,
     );
   }
 }
