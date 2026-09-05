@@ -177,10 +177,16 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     // "There is a hotel" is not the place word: the existential is es at the
     // front with no subject at all (grammar/copula.md). Only a clause-initial
     // there followed by the verb to be is it; "the hotel is there" is situ.
+    const before = out.filter((x) => x.p !== 'DROP');
     if (
       w === 'there' &&
-      !out.some((x) => x.p !== 'DROP') &&
-      ['is', 'are', 'was', 'were', "'s", "'re"].includes((tokens[i] ?? '').toLowerCase())
+      (
+        // "There is a hotel" — the verb follows.
+        (!before.length &&
+          ['is', 'are', 'was', 'were', "'s", "'re"].includes((tokens[i] ?? '').toLowerCase())) ||
+        // "Is there a hotel?" — the question turns the two round.
+        (before.length === 1 && before[0].p === 'BE')
+      )
     ) {
       out.push({ t, p: 'EXIST', r: null });
       continue;
@@ -257,6 +263,10 @@ function ditransitive(tg: Tok[]): Tok[] {
 
 function clause(tg: Tok[], question: boolean): string {
   tg = ditransitive(tg);
+  // "There is..." has no subject, and es stands whatever the predicate is —
+  // Es cok badal, there are many clouds (grammar/copula.md). Read before any
+  // reordering, because the question form puts the verb first.
+  const existential = tg.some((x) => x.p === 'EXIST');
   let tail: string | null = null;
 
   // "A question is the answer with one word swapped": the question word goes
@@ -266,7 +276,7 @@ function clause(tg: Tok[], question: boolean): string {
   if (question && tg[0]?.p === 'Q' && !kimSubject) { tail = tg[0].r; tg = tg.slice(1); }
 
   // A fronted "is" belongs to its predicate, not to the front of the sentence.
-  if (question && tg[0]?.p === 'BE') {
+  if (question && tg[0]?.p === 'BE' && !existential) {
     const be = tg[0], rest = tg.slice(1);
     let j = 0;
     while (rest[j]?.p === 'DROP') j++;
@@ -296,17 +306,26 @@ function clause(tg: Tok[], question: boolean): string {
     }
   }
 
+  // A place word ends its clause (grammar/place.md, settled September 5, 2026).
+  // English can put one in the middle — "the people here are good" — and
+  // Amadunia cannot, so it moves and the sentence says a little less, which is
+  // what upstream's own rewrite of that line did.
+  const lastLoc = tg.length - 1;
+  if (lastLoc >= 1 && tg[lastLoc].p !== 'LOC') {
+    const k = tg.findIndex((x) => x.p === 'LOC');
+    if (k >= 0 && k < lastLoc && !tg.some((x) => ['CONJ', 'Q', 'W'].includes(x.p))) {
+      tg = [...tg.slice(0, k), ...tg.slice(k + 1), tg[k]];
+    }
+  }
+
   const out: string[] = [];
   let i = 0, neg = false, tense: string | null = null;
-  // "There is..." has no subject, and es stands whatever the predicate is —
-  // Es cok badal, there are many clouds (grammar/copula.md).
-  let existential = false;
   const n = tg.length;
 
   while (i < n) {
     const { t, p, r, past, cmp } = tg[i];
     if (p === 'DROP') { i++; continue; }
-    if (p === 'EXIST') { existential = true; i++; continue; }
+    if (p === 'EXIST') { i++; continue; }
     if (p === 'UNK' || p === 'OPEN') { out.push(`⟨${t}⟩`); i++; continue; }
     if (p === 'NEG') { neg = true; i++; continue; }
     if (p === 'AUX') { tense = r; i++; continue; }
