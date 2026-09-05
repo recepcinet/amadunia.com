@@ -52,6 +52,12 @@ const QUANT: Record<string, string> = { many: 'cok', much: 'cok', some: 'cok', a
  * would be this page settling something the language has not.
  */
 const UNSETTLED = new Set(['very', 'sometimes', 'occasionally']);
+// cok, lebi, kurang and paling all stand in the same slot in front of what they
+// scale, and grammar/comparison.md records that nothing grants putting two
+// there at once — Cok lebi hao came out of Lesson 18 on September 4, 2026 for
+// that reason, and the page's own Ta rabota paling cok on September 5. So the
+// rules cannot say "much better", and they say so rather than inventing it.
+const DEGREE = new Set(['cok', 'lebi', 'kurang', 'paling']);
 
 // English-side only: which English word the index already answers. No Amadunia
 // word is added here — "well" is the adverb of "good", and the language uses
@@ -231,6 +237,16 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     // A plural noun doubles; nothing inside the word changes.
     const plural = pos === 'N' && stem !== base && base.endsWith('s') && !stem.endsWith('s');
     out.push({ t, p: pos, r: plural ? `${root}-${root}` : root, past });
+  }
+  // Two degree words in one slot is the open question above. A word scaling
+  // another degree word is marked open rather than written, the same as very.
+  // bigger and best carry their degree in cmp rather than in r — lebi and
+  // paling are added at output — so the pair is read from there.
+  const head = (x: Tok) => (x.p === 'CMP' ? x.cmp![0] : (x.r?.split(/[ -]/)[0] ?? ''));
+  for (let i = 0; i + 1 < out.length; i++) {
+    if (DEGREE.has(head(out[i])) && DEGREE.has(head(out[i + 1]))) {
+      out[i] = { t: out[i].t, p: 'OPEN', r: null };
+    }
   }
   return out;
 }
