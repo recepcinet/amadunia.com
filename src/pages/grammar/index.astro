@@ -176,9 +176,12 @@ const unreached = demand.rows.filter((r) => r.pages === 0);
             ))}
           </ul>
           <p class="source" style="margin-top:1.5rem">
-            Counted upstream{demand.asOf && ` ${demand.asOf}`}, and not machine-checked — the
-            language repository keeps this table by hand and says so. A question absent from it was
-            not blocked while writing; that is not the same as being small.
+            Counted upstream{demand.asOf && ` ${demand.asOf}`}. The ordering is held by
+            <a href={`${LANG_REPO}/blob/main/check.py`}>the checker</a>, which counts the pages for
+            the rows whose claim is written the same way everywhere; the rest are worded
+            differently on each page, so the table names its sources and a reader can follow them.
+            A question absent from it was not blocked while writing; that is not the same as being
+            small.
           </p>
         </>
       )
