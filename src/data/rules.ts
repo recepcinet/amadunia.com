@@ -27,7 +27,7 @@ export const rules: Rule[] = [
   },
   {
     claim: 'No two words of one length are a sound apart',
-    body: 'Same length, one letter different — a word one sound longer than another is a different thing, and four candidates were once rejected for a collision that was not one. The rule that kills most candidates, and between l and r it is absolute: telling beli from beri is the hardest contrast on Earth for well over a billion speakers, and a world language cannot rest a distinction on it. It outranks how widely a word travels — dom replaced ruma, after eighty-four uses, because ruma stood against luma.',
+    body: 'Same length, one letter different. A word one sound longer is not a minimal pair, which is what four candidates were once wrongly rejected for — though it can still sit near enough to refuse, the way ese sits one deletion from es. The ban is the narrow one; the distance is measured either way. The rule that kills most candidates, and between l and r it is absolute: telling beli from beri is the hardest contrast on Earth for well over a billion speakers, and a world language cannot rest a distinction on it. It outranks how widely a word travels — dom replaced ruma, after eighty-four uses, because ruma stood against luma.',
     href: '/grammar/phonology/',
     example: { form: 'ruma → dom', gloss: 'replaced, because luma is light and the pair differs only in l against r.' },
   },
