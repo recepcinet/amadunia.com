@@ -58,6 +58,8 @@ const UNSETTLED = new Set(['very', 'sometimes', 'occasionally']);
 // that reason, and the page's own Ta rabota paling cok on September 5. So the
 // rules cannot say "much better", and they say so rather than inventing it.
 const DEGREE = new Set(['cok', 'lebi', 'kurang', 'paling']);
+// The two question words that also open a subordinate clause (grammar/subordination.md).
+const CLAUSE_OPENER = new Set(['kab', 'porke']);
 
 // English-side only: which English word the index already answers. No Amadunia
 // word is added here — "well" is the adverb of "good", and the language uses
@@ -304,7 +306,14 @@ function clause(tg: Tok[], question: boolean): string {
   // *Nali es hotel* — es before a noun, so nothing forbids it, but copula.md
   // illustrates the place question as *Hotel nali?*, place word, no es, and
   // all ten place questions in the corpus are shaped that way.
-  if (tg[0]?.p === 'Q') question = true;
+  //
+  // Except that two of the question words also open a clause. *kab* and *porke*
+  // are filed under Question words and are what subordination.md names, with
+  // *agar*, as the markers a clause begins with — the corpus writes
+  // *Kab yamur lai, tarik kotor*, front and staying there. Reading an unmarked
+  // *When the rain stops we will go* as a question sent *kab* to the tail. With
+  // a mark typed it is still a question and still fronts.
+  if (tg[0]?.p === 'Q' && !CLAUSE_OPENER.has(tg[0].r ?? '')) question = true;
 
   const kimSubject = tg[0]?.p === 'Q' && tg[0].r === 'kim' && !tg.slice(0, 3).some((x) => x.p === 'BE');
   if (question && tg[0]?.p === 'Q' && !kimSubject) { tail = tg[0].r; tg = tg.slice(1); }
