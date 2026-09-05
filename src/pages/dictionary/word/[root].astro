@@ -57,13 +57,20 @@ const ld = [
   },
 ];
 
+// 21st and 23rd, but 11th and 13th — the teens take th whatever they end in.
+const ordinal = (n: number) => {
+  const t = n % 100;
+  if (t >= 11 && t <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+};
+
 const plural = `${root}-${root}`;
 ---
 
 <Base
   title={`${root} — ${entry.meaning}`}
   description={`${root} means "${entry.meaning}" in Amadunia.${
-    freq ? ` It is the ${freq.rank} commonest root, ${freq.share} of every word written.` : ''
+    freq ? ` It is the ${ordinal(freq.rank)} commonest root, ${freq.share} of every word written.` : ''
   }${lesson ? ` Taught in Lesson ${lesson.n}.` : ''} Etymology, examples and the sentences that use it.`}
   crumbs={[
     ['Dictionary', '/dictionary/'],
@@ -99,9 +106,7 @@ const plural = `${root}-${root}`;
             <dt>How often it is used</dt>
             <dd>
               {freq.uses} times in running Amadunia — {freq.share} of every word written, the
-              {' '}{freq.rank}
-              {freq.rank === 1 ? 'st' : freq.rank === 2 ? 'nd' : freq.rank === 3 ? 'rd' : 'th'}
-              {' '}commonest root. Counted upstream over the lessons, texts and phrasebook;
+              {' '}{ordinal(freq.rank)} commonest root. Counted upstream over the lessons, texts and phrasebook;
               <a href="/dictionary/frequency/"> the whole curve</a>.
             </dd>
           </>
