@@ -359,10 +359,14 @@ const ld = [
         missing.length
           ? `<p class="stack__note">Left in English: ${missing
               .map((w) =>
-                OPEN_WORDS.has(w.toLowerCase())
-                  ? `<strong>${esc(w)}</strong> is not written because the language has not
-                     settled it — see <a href="/grammar/adverbs/">the open question</a>`
-                  : `the dictionary has no entry for <strong>${esc(w)}</strong>`,
+                /^\d+$/.test(w)
+                  ? `<strong>${esc(w)}</strong> needs a separator between its groups, and whether
+                     that is a hyphen or a space is
+                     <a href="/grammar/numbers/">an open question</a>`
+                  : OPEN_WORDS.has(w.toLowerCase())
+                    ? `<strong>${esc(w)}</strong> is not written because the language has not
+                       settled it — see <a href="/grammar/adverbs/">the open question</a>`
+                    : `the dictionary has no entry for <strong>${esc(w)}</strong>`,
               )
               .join('; ')}.</p>`
           : '',

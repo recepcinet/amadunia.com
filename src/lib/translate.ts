@@ -89,16 +89,23 @@ const IRREG_PL: Record<string, string> = {
  * digit after it adds, so du-des is twenty and des-du is twelve
  * (grammar/numbers.md). Every root comes from the lexicon; none is typed here.
  */
-export function numeral(lex: Lexicon, n: number): string {
+export function numeral(lex: Lexicon, n: number): string | null {
   const r = (v: number) => lex.num[String(v)];
-  if (n >= 1 && n <= 10) return r(n) ?? String(n);
-  if (n === 100 || n === 1000) return r(n) ?? String(n);
+  if (n >= 1 && n <= 10) return r(n) ?? null;
+  if (n === 100 || n === 1000) return r(n) ?? null;
   if (n > 10 && n < 20) return `${r(10)}-${numeral(lex, n - 10)}`;
   if (n < 100 && n % 10 === 0) return `${numeral(lex, n / 10)}-${r(10)}`;
   if (n < 100) return `${numeral(lex, Math.floor(n / 10))}-${r(10)}-${numeral(lex, n % 10)}`;
+  // A digit before a base multiplies it, so tri-sen is three hundred and
+  // du-mila two thousand. Both shapes are attested.
+  if (n < 1000 && n % 100 === 0) return `${numeral(lex, n / 100)}-${r(100)}`;
   if (n < 10000 && n % 1000 === 0) return `${numeral(lex, n / 1000)}-${r(1000)}`;
-  return String(n);
+  // Anything else needs a separator between its groups, and whether that is a
+  // hyphen or a space is an open question in grammar/numbers.md. Writing one
+  // would answer it by accident, so this writes none.
+  return null;
 }
+
 
 type Tok = { t: string; p: string; r: string | null; past?: boolean; cmp?: [string, string] };
 
@@ -158,8 +165,12 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     if (w in POSS_PRON) { out.push({ t, p: 'PRON', r: POSS_PRON[w] }); continue; }
     if (w in PRON) { out.push({ t, p: 'PRON', r: PRON[w] }); continue; }
     if (w in DEM) { out.push({ t, p: 'DEM', r: DEM[w] }); continue; }
-    if (w in NUMVALUE) { out.push({ t, p: 'NUM', r: numeral(lex, NUMVALUE[w]) }); continue; }
-    if (/^\d+$/.test(w)) { out.push({ t, p: 'NUM', r: numeral(lex, Number(w)) }); continue; }
+    if (w in NUMVALUE || /^\d+$/.test(w)) {
+      const v = w in NUMVALUE ? NUMVALUE[w] : Number(w);
+      const am = numeral(lex, v);
+      out.push(am ? { t, p: 'NUM', r: am } : { t, p: 'NUMOPEN', r: null });
+      continue;
+    }
     if (w === 'not' || w === 'no') { out.push({ t, p: 'NEG', r: 'no' }); continue; }
     if (w === 'do' || w === 'does') { out.push({ t, p: 'DROP', r: null }); continue; }
     if (w === 'did') { out.push({ t, p: 'AUX', r: 'suda' }); continue; }
@@ -224,7 +235,7 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
   return out;
 }
 
-const NP = ['POSS', 'NUM', 'DEM', 'ADJ', 'N', 'PRON', 'NAME', 'QUANT', 'DEG', 'CMP'];
+const NP = ['POSS', 'NUM', 'NUMOPEN', 'DEM', 'ADJ', 'N', 'PRON', 'NAME', 'QUANT', 'DEG', 'CMP'];
 
 // Verbs that hand something over. Their recipient takes por, because two nouns
 // side by side already mean possession: Mi beri pan dugu mi would read as "I
@@ -349,9 +360,13 @@ function clause(tg: Tok[], question: boolean): string {
       for (const g of groups.filter((x) => x.length).reverse()) {
         const owner: string[] = [], adjs: string[] = [], pre: string[] = [];
         let dem: string | null = null, num: string | null = null, head: string | null = null;
+        let counted = false, gap: string | null = null;
         for (const x of g) {
           if (x.p === 'POSS') owner.push(x.r!);
           else if (x.p === 'NUM') num = x.r;
+          // A number the language has not settled how to write is still a
+          // number, and the noun after one stays single.
+          else if (x.p === 'NUMOPEN') { counted = true; gap = x.t; }
           else if (x.p === 'DEM') dem = x.r;
           else if (x.p === 'DEG' || x.p === 'QUANT') pre.push(x.r!);
           else if (x.p === 'CMP') { pre.push(x.cmp![0]); adjs.push(x.cmp![1]); }
@@ -367,12 +382,15 @@ function clause(tg: Tok[], question: boolean): string {
         if (head === null) {
           // "five years old" splits: the number stands alone here and tahun
           // follows as its own piece. Dropping it lost the five.
+          if (gap) out.push(`⟨${gap}⟩`);
           if (num) out.push(num);
           out.push(...pre, ...adjs);
           continue;
         }
-        // After a number the noun stays single: the number has done the work.
+        // After a number the noun stays single: the number has done the work,
+        // and a number the language cannot yet write has still done it.
         let rest = pre;
+        if (gap) { out.push(`\u27e8${gap}\u27e9`); head = head.split('-')[0]; }
         if (num) { out.push(num); head = head.split('-')[0]; }
         if (pre.length) head = head.split('-')[0];
         if (pre.length && !adjs.length) { out.push(pre[0]); rest = pre.slice(1); }
