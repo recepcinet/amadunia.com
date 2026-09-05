@@ -780,7 +780,9 @@ export function englishIndexJson(site: string): string {
       source: `${LANG_REPO}/blob/main/dictionary/index-english.md`,
       site,
       pos_note:
-        'Word class per root, read off the headings in dictionary.md. N noun, V verb, ADJ adjective, Q question word, P preposition, LOC place word, NUM number, DEM demonstrative, G particle.',
+        'Word class per root, read off the headings in dictionary.md. N noun, V verb, ADJ adjective, Q question word, P preposition, LOC place word, NUM number, DEM demonstrative, G particle. ' +
+        'This reports where the dictionary files a root, not a ruling on it: where a root\u2019s class is itself an open question — rabota is used both ways — the grouping is not the answer. ' +
+        `See ${LANG_REPO}/blob/main/grammar/proposal-two-jobs.md`,
       pos: posIndex(),
       numerals: numerals(),
       names: corpusNames(),
