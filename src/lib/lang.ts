@@ -583,6 +583,24 @@ export function textsClaims(): { lead: string; rest: string }[] {
 }
 
 /** "story-2-safari-por-pahar" and "text-5-uan" both order by their number. */
+/**
+ * How many texts exercise each settled rule, from the table check.py generates
+ * in texts/README.md. The claim above it says "this table", so the page that
+ * quotes the claim has to carry the table with it.
+ */
+export function rulesExercised(): { rule: string; texts: number }[] {
+  const body = readLang('texts/README.md');
+  const i = body.indexOf('<!-- generated -->');
+  const j = body.indexOf('<!-- end generated -->');
+  if (i === -1 || j === -1) return [];
+  return body
+    .slice(i, j)
+    .split('\n')
+    .map((line) => line.match(/^\|\s*([a-z ]+?)\s*\|\s*(\d+)\s*\|$/))
+    .filter((m): m is RegExpMatchArray => Boolean(m))
+    .map((m) => ({ rule: m[1], texts: Number(m[2]) }));
+}
+
 export function textNumber(id: string): number {
   return Number(id.match(/^(?:story|text)-(\d+)/)?.[1] ?? 0);
 }

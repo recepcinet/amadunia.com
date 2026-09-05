@@ -614,3 +614,23 @@ img, svg { max-width: 100%; }
   margin: 0;
   color: var(--am);
 }
+
+/* ---------- Which rules the texts exercise ---------- */
+
+.exercised {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  max-width: 22rem;
+}
+.exercised li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  padding-block: 0.4rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+}
+.exercised li:last-child { border-bottom: 1px solid var(--rule); }
+.exercised li span:last-child { color: var(--ink-soft); font-variant-numeric: tabular-nums; }

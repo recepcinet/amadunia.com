@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Band from '../../components/Band.astro';
-import { titleOf, subtitleOf, rootsUsedOf, gapsOf, textNumber, textKinds, textsClaims, markAmadunia, LANG_REPO } from '../../lib/lang';
+import { titleOf, subtitleOf, rootsUsedOf, gapsOf, textNumber, textKinds, textsClaims, rulesExercised, markAmadunia, LANG_REPO } from '../../lib/lang';
 import { dictionary } from '../../lib/lang';
 
 const kinds = textKinds();
@@ -20,6 +20,7 @@ const texts = (await getCollection('texts'))
 const openGaps = texts.reduce((n, t) => n + t.gaps.open, 0);
 const roots = dictionary().length;
 const claims = textsClaims();
+const exercised = rulesExercised();
 ---
 
 <Base
@@ -70,6 +71,19 @@ const claims = textsClaims();
                 {markAmadunia(c.rest).map((p) =>
                   p.am ? <span lang="art-x-amadunia">{p.text}</span> : p.text,
                 )}
+                {
+                  /* The claim says "this table", so it comes with one. */
+                  c.rest.includes('This table is regenerated') && exercised.length > 0 && (
+                    <ul class="exercised">
+                      {exercised.map((e) => (
+                        <li>
+                          <span>{e.rule}</span>
+                          <span>{e.texts}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                }
               </dd>
             </>
           ))}
