@@ -473,6 +473,7 @@ export function translate(lex: Lexicon, sentence: string): string {
   if (buf.trim()) pieces.push([buf, '']);
 
   const outs: string[] = [];
+  let prev: Tok[] = [];
   for (const [raw, punct] of pieces) {
     let chunk = raw
       .replace(/\b(\w+)'ll\b/gi, '$1 will')
@@ -496,7 +497,19 @@ export function translate(lex: Lexicon, sentence: string): string {
     }
     if (!toks.length) continue;
     const q = punct === '?' || text.endsWith('?');
-    let am = clause(tag(lex, toks), q);
+    let tg = tag(lex, toks);
+
+    // English drops the verb after a comma — "I want this, not that" — and
+    // Amadunia has no ellipsis: no stands before a predicate, never a noun
+    // (grammar/negation.md). Put the subject and verb back, which is what
+    // upstream did to all five sentences that had copied the English shape.
+    if (tg[0]?.p === 'NEG' && !tg.some((x) => x.p === 'V' || x.p === 'BE') && prev.length) {
+      const head = prev.findIndex((x) => x.p === 'V' || x.p === 'BE');
+      if (head >= 0) tg = [...prev.slice(0, head), tg[0], prev[head], ...tg.slice(1)];
+    }
+    prev = tg;
+
+    let am = clause(tg, q);
     if (!am) continue;
     if (/^[A-Z]/.test(raw.trim())) am = am[0].toUpperCase() + am.slice(1);
     outs.push(am + ('.?!,;'.includes(punct) ? punct : ''));
