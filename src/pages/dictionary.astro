@@ -93,11 +93,15 @@ const ld = [
             <li>
               <span class="stack__inert entry">
                 <span class="entry__word">{w.word}</span>
-                <span class="entry__meaning">
-                  {markAmadunia(w.sentence).map((p) =>
-                    p.am ? <span lang="art-x-amadunia">{p.text}</span> : p.text,
-                  )}
-                </span>
+                {/* A gap found by a question stopped no sentence, so it has none
+                    and the element is left out rather than left empty. */}
+                {w.sentence && (
+                  <span class="entry__meaning">
+                    {markAmadunia(w.sentence).map((p) =>
+                      p.am ? <span lang="art-x-amadunia">{p.text}</span> : p.text,
+                    )}
+                  </span>
+                )}
                 <span class="entry__sources">
                   {w.foundByHref ? <a href={w.foundByHref}>{w.foundBy}</a> : w.foundBy}
                 </span>

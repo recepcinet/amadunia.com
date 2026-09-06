@@ -198,7 +198,12 @@ export function wantedWords(): Wanted[] {
   const body = readLang('dictionary/README.md');
   const rows = tableRows(body, '## Words the writing has asked for');
   return rows
-    .filter((r) => r[0] && r[2])
+    // A gap needs a word; the sentence that stopped is not required, because the
+    // page's own third way of finding one is a question, and a question stops no
+    // sentence. Requiring it dropped "uncle, aunt, grandmother, cousin", whose
+    // row carries two cells in a three-column table, so the band read fourteen
+    // where the page says fifteen.
+    .filter((r) => r[0])
     .map((r) => {
       const link = r[1]?.match(/\[([^\]]+)\]\(([^)]+)\)/);
       const id = link?.[2].match(/([^/]+)\.md$/)?.[1];
