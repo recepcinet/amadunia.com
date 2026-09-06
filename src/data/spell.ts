@@ -17,6 +17,10 @@ export function spell(n: number): string {
     const t = tens[Math.floor(n / 10)];
     return n % 10 === 0 ? t : `${t}-${words[n % 10]}`;
   }
+  if (n >= 100 && n < 1000) {
+    const h = `${words[Math.floor(n / 100)]} hundred`;
+    return n % 100 === 0 ? h : `${h} and ${spell(n % 100)}`;
+  }
   return String(n);
 }
 

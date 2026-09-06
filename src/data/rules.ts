@@ -5,12 +5,15 @@
 // out of date quietly.
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { numerals } from '../lib/lang';
+import { dictionary, numerals, taughtIn } from '../lib/lang';
 import { spell, Spell } from './spell';
 
 // Four pages upstream stated the size of the number system and three had gone
 // stale, because settling mila moved a ceiling without breaking a sentence.
 // This one is counted off the dictionary instead of written down.
+// The roots count is stated three times in the prose below. An index is where a
+// withdrawn number survives, so it is counted rather than written.
+const roots = dictionary().length;
 const num = numerals();
 const digits = Object.keys(num).filter((v) => Number(v) < 10).length;
 const bases = Object.keys(num).length - digits;
@@ -132,7 +135,7 @@ export const rules: Rule[] = [
   },
   {
     claim: 'Every letter has one named sound',
-    body: 'The plain five vowels — the commonest system on Earth, shared by Spanish, Japanese, Swahili, Indonesian, Greek, Hausa and Turkish. The values were not chosen: three hundred sourced etymologies already committed the language to them, and this reads them back off the vocabulary.',
+    body: `The plain five vowels — the commonest system on Earth, shared by Spanish, Japanese, Swahili, Indonesian, Greek, Hausa and Turkish. The values were not chosen: ${spell(roots)} sourced etymologies already committed the language to them, and this reads them back off the vocabulary.`,
     href: '/grammar/pronunciation/',
     example: { form: 'ca, dunia, kita, dom', gloss: 'from Chinese chá, Arabic dunyā, Indonesian kita, Russian dom — every source reads these letters the same way.' },
   },
@@ -162,7 +165,7 @@ export const rules: Rule[] = [
   },
   {
     claim: 'Two roots join for a number or a plural, and for nothing else',
-    body: 'Every hyphen in the language is one or the other; not one compound word has ever been formed. Three hundred roots go further than three hundred words because things can be described with what is already there, not because new words can be built out of old ones.',
+    body: `Every hyphen in the language is one or the other; not one compound word has ever been formed. ${Spell(roots)} roots go further than ${spell(roots)} words because things can be described with what is already there, not because new words can be built out of old ones.`,
     href: '/grammar/word-formation/',
     example: { form: 'Mesin ambil foto korpo anak.', gloss: "A machine takes a photo of the child's body — an X-ray, said with no new root and no new word." },
   },
@@ -185,6 +188,21 @@ export const rules: Rule[] = [
  * Proposals are briefings rather than rules and are listed separately, on
  * /grammar/, so they are exempt.
  */
+// The prose states one "since Lesson NN" claim. That class is what goes stale in
+// a summary: the lesson can move and an index has no way to notice, because it
+// restates the claim in one clause and links to the page that owns it.
+const LESSON_CLAIMS: Record<string, number> = { dari: 15 };
+
+export function assertLessonClaims(): void {
+  const taught = taughtIn();
+  const wrong = Object.entries(LESSON_CLAIMS)
+    .filter(([w, n]) => taught[w]?.n !== n)
+    .map(([w, n]) => `${w}: stated as Lesson ${n}, taught in ${taught[w] ? `Lesson ${taught[w].n}` : 'no lesson'}`);
+  if (wrong.length) {
+    throw new Error(`src/data/rules.ts names a lesson that has moved — ${wrong.join('; ')}.`);
+  }
+}
+
 export function assertCoversGrammar(): void {
   const dir = join(process.cwd(), 'lang', 'grammar');
   const topics = readdirSync(dir)
