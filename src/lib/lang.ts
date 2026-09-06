@@ -692,17 +692,6 @@ export function textsClaims(): { lead: string; rest: string }[] {
   for (const para of body.split(/\n\s*\n/)) {
     const m = para.match(/^\*\*([^*]+)\*\*([\s\S]*)$/);
     if (!m) continue;
-    const clean = (t: string) =>
-      t
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        // Emphasis markers, not text. The colour on an Amadunia word here comes
-        // from the dictionary, not from upstream's italics, so dropping them
-        // loses nothing and printing them would show a reader an asterisk.
-        .replace(/\*\*([^*]+)\*\*/g, '$1')
-        .replace(/\*([^*]+)\*/g, '$1')
-        .replace(/`([^`]+)`/g, '$1')
-        .replace(/\s+/g, ' ')
-        .trim();
     out.push({ lead: clean(m[1]), rest: clean(m[2]) });
   }
   return out;
@@ -1005,8 +994,20 @@ export interface Pair {
   source: string; // file the pair came from
 }
 
+// Markdown that is markup rather than text: links reduced to their label, and
+// emphasis dropped because the colour on an Amadunia word comes from the
+// dictionary and printing an asterisk would show a reader one. Two copies of
+// this stood in the file, one thorough and one not, under the same name — the
+// shape upstream keeps finding. Making the module copy do all six and deleting
+// the local one leaves the corpus byte-identical.
 const clean = (s: string) =>
-  s.replace(/\*\*/g, '').replace(/\*/g, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').trim();
+  s
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 /**
  * Amadunia–English sentence pairs, pulled from every table whose columns are
