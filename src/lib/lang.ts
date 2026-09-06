@@ -198,11 +198,13 @@ export function wantedWords(): Wanted[] {
   const body = readLang('dictionary/README.md');
   const rows = tableRows(body, '## Words the writing has asked for');
   return rows
-    // A gap needs a word; the sentence that stopped is not required, because the
-    // page's own third way of finding one is a question, and a question stops no
-    // sentence. Requiring it dropped "uncle, aunt, grandmother, cousin", whose
-    // row carries two cells in a three-column table, so the band read fourteen
-    // where the page says fifteen.
+    // A gap needs a word and nothing else. Requiring the third cell as well
+    // dropped "uncle, aunt, grandmother, cousin" on September 15, 2026, when
+    // that row had lost a cell wall and carried only two — the band read
+    // fourteen where the page said fifteen. Upstream repaired the row the next
+    // day and now checks that every row has the header's number of cells, so
+    // this is no longer what keeps the count right; it is what stops a
+    // malformed row from silently shortening the list again.
     .filter((r) => r[0])
     .map((r) => {
       const link = r[1]?.match(/\[([^\]]+)\]\(([^)]+)\)/);

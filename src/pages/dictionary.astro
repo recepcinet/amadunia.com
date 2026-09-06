@@ -93,8 +93,9 @@ const ld = [
             <li>
               <span class="stack__inert entry">
                 <span class="entry__word">{w.word}</span>
-                {/* A gap found by a question stopped no sentence, so it has none
-                    and the element is left out rather than left empty. */}
+                {/* Every gap states the sentence that stopped, and one did not for
+                    a day. The element is left out rather than left empty when a
+                    row has no third cell. */}
                 {w.sentence && (
                   <span class="entry__meaning">
                     {markAmadunia(w.sentence).map((p) =>
