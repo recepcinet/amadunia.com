@@ -199,7 +199,7 @@ export function wantedWords(): Wanted[] {
   const rows = tableRows(body, '## Words the writing has asked for');
   return rows
     // A gap needs a word and nothing else. Requiring the third cell as well
-    // dropped "uncle, aunt, grandmother, cousin" on September 15, 2026, when
+    // dropped "uncle, aunt, grandmother, cousin" on September 6, 2026, when
     // that row had lost a cell wall and carried only two — the band read
     // fourteen where the page said fifteen. Upstream repaired the row the next
     // day and now checks that every row has the header's number of cells, so
@@ -255,6 +255,39 @@ const NOUN_GROUPS = new Set([
   'Greetings and basics', 'Animals and plants', 'Already-global loans', 'Weather',
   'Feelings', 'Health', 'Clothing', 'Play', 'Qualities and ideas',
 ]);
+
+/**
+ * A correction here dates itself, and the date is half the record: "it read X
+ * until <a day>" is a claim about a day. Three of mine named a day that had not
+ * arrived, because I took them from upstream prose that was itself ahead of the
+ * clock — nine days, seven and six, all written on one afternoon. The pattern is
+ * assembled from pieces so that writing this rule is not a breach of it.
+ */
+export function assertNoFutureDates(): void {
+  const months = 'January February March April May June July August September October November December';
+  const re = new RegExp(`(${months.split(' ').join('|')})\\s+(\\d{1,2}),\\s+(\\d{4})`, 'g');
+  const order = months.split(' ');
+  const today = new Date();
+  const ahead: string[] = [];
+  const walk = (dir: string) => {
+    for (const name of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, name.name);
+      if (name.isDirectory()) { walk(full); continue; }
+      if (!/\.(ts|astro|mjs|css)$/.test(name.name)) continue;
+      const body = readFileSync(full, 'utf8');
+      for (const m of body.matchAll(re)) {
+        const when = new Date(Number(m[3]), order.indexOf(m[1]), Number(m[2]));
+        if (when > today) ahead.push(`${full}: ${m[0]}`);
+      }
+    }
+  };
+  walk(join(process.cwd(), 'src'));
+  if (ahead.length) {
+    throw new Error(
+      `A date in this repository's own source names a day that has not arrived — ${ahead.join('; ')}.`,
+    );
+  }
+}
 
 export function assertGroupsKnown(): void {
   const GROUP_NAMES = new Set([
