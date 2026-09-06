@@ -1,12 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
-import { corpus, dictionary, corpusTsv, corpusJsonl, fullReference, dictionaryJson, englishIndex, englishIndexJson, readmeStatus, langFileSize, bytes, materialCounts, LANG_REPO } from '../lib/lang';
+import { assertGroupsKnown, corpus, dictionary, corpusTsv, corpusJsonl, fullReference, dictionaryJson, englishIndex, englishIndexJson, readmeStatus, langFileSize, bytes, materialCounts, LANG_REPO } from '../lib/lang';
 
 const pairs = corpus();
 const words = dictionary();
 import { spell } from '../data/spell';
 
+assertGroupsKnown();
 const material = materialCounts();
 
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';

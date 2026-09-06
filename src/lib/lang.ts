@@ -233,6 +233,39 @@ export function englishIndex(): { en: string; am: string[] }[] {
  * themselves. Qualities and ideas holds both adjectives and abstract nouns, so
  * that one group is split by whether the gloss reads as a thing.
  */
+/**
+ * The dictionary's thematic headings whose members are plain nouns. posIndex
+ * falls back to N for anything not in GROUP, which is right for all fifteen of
+ * these — Body, Weather, Clothing and the rest are groups of things. It would
+ * also be silently right-looking for a heading of adjectives added tomorrow,
+ * which is the fault upstream found in its own family map: a name the data
+ * carries and the map does not know is a thing the measurement cannot see, and
+ * nothing says so. So the set is written down and a new heading has to be
+ * classed on purpose.
+ */
+const NOUN_GROUPS = new Set([
+  'Home and world', 'People', 'Town and money', 'Food and water', 'Time', 'Body',
+  'Greetings and basics', 'Animals and plants', 'Already-global loans', 'Weather',
+  'Feelings', 'Health', 'Clothing', 'Play', 'Qualities and ideas',
+]);
+
+export function assertGroupsKnown(): void {
+  const GROUP_NAMES = new Set([
+    'Actions', 'Question words', 'Prepositions', 'Grammar particles',
+    'Numbers', 'This and that', 'Place', 'Colours',
+  ]);
+  const unknown = [
+    ...new Set(dictionary().map((e) => e.group).filter((g) => !GROUP_NAMES.has(g) && !NOUN_GROUPS.has(g))),
+  ];
+  if (unknown.length) {
+    throw new Error(
+      `lang/dictionary/ has heading${unknown.length === 1 ? '' : 's'} posIndex has never been ` +
+        `told about — ${unknown.join(', ')}. Their roots are being classed as nouns by default. ` +
+        `Add each to GROUP with its word class, or to NOUN_GROUPS if its members are things.`,
+    );
+  }
+}
+
 export function posIndex(): Record<string, string> {
   const GROUP: Record<string, string> = {
     Actions: 'V', 'Question words': 'Q', Prepositions: 'P', 'Grammar particles': 'G',
