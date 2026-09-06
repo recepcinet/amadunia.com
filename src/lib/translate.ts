@@ -261,15 +261,26 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     const plural = pos === 'N' && stem !== base && base.endsWith('s') && !stem.endsWith('s');
     out.push({ t, p: pos, r: plural ? `${root}-${root}` : root, past });
   }
-  // dekat is an adjective and adjectives follow their noun, so it cannot govern
-  // one: *Dom ta in tarik dekat sungai* reads "a near road" with the river left
+  // A place word cannot govern a noun. dekat is an adjective and adjectives
+  // follow their noun, so it cannot take one: *Dom ta in tarik dekat sungai* reads "a near road" with the river left
   // dangling, and text 24 had to say it as two sentences — Dom ta in tarik.
   // Sungai dekat. The language has three prepositions, in, dari and por, and
   // none of them is beside. Every use of dekat in the corpus is predicative or
   // standalone. So "near" with a noun after it is marked open rather than
   // written, and "the road is near" still comes out tarik dekat.
   for (let i = 0; i + 1 < out.length; i++) {
-    if (out[i].r !== 'dekat') continue;
+    // Widened from dekat alone on September 10, when text 25 gave the second
+    // witness: Sungai sub says the river is below and stops, because sub can no
+    // more take a noun than dekat could. Every place word is the same shape.
+    // The twelve corpus lines where one is followed by a root all have a comma
+    // or a full stop between, and translate() has already split on those.
+    if (out[i].p !== 'LOC' && out[i].r !== 'dekat') continue;
+    // Only where a copula puts the place word in the predicate: "the river is
+    // below the bridge" asserts the relation, where "right hand" and "two
+    // children here" merely put the word before its noun, and the engine
+    // rightly moves it after. Measured: without this the corpus loses
+    // Mano yamin, mano kiri and Du anak sini.
+    if (!out.slice(0, i).some((x) => x.p === 'BE')) continue;
     let j = i + 1;
     while (j < out.length && out[j].p === 'DROP') j++;
     if (j < out.length && ['N', 'PRON', 'NAME', 'POSS', 'DEM'].includes(out[j].p)) {
