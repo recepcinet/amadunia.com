@@ -748,15 +748,29 @@ export function splitLessonTitle(title: string): { label: string; name: string }
  */
 export function assertLessonWordCounts(): void {
   const wrong: string[] = [];
+  let found = 0;
   for (const name of lessonFiles()) {
     const body = readLang(`lessons/${name}`);
     const claim = body.match(/\b([A-Za-z][a-z-]+|\d+) words are new here/)?.[1];
     if (!claim) continue;
+    found++;
     const got = newWordsOf(body);
     const said = /^\d+$/.test(claim) ? claim : claim.toLowerCase();
     if (said !== String(got) && said !== spell(got)) {
       wrong.push(`${name} says ${claim} words are new here; the table gives ${got}`);
     }
+  }
+  // Two lessons state their own figure — 24 and 25 — and the rest state none, so
+  // this reads two claims. A check that finds nothing to check passes exactly
+  // like one that checked everything, which is how a map returning empty for
+  // what it does not know lets a check pass by not running. If upstream rewords
+  // the sentence, this says so rather than going quiet.
+  if (found < 2) {
+    throw new Error(
+      `assertLessonWordCounts found ${found} lesson${found === 1 ? '' : 's'} stating "N words ` +
+        `are new here", and expects at least two. The sentence has been reworded, so the check ` +
+        `is no longer reading anything.`,
+    );
   }
   if (wrong.length) {
     throw new Error(`A lesson's own word count disagrees with its table — ${wrong.join('; ')}.`);
