@@ -21,6 +21,23 @@ const openGaps = texts.reduce((n, t) => n + t.gaps.open, 0);
 const roots = dictionary().length;
 const claims = textsClaims();
 const exercised = rulesExercised();
+// Which claim the rule table belongs under: the first one that points at it.
+const tableClaim = claims.find((c) => /\btable\b/i.test(`${c.lead} ${c.rest}`));
+if (!tableClaim) {
+  throw new Error(
+    'No claim on lang/texts/README.md refers to the rule table, so the table has ' +
+      'nowhere to attach. It was rendered under one until upstream reworded it.',
+  );
+}
+
+// An empty table means the generated block in texts/README.md stopped parsing,
+// which is a thing to be told about rather than to render as nothing.
+if (exercised.length === 0) {
+  throw new Error(
+    'rulesExercised() found no rows in the generated block of lang/texts/README.md. ' +
+      'The markers or the row shape changed.',
+  );
+}
 
 // This page counts the texts from the content collection and /data/ counts them
 // from the language directory — two counters for one fact, which is how a
@@ -86,8 +103,12 @@ if (counted !== texts.length) {
                   p.am ? <span lang="art-x-amadunia">{p.text}</span> : p.text,
                 )}
                 {
-                  /* The claim says "this table", so it comes with one. */
-                  c.rest.includes('This table is regenerated') && exercised.length > 0 && (
+                  /* The first claim that points at the table brings it with
+                     it. This matched upstream's exact sentence until September
+                     8, 2026, when that sentence was moved out of the claim and
+                     the table silently vanished from this page — a condition
+                     tied to a wording rather than to the thing it is about. */
+                  c === tableClaim && (
                     <ul class="exercised">
                       {exercised.map((e) => (
                         <li>

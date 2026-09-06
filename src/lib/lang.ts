@@ -336,6 +336,20 @@ export function lexicon(): {
  * A dataset description is read by machines and nobody proofreads it, which is
  * exactly where a hand-typed number goes stale unseen.
  */
+/**
+ * The lesson files, in order. Written out three times before — in
+ * materialCounts, taughtIn and assertLessonWordCounts — with the same pattern
+ * each time. They agreed, but upstream's finding is that two copies of one
+ * judgement are not a risk of disagreement, they are a guarantee of it, and the
+ * only question is which figure someone reads first. lessons/ also holds a
+ * README and the reading ladder, which are not lessons.
+ */
+function lessonFiles(): string[] {
+  return readdirSync(join(LANG, 'lessons'))
+    .filter((n) => n.endsWith('.md') && /^lesson-\d+/.test(n))
+    .sort((a, b) => lessonNumber(a) - lessonNumber(b));
+}
+
 export function materialCounts(): { rules: number; lessons: number; texts: number } {
   const md = (dir: string, keep: (n: string) => boolean) =>
     readdirSync(join(LANG, dir)).filter((n) => n.endsWith('.md') && keep(n)).length;
@@ -351,9 +365,7 @@ export function materialCounts(): { rules: number; lessons: number; texts: numbe
 /** Which lesson first teaches each root, read off the lessons' own tables. */
 export function taughtIn(): Record<string, { id: string; n: number }> {
   const out: Record<string, { id: string; n: number }> = {};
-  const names = readdirSync(join(LANG, 'lessons'))
-    .filter((n) => /^lesson-\d+/.test(n))
-    .sort((a, b) => lessonNumber(a) - lessonNumber(b));
+  const names = lessonFiles();
   for (const name of names) {
     const id = name.replace(/\.md$/, '');
     for (const w of lessonWords(readLang(`lessons/${name}`), '## New words')) {
@@ -703,7 +715,7 @@ export function splitLessonTitle(title: string): { label: string; name: string }
  */
 export function assertLessonWordCounts(): void {
   const wrong: string[] = [];
-  for (const name of readdirSync(join(LANG, 'lessons')).filter((n) => /^lesson-\d+/.test(n))) {
+  for (const name of lessonFiles()) {
     const body = readLang(`lessons/${name}`);
     const claim = body.match(/\b([A-Za-z][a-z-]+|\d+) words are new here/)?.[1];
     if (!claim) continue;
