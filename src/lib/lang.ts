@@ -931,6 +931,17 @@ export function corpus(): Pair[] {
     am = clean(am); en = clean(en);
     if (!am || !en || am === '—' || en === '—') return;
     if (!isAmadunia(am)) return;
+    // A row whose comma-separated items all begin with the same word is a list
+    // of examples of one construction, not a sentence: "lebi kabir, lebi hayai,
+    // lebi baid, lebi hao | more". Texts 13, 22 and 23 each carry one such
+    // table, showing every part of a rule at once, and nine of their rows were
+    // entering the corpus as though somebody had said them — the phrasebook's
+    // dot-separated word list read as two sentences, one table over.
+    if (!/[.!?]$/.test(am) && am.includes(',')) {
+      const items = am.split(',').map((x) => x.trim()).filter(Boolean);
+      const heads = new Set(items.map((x) => x.split(/\s+/)[0].toLowerCase()));
+      if (items.length >= 2 && heads.size === 1) return;
+    }
     // An em dash on the English side alone opens a note, not a translation:
     // "My head is hot. — the nearest the language gets to my head hurts".
     // Where both sides carry one it is dialogue or punctuation, and stays.

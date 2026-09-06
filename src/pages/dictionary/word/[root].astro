@@ -115,9 +115,11 @@ const plural = `${root}-${root}`;
 
       <dt>In the published corpus</dt>
       <dd>
-        {pairs} of the {corpusSize} glossed sentence pairs use it. That is a narrower measure than
-        the one above — only sentences carrying an English translation are in
-        <a href="/data/"> the corpus</a> — and it is the one you can check for yourself.
+        {pairs} of the {corpusSize} glossed sentence pairs use it.{' '}
+        {freq
+          ? 'That is a narrower measure than the one above — only sentences carrying an English translation are in '
+          : 'Only the sentences that carry an English translation are in '}
+        <a href="/data/">the corpus</a>, and it is the measure you can check for yourself.
       </dd>
 
       {
