@@ -42,7 +42,14 @@ const NUMVALUE: Record<string, number> = {
   one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9,
   ten: 10, eleven: 11, twelve: 12, twenty: 20, hundred: 100, thousand: 1000,
 };
-const QUANT: Record<string, string> = { many: 'cok', much: 'cok', some: 'cok', all: 'cok' };
+// berapa counts a noun and the noun after it stays single, the same as after a
+// number: berapa anak, berapa rafiki, Berapa dom, every one of them in the
+// corpus. It was a PHRASE, which is emitted in place and never reaches the rule
+// that keeps a counted noun single, so "how many breads" came out berapa
+// pan-pan.
+const QUANT: Record<string, string> = {
+  many: 'cok', much: 'cok', some: 'cok', all: 'cok',
+};
 
 /**
  * Words the language has not settled, which this does not write. Whether cok
@@ -152,7 +159,15 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     for (const k of [3, 2, 1]) {
       if (i + k > tokens.length) continue;
       const ph = tokens.slice(i, i + k).map((x) => x.toLowerCase()).join(' ');
-      if (ph in PHRASE) { out.push({ t, p: 'PHRASE', r: PHRASE[ph] }); consumed = k; w = ''; break; }
+      if (ph in PHRASE) {
+        // berapa counts a noun, so it is a quantifier and the noun after it
+        // stays single — berapa anak, Berapa dom, every one in the corpus.
+        // Emitted in place as a PHRASE it never reached that rule, and "how
+        // many breads" came out berapa pan-pan.
+        const p = PHRASE[ph] === 'berapa' ? 'QUANT' : 'PHRASE';
+        out.push({ t, p, r: PHRASE[ph] });
+        consumed = k; w = ''; break;
+      }
       if (ph in SYN && k > 1) { w = SYN[ph]; consumed = k; break; }
     }
     i += consumed;
@@ -245,7 +260,11 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
       // English word up in the language's own colour, which is a claim this
       // page must not make. A name is a word the writing already uses as one,
       // or a capital somewhere a capital had to be chosen.
-      const lower = t.toLowerCase();
+      // Look under the word a synonym mapped to as well as the one typed. hi is
+      // a root the English index does not answer for, so "Hi" resolved through
+      // the root test below while "hello" — which SYN turns into hi — did not,
+      // because that test read the original token.
+      const lower = base in lex.pos ? base : t.toLowerCase();
       // A word the English index cannot answer may still be Amadunia: Sol is a
       // name in the writing and sol is the root for sun, and someone typing
       // either means the same word.
@@ -606,7 +625,15 @@ export function translate(lex: Lexicon, sentence: string): string {
 
     let am = clause(tg, q);
     if (!am) continue;
-    if (/^[A-Z]/.test(raw.trim())) am = am[0].toUpperCase() + am.slice(1);
+    // A dialogue turn opens with an em dash and is still a sentence: text 29 is
+    // thirty of them, and testing the first character rather than the first
+    // letter left every one lowercase.
+    if (/^[^A-Za-z]*[A-Z]/.test(raw.trim())) am = am[0].toUpperCase() + am.slice(1);
+    // The dash that opens a turn is the input's own, not a word to translate, so
+    // it is carried across rather than dropped. 33 of the 53 dashed sentences in
+    // the corpus are dashed in the English too; the other 20 are not, and
+    // nothing here invents one.
+    if (/^\s*\u2014/.test(raw)) am = `\u2014 ${am}`;
     outs.push(am + ('.?!,;'.includes(punct) ? punct : ''));
   }
   return outs.join(' ').trim();
