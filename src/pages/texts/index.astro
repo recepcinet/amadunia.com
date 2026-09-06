@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Band from '../../components/Band.astro';
-import { titleOf, subtitleOf, rootsUsedOf, gapsOf, textNumber, textKinds, textsClaims, rulesExercised, markAmadunia, LANG_REPO } from '../../lib/lang';
+import { titleOf, subtitleOf, rootsUsedOf, gapsOf, textNumber, textKinds, textsClaims, rulesExercised, markAmadunia, materialCounts, LANG_REPO } from '../../lib/lang';
 import { dictionary } from '../../lib/lang';
 
 const kinds = textKinds();
@@ -21,6 +21,18 @@ const openGaps = texts.reduce((n, t) => n + t.gaps.open, 0);
 const roots = dictionary().length;
 const claims = textsClaims();
 const exercised = rulesExercised();
+
+// This page counts the texts from the content collection and /data/ counts them
+// from the language directory — two counters for one fact, which is how a
+// repository ends up stating different halves of it. They agree; nothing was
+// making them.
+const counted = materialCounts().texts;
+if (counted !== texts.length) {
+  throw new Error(
+    `/texts/ has ${texts.length} texts from the collection and materialCounts() finds ` +
+      `${counted} in lang/texts/. One of them is missing a file the other can see.`,
+  );
+}
 ---
 
 <Base
