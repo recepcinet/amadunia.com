@@ -58,6 +58,11 @@ const UNSETTLED = new Set(['very', 'sometimes', 'occasionally']);
 // that reason, and the page's own Ta rabota paling cok on September 5. So the
 // rules cannot say "much better", and they say so rather than inventing it.
 const DEGREE = new Set(['cok', 'lebi', 'kurang', 'paling']);
+// The only two concepts the language composes out of two roots, both with the
+// demonstrative: din ini for today and rat ini for tonight. Every one of the
+// eight corpus sentences using them puts the phrase last, wherever the English
+// put it.
+const TIME_PHRASE = new Set(['din ini', 'rat ini']);
 // The two question words that also open a subordinate clause (grammar/subordination.md).
 const CLAUSE_OPENER = new Set(['kab', 'porke']);
 
@@ -358,6 +363,9 @@ function clause(tg: Tok[], question: boolean): string {
   // *When the rain stops we will go* as a question sent *kab* to the tail. With
   // a mark typed it is still a question and still fronts.
   if (tg[0]?.p === 'Q' && !CLAUSE_OPENER.has(tg[0].r ?? '')) question = true;
+
+  // A time phrase stands at the end of the sentence, not where English left it.
+  if (tg[0]?.p === 'PHRASE' && TIME_PHRASE.has(tg[0].r ?? '')) tg = [...tg.slice(1), tg[0]];
 
   const kimSubject = tg[0]?.p === 'Q' && tg[0].r === 'kim' && !tg.slice(0, 3).some((x) => x.p === 'BE');
   if (question && tg[0]?.p === 'Q' && !kimSubject) { tail = tg[0].r; tg = tg.slice(1); }
