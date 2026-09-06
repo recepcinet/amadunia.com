@@ -263,6 +263,32 @@ const NOUN_GROUPS = new Set([
  * clock — nine days, seven and six, all written on one afternoon. The pattern is
  * assembled from pieces so that writing this rule is not a breach of it.
  */
+/**
+ * /translate/ names three sentences and the file each lives in. Upstream moved
+ * every number in a page by one to find which ones nothing was holding; doing
+ * the same here, all three could be repointed at another lesson or text and the
+ * build stayed green — the link audit only asks whether the page exists, which
+ * is the fault upstream fixed on the same day for its own "[text 6]" labels.
+ * Held against the file now, including the one that is a claim about an absence.
+ */
+export function assertSentenceClaims(): void {
+  const claims: [string, string, boolean][] = [
+    ['Besok mi saufa go dom mi', 'texts/text-17-tren-aur-farasi.md', true],
+    ['Dom suda kabir', 'lessons/lesson-11-being.md', true],
+    ['Cok lebi hao', 'lessons/lesson-18-comparing-and-joining.md', false],
+  ];
+  const wrong = claims
+    .filter(([sentence, file, want]) => readLang(file).includes(sentence) !== want)
+    .map(([sentence, file, want]) =>
+      want
+        ? `${file} no longer contains "${sentence}"`
+        : `${file} contains "${sentence}", which /translate/ says was removed from it`,
+    );
+  if (wrong.length) {
+    throw new Error(`A sentence /translate/ attributes to a page is not there — ${wrong.join('; ')}.`);
+  }
+}
+
 export function assertNoFutureDates(): void {
   const months = 'January February March April May June July August September October November December';
   const re = new RegExp(`(${months.split(' ').join('|')})\\s+(\\d{1,2}),\\s+(\\d{4})`, 'g');
