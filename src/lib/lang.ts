@@ -369,6 +369,27 @@ export function taughtIn(): Record<string, { id: string; n: number }> {
  * corpus, which holds only the sentences that carry an English gloss, so where
  * upstream has a number this uses upstream's.
  */
+/**
+ * /learn/ says ten roots carry nearly a third of everything written. That is a
+ * fraction with no figure beside it, which is the one shape nothing here was
+ * checking — upstream found two of them in two days, both rounding upward, and
+ * ruled that 23% may be called nearly a quarter and may not be called a
+ * quarter. The top ten carry 31%, so the same test applies to this sentence.
+ */
+export function assertTopTenShare(): void {
+  const top = Object.values(frequencyTable())
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, 10);
+  const share = top.reduce((sum, r) => sum + (parseFloat(r.share) || 0), 0);
+  if (top.length < 10 || share < 28 || share >= 100 / 3) {
+    throw new Error(
+      `/learn/ calls the top ten roots nearly a third of everything written; they are ` +
+        `${share.toFixed(1)}% of it. Under 28% the sentence overstates; at a third or more ` +
+        `it understates and should say a third.`,
+    );
+  }
+}
+
 export function frequencyTable(): Record<string, { uses: number; share: string; rank: number }> {
   const rows = tableRows(readLang('dictionary/frequency.md'), '## The forty commonest');
   const out: Record<string, { uses: number; share: string; rank: number }> = {};
