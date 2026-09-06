@@ -224,6 +224,17 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     const base = IRREG[w] ?? w;
     const f = lookup(lex, base);
     if (!f) {
+      // A grandmother is not a missing word, she is possession applied twice:
+      // mama mama mi, one rule and no new root, which is what text 24 is named
+      // after. Reached only when the dictionary has no root of its own, so a
+      // root admitted later wins without this having to be removed. It holds
+      // for one step of remove and no further — mama mama mama mi is not
+      // ungrammatical, it is unreadable.
+      const KIN: Record<string, string> = { grandmother: 'mother', grandfather: 'father' };
+      if (base in KIN) {
+        const g = lookup(lex, KIN[base]);
+        if (g) { out.push({ t, p: 'N', r: `${g[0]} ${g[0]}` }); continue; }
+      }
       // A capital at the start of a sentence says nothing — every sentence has
       // one — so it is not evidence of a name. Treating it as one dressed an
       // English word up in the language's own colour, which is a claim this
@@ -245,6 +256,22 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     const plural = pos === 'N' && stem !== base && base.endsWith('s') && !stem.endsWith('s');
     out.push({ t, p: pos, r: plural ? `${root}-${root}` : root, past });
   }
+  // dekat is an adjective and adjectives follow their noun, so it cannot govern
+  // one: *Dom ta in tarik dekat sungai* reads "a near road" with the river left
+  // dangling, and text 24 had to say it as two sentences — Dom ta in tarik.
+  // Sungai dekat. The language has three prepositions, in, dari and por, and
+  // none of them is beside. Every use of dekat in the corpus is predicative or
+  // standalone. So "near" with a noun after it is marked open rather than
+  // written, and "the road is near" still comes out tarik dekat.
+  for (let i = 0; i + 1 < out.length; i++) {
+    if (out[i].r !== 'dekat') continue;
+    let j = i + 1;
+    while (j < out.length && out[j].p === 'DROP') j++;
+    if (j < out.length && ['N', 'PRON', 'NAME', 'POSS', 'DEM'].includes(out[j].p)) {
+      out[i] = { t: out[i].t, p: 'OPEN', r: null };
+    }
+  }
+
   // The first of a pair of "as" drops and the second becomes kadar. An "as"
   // with no partner is not this construction and stays unknown rather than
   // being quietly deleted.
