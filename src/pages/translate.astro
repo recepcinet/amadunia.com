@@ -350,7 +350,8 @@ const ld = [
           (a, b) =>
             Number(b.exact) - Number(a.exact) ||
             b.hits - a.hits ||
-            a.p.en.length - b.p.en.length,
+            a.p.en.length - b.p.en.length ||
+            a.p.en.localeCompare(b.p.en),
         )
         .slice(0, 6);
 

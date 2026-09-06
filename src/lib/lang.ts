@@ -474,6 +474,12 @@ export function sentencesUsing(root: string, limit = 12): Pair[] {
   const re = new RegExp(`(^|[^a-z-])${root}(-${root})?([^a-z-]|$)`, 'i');
   return corpus()
     .filter((p) => re.test(p.am))
+    // Shortest first; a tie keeps corpus order, which is allLangFiles() order,
+    // which sorts by name — so the tie is broken by where the sentence was
+    // written, and lessons come before texts. That is a fact about the material
+    // and not about the process, which is what upstream's hash-seed ordering
+    // was not. Deliberate: grouping by source reads better here than
+    // alphabetical would, and both are stable.
     .sort((a, b) => a.am.split(/\s+/).length - b.am.split(/\s+/).length)
     .slice(0, limit);
 }
@@ -717,7 +723,7 @@ export function readingLadder(): {
   const opens = tableRows(body, '## When each text opens')
     .map((r) => ({ text: strip(r[0] ?? ''), after: Number(r[1]) }))
     .filter((r) => r.text && Number.isFinite(r.after))
-    .sort((a, b) => a.after - b.after);
+    .sort((a, b) => a.after - b.after || a.text.localeCompare(b.text));
   const next = opens.find((o) => o.after > (opens[0]?.after ?? 0));
   return {
     firstLessonShare,
