@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Band from '../../components/Band.astro';
-import { titleOf, lessonNumber, splitLessonTitle, newWordsOf, readingLadder , assertTopTenShare } from '../../lib/lang';
+import { titleOf, lessonNumber, splitLessonTitle, newWordsOf, readingLadder , assertTopTenShare, assertLessonWordCounts } from '../../lib/lang';
 import { dictionary } from '../../lib/lang';
 
 const lessons = (await getCollection('lessons'))
@@ -10,6 +10,7 @@ const lessons = (await getCollection('lessons'))
   .sort((a, b) => a.n - b.n);
 const roots = dictionary().length;
 assertTopTenShare();
+assertLessonWordCounts();
 const ladder = readingLadder();
 const site = Astro.site?.toString() ?? 'https://amadunia.com/';
 const ld = [

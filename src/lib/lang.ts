@@ -2,6 +2,7 @@
 // but parsed into data: the dictionary table, the alphabet in phonology.md,
 // and the status line in the README. Everything here runs at build only.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { spell } from '../data/spell';
 import { join } from 'node:path';
 import { translate as ruleTranslate } from './translate';
 
@@ -693,10 +694,39 @@ export function splitLessonTitle(title: string): { label: string; name: string }
   return { label: label.trim(), name: rest.join(' — ').trim() || label.trim() };
 }
 
+/**
+ * Where a lesson states how many words it teaches, the count derived from its
+ * table must be that number. Upstream's finding is that a count is only as good
+ * as the wording carrying it: the half of a figure that names its members can be
+ * checked and the half that does not cannot. Two lessons name theirs, and this
+ * is what caught newWordsOf reading one column of one table.
+ */
+export function assertLessonWordCounts(): void {
+  const wrong: string[] = [];
+  for (const name of readdirSync(join(LANG, 'lessons')).filter((n) => /^lesson-\d+/.test(n))) {
+    const body = readLang(`lessons/${name}`);
+    const claim = body.match(/\b([A-Za-z][a-z-]+|\d+) words are new here/)?.[1];
+    if (!claim) continue;
+    const got = newWordsOf(body);
+    const said = /^\d+$/.test(claim) ? claim : claim.toLowerCase();
+    if (said !== String(got) && said !== spell(got)) {
+      wrong.push(`${name} says ${claim} words are new here; the table gives ${got}`);
+    }
+  }
+  if (wrong.length) {
+    throw new Error(`A lesson's own word count disagrees with its table — ${wrong.join('; ')}.`);
+  }
+}
+
 export function newWordsOf(body: string): number {
   const heading = body.match(/^## New words?\s*$/m)?.[0];
   if (!heading) return 0;
-  return tableRows(body, heading).filter((r) => r[0]).length;
+  // Read by lessonWords rather than by a table reader of its own. This counted
+  // the first column of the first table, so Lesson 24 came out 12 against the
+  // twenty-three it states — the section is two column-pairs wide and carries
+  // an "Also introduced here" table underneath. lessonWords was fixed for both
+  // of those and this was not, which is two readers for one claim.
+  return lessonWords(body, heading).length;
 }
 
 /** Byte size of a file the site serves, for the dataset listing. */
