@@ -1045,7 +1045,12 @@ export function corpus(): Pair[] {
     if (!/[.!?]$/.test(am) && am.includes(',')) {
       const items = am.split(',').map((x) => x.trim()).filter(Boolean);
       const heads = new Set(items.map((x) => x.split(/\s+/)[0].toLowerCase()));
-      if (items.length >= 2 && heads.size === 1) return;
+      const tails = new Set(items.map((x) => x.split(/\s+/).at(-1)!.toLowerCase()));
+      // A shared last word is the same kind of list as a shared first one:
+      // "otur una, kula una, kita una | together" shows one construction three
+      // ways. Measured across the corpus, the tail rule catches that row and
+      // nothing else.
+      if (items.length >= 2 && (heads.size === 1 || tails.size === 1)) return;
     }
     // An em dash on the English side alone opens a note, not a translation:
     // "My head is hot. — the nearest the language gets to my head hurts".

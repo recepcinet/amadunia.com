@@ -77,7 +77,7 @@ const CLAUSE_OPENER = new Set(['kab', 'porke']);
 // word is added here — "well" is the adverb of "good", and the language uses
 // one form for both (grammar/adverbs.md).
 const SYN: Record<string, string> = {
-  well: 'good', has: 'have', had: 'have', with: 'together', lots: 'many',
+  well: 'good', has: 'have', had: 'have', lots: 'many',
   tell: 'say', okay: 'ok', hello: 'hi', sure: 'ok', thanks: 'thank you',
 };
 // Compounds read off the corpus, not invented: din ini is attested for "today".
@@ -213,6 +213,12 @@ function tag(lex: Lexicon, tokens: string[]): Tok[] {
     if (w === 'less') { out.push({ t, p: 'DEG', r: 'kurang' }); continue; }
     if (w === 'most') { out.push({ t, p: 'DEG', r: 'paling' }); continue; }
     if (w === 'than') { out.push({ t, p: 'W', r: 'dari' }); continue; }
+    // una alone is the adverb together and stands last — Kita kula una, we eat
+    // together. una with a noun after it is the preposition with — Kita kula
+    // una familia, Anda una mi, Mama tabak corba una legum. One word, two
+    // rules, and mapping "with" onto "together" put the preposition after its
+    // object. English tells them apart: with takes one, together does not.
+    if (w === 'with') { out.push({ t, p: 'P', r: 'una' }); continue; }
     // "as big as" is kadar, settled in grammar/comparison.md and used seven
     // times in the writing: Dom mi kabir kadar dom yu, Mi hayai kadar yu — the
     // quality first, then kadar, then what it is measured against. Marked here
